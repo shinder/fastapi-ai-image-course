@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: pg-ai-image
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: ai_image_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis-ai-image
+    ports:
+      - "6379:6379"
+
+volumes:
+  pg-data:

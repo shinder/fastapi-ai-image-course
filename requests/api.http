@@ -1,0 +1,138 @@
+@baseUrl = http://localhost:8000
+
+### 健康檢查
+GET {{baseUrl}}/health
+
+### 列出圖片
+GET {{baseUrl}}/api/v1/images?limit=10
+
+### 上傳並辨識（multipart）
+POST {{baseUrl}}/api/v1/images/upload-and-classify
+Content-Type: multipart/form-data; boundary=----Boundary
+
+------Boundary
+Content-Disposition: form-data; name="title"
+
+我的貓
+------Boundary
+Content-Disposition: form-data; name="file"; filename="cat.jpg"
+Content-Type: image/jpeg
+
+< ./test_images/cat.jpg
+------Boundary--
+
+### 取得單張圖片
+GET {{baseUrl}}/api/v1/images/1
+
+### 純 AI 分類（不入庫）
+POST {{baseUrl}}/api/v1/ai/classify
+Content-Type: multipart/form-data; boundary=----Boundary
+
+------Boundary
+Content-Disposition: form-data; name="file"; filename="cat.jpg"
+Content-Type: image/jpeg
+
+< ./test_images/cat.jpg
+------Boundary--
+
+### 上傳並入庫（不辨識）
+POST {{baseUrl}}/api/v1/images/upload
+Content-Type: multipart/form-data; boundary=----Boundary
+
+------Boundary
+Content-Disposition: form-data; name="title"
+
+測試圖片
+------Boundary
+Content-Disposition: form-data; name="file"; filename="cat.jpg"
+Content-Type: image/jpeg
+
+< ./test_images/cat.jpg
+------Boundary--
+
+### Ollama 描述圖片
+POST {{baseUrl}}/api/v1/ai/describe
+Content-Type: multipart/form-data; boundary=----Boundary
+
+------Boundary
+Content-Disposition: form-data; name="prompt"
+
+請以繁體中文描述這張圖片
+------Boundary
+Content-Disposition: form-data; name="file"; filename="cat.jpg"
+Content-Type: image/jpeg
+
+< ./test_images/cat.jpg
+------Boundary--
+
+### OCR 文字辨識
+POST {{baseUrl}}/api/v1/ai/ocr
+Content-Type: multipart/form-data; boundary=----Boundary
+
+------Boundary
+Content-Disposition: form-data; name="file"; filename="text.png"
+Content-Type: image/png
+
+< ./test_images/text.png
+------Boundary--
+
+### 影像生成（OpenAI DALL·E）
+POST {{baseUrl}}/api/v1/ai/generate
+Content-Type: application/x-www-form-urlencoded
+
+prompt=A cute corgi wearing sunglasses on a beach, watercolor style
+
+### 啟動非同步生成
+POST {{baseUrl}}/api/v1/ai/generate-async
+Content-Type: application/x-www-form-urlencoded
+
+prompt=A futuristic city at night, cyberpunk style
+
+### 查詢任務狀態（換成上一行回傳的 task_id）
+GET {{baseUrl}}/api/v1/ai/tasks/REPLACE_TASK_ID
+
+### Redis 快取統計
+GET {{baseUrl}}/api/v1/ai/cache/stats
+
+### 透過依賴注入測試 Redis
+GET {{baseUrl}}/api/v1/ai/cache-test
+
+### 純 JSON 建立（教材 3.2 範例）
+POST {{baseUrl}}/api/v1/demo/images
+Content-Type: application/json
+
+{
+  "title": "我的貓",
+  "url": "https://example.com/cat.jpg",
+  "tags": ["cat", "pet"]
+}
+
+### 練習 1：JSONPlaceholder 取單張
+GET https://jsonplaceholder.typicode.com/photos/1
+
+### 練習 2：相簿圖片列表
+GET https://jsonplaceholder.typicode.com/photos?albumId=1
+
+### 練習 3：建立新圖片紀錄
+POST https://jsonplaceholder.typicode.com/photos
+Content-Type: application/json
+
+{
+  "albumId": 1,
+  "title": "我的圖片",
+  "url": "https://example.com/img.jpg"
+}
+
+### 練習 4：完整更新
+PUT https://jsonplaceholder.typicode.com/photos/1
+Content-Type: application/json
+
+{
+  "albumId": 1,
+  "id": 1,
+  "title": "更新標題",
+  "url": "https://example.com/new.jpg"
+}
+
+### 練習 5：刪除
+DELETE https://jsonplaceholder.typicode.com/photos/1

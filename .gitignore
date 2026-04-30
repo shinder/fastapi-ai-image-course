@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# 虛擬環境
+.venv/
+venv/
+env/
+
+# uv
+.uv/
+
+# 打包
+build/
+dist/
+*.egg-info/
+*.egg
+
+# 測試與覆蓋率
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# 環境變數（不進版控）
+.env
+
+# 上傳檔案目錄
+uploads/*
+!uploads/.gitkeep
+
+# IDE
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# 暫存圖片
+test_images/*
+!test_images/.gitkeep
