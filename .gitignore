@@ -42,3 +42,5 @@ uploads/*
 # 暫存圖片
 test_images/*
 !test_images/.gitkeep
+
+.vscode

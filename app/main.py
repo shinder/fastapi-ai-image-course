@@ -1,4 +1,5 @@
-"""FastAPI 入口（教材 2.3、2.5、2.6、3.6、4.3、5.3、5.7）"""
+"""FastAPI 入口（教材 2.3、2.4、2.5、2.6、3.6、4.3、5.3、5.7）"""
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -36,8 +37,6 @@ app.add_middleware(
 )
 
 # 靜態檔案掛載（教材 3.6）：http://localhost:8000/uploads/<filename>
-import os
-
 os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_DIR), name="uploads")
 
@@ -52,7 +51,39 @@ def health_check():
     return {"status": "ok", "app": settings.APP_NAME}
 
 
-# 註冊各路由模組（教材 2.5）
+# ---------- 教材 2.4 路由設計 ----------
+
+# 基本路由 + 查詢參數
+@app.get("/items")
+def list_items(skip: int = 0, limit: int = 10, keyword: str | None = None):
+    """查詢參數示範：GET /items?skip=0&limit=20&keyword=cat"""
+    return {"skip": skip, "limit": limit, "keyword": keyword}
+
+
+@app.post("/items")
+def create_item():
+    return {"id": 3, "created": True}
+
+
+# 路徑參數：型別提示自動驗證，傳入 /items/abc 會回 422
+@app.get("/items/{item_id}")
+def get_item(item_id: int):
+    return {"id": item_id}
+
+
+# 路徑順序的重要性：具體路徑（/users/me）必須放在參數路徑（/users/{user_id}）之前
+@app.get("/users/me")
+def get_current_user():
+    return {"id": "current"}
+
+
+@app.get("/users/{user_id}")
+def get_user(user_id: int):
+    return {"id": user_id}
+
+
+# ---------- 教材 2.5 註冊各 APIRouter ----------
+
 app.include_router(basic.router)
 app.include_router(images.router)
 app.include_router(ai.router)

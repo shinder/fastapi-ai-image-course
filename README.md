@@ -25,7 +25,7 @@ fastapi-ai-image/
 │   ├── schemas/
 │   │   └── image.py        # 教材 3.1、3.2、3.3 純 Pydantic 範例
 │   ├── routes/
-│   │   ├── basic.py        # 教材 2.4、3.2、3.3、3.4 基本路由
+│   │   ├── basic.py        # 教材 3.2、3.3、3.4 demo 路由（單元 2 路由直接寫在 main.py）
 │   │   ├── images.py       # 教材 3.5、3.6、4.6、4.7、綜合實作
 │   │   └── ai.py           # 教材 5.3、5.4、5.5、5.6、5.7、6.5、7.5
 │   ├── services/
@@ -126,9 +126,10 @@ uv run pytest -q
 | Method | Path | 說明 | 教材 |
 | ------ | ---- | ---- | ---- |
 | GET    | `/health`                              | 健康檢查 | 2.3 |
-| GET    | `/api/v1/items`                        | 查詢參數示範 | 2.4 |
-| GET    | `/api/v1/items/{item_id}`              | 路徑參數示範 | 2.4 |
-| GET    | `/api/v1/users/me` / `/{user_id}`      | 路徑順序示範 | 2.4 |
+| GET    | `/items`                               | 查詢參數示範 | 2.4 |
+| POST   | `/items`                               | 基本 POST | 2.4 |
+| GET    | `/items/{item_id}`                     | 路徑參數示範 | 2.4 |
+| GET    | `/users/me` / `/users/{user_id}`       | 路徑順序示範 | 2.4 |
 | POST   | `/api/v1/demo/images`                  | 接收 JSON | 3.2 |
 | POST   | `/api/v1/demo/images-response`         | response_model | 3.3 |
 | POST   | `/api/v1/contact`                      | Form 表單 | 3.4 |
