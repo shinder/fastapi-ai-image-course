@@ -2,7 +2,7 @@
 name = "fastapi-ai-image"
 version = "0.1.0"
 description = "FastAPI 與 AI 影像應用開發 範例專案"
-requires-python = ">=3.12"
+requires-python = ">=3.12,<3.13"
 dependencies = [
     "fastapi[all]>=0.115.0",
     "sqlmodel>=0.0.22",
@@ -45,6 +45,7 @@ dev = [
 
 [tool.ty.environment]
 python = "./.venv"
+python-version = "3.12"
 
 [tool.ruff]
 line-length = 100
