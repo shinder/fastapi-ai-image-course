@@ -11,6 +11,9 @@ class Settings:
     DEBUG: bool = os.getenv("DEBUG", "false").lower() == "true"
     DATABASE_URL: str = os.getenv("DATABASE_URL", "")
     REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+    # 單元九：MongoDB 連線設定
+    MONGO_URL: str = os.getenv("MONGO_URL", "mongodb://localhost:27017")
+    MONGO_DB: str = os.getenv("MONGO_DB", "ai_image_db")
     OLLAMA_HOST: str = os.getenv("OLLAMA_HOST", "http://localhost:11434")
     OLLAMA_VISION_MODEL: str = os.getenv("OLLAMA_VISION_MODEL", "gemma3:4b")
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")

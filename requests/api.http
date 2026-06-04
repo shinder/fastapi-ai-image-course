@@ -188,6 +188,22 @@ GET {{baseUrl}}/web
 ### 上傳表單頁（教材 8.6，建議用瀏覽器開）
 GET {{baseUrl}}/web/upload
 
+# === 單元九 MongoDB 留言（補充教材）===
+
+### 新增留言（教材 9.4，可多帶任意欄位如 mood）
+POST {{baseUrl}}/api/v1/notes
+Content-Type: application/json
+
+{
+  "image_filename": "cat.jpg",
+  "text": "好可愛的貓",
+  "author": "小明",
+  "mood": "開心"
+}
+
+### 列出某張圖的留言（教材 9.4）
+GET {{baseUrl}}/api/v1/notes?image_filename=cat.jpg
+
 ### 練習 1：JSONPlaceholder 取單張
 GET https://jsonplaceholder.typicode.com/photos/1
 

@@ -90,3 +90,29 @@ def test_web_upload_prg(tmp_path, monkeypatch):
     assert r.headers["location"].endswith("/web")
     # 檔案確實寫進了被覆蓋的上傳目錄
     assert len(list(tmp_path.iterdir())) == 1
+
+
+# ---------- 單元九 MongoDB 留言（補充教材）----------
+# 測試以 TestClient 直接建構（不進 lifespan），因此未呼叫 connect_mongo，
+# Mongo client 維持 None，正好用來驗證「未連線時的優雅行為」。
+
+
+def test_notes_validation():
+    """缺必填欄位 text 時，應在進到 Mongo 之前就被擋下回 422"""
+    from app.main import app
+
+    client = TestClient(app)
+    r = client.post("/api/v1/notes", json={"image_filename": "cat.jpg"})
+    assert r.status_code == 422
+
+
+def test_notes_requires_mongo():
+    """未連線 MongoDB 時，建立留言應回 503（而非崩潰）"""
+    from app.main import app
+
+    client = TestClient(app)
+    r = client.post(
+        "/api/v1/notes",
+        json={"image_filename": "cat.jpg", "text": "測試"},
+    )
+    assert r.status_code == 503

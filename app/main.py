@@ -8,21 +8,25 @@ from fastapi.staticfiles import StaticFiles
 
 from app.config import settings
 from app.database import init_db
-from app.routes import ai, basic, images, web
+from app.db.mongo import close_mongo, connect_mongo
+from app.routes import ai, basic, images, mongo_demo, web
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """啟動時建立資料表；如需預載 AI 模型可在此加 get_classifier() 等呼叫（教材 5.3）
 
-    init_db() 若連不到資料庫只會印出警告並回傳 False，不會中斷應用啟動，
-    讓沒用到資料庫的路由仍可正常運作。
+    init_db() 與 connect_mongo() 連不到時都只印警告、不中斷啟動，
+    讓沒用到該資料庫的路由仍可正常運作。
     """
     if init_db():
         print(f"✅ 資料庫連線成功：{settings.DATABASE_URL}")
+    # 單元九：連線 MongoDB（連不到也不中斷啟動）
+    await connect_mongo()
     # 例：from app.services.ai_service import get_classifier; get_classifier()
     yield
-    # 關閉時可在此清理資源
+    # 關閉時清理資源
+    await close_mongo()
 
 
 app = FastAPI(
@@ -96,3 +100,4 @@ app.include_router(basic.router)
 app.include_router(images.router)
 app.include_router(ai.router)
 app.include_router(web.router)  # 單元八（補充教材）：Jinja2 樣板網頁
+app.include_router(mongo_demo.router)  # 單元九（補充教材）：MongoDB 留言
