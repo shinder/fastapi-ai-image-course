@@ -30,6 +30,9 @@ def call_external_classify(content: bytes) -> dict:
         raise RuntimeError("外部 AI 服務逾時")
     except requests.HTTPError as e:
         raise RuntimeError(f"外部 AI 錯誤：{e.response.status_code}")
+    except requests.RequestException as e:
+        # 連線失敗、DNS 錯誤等其餘 requests 例外的兜底（須放最後，因前面都是它的子類）
+        raise RuntimeError(f"外部 AI 連線失敗：{e}")
 
 
 async def call_external_classify_async(content: bytes) -> dict:
