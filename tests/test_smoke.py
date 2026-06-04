@@ -116,3 +116,42 @@ def test_notes_requires_mongo():
         json={"image_filename": "cat.jpg", "text": "測試"},
     )
     assert r.status_code == 503
+
+
+# ---------- 單元六進階：速率限制 / 分散式鎖（Redis 不可用時 fail-open）----------
+
+
+def _raising_redis():
+    """回傳一個所有操作都丟 RedisError 的假 client，模擬 Redis 不可用。
+
+    用 mock 而非真的連不到的 port，測試才會即時（避免 redis-py 重試的延遲）。
+    """
+    from unittest.mock import MagicMock
+
+    import redis
+
+    m = MagicMock()
+    m.incr.side_effect = redis.RedisError("down")
+    m.set.side_effect = redis.RedisError("down")
+    m.delete.side_effect = redis.RedisError("down")
+    return m
+
+
+def test_rate_limit_fail_open():
+    """Redis 不可用時，限流應放行（不丟例外、不擋請求）"""
+    from types import SimpleNamespace
+
+    from app.services.rate_limit import RateLimit
+
+    rl = RateLimit(limit=1, window=60)
+    req = SimpleNamespace(client=SimpleNamespace(host="1.2.3.4"))
+    for _ in range(5):
+        assert rl(req, _raising_redis()) is None
+
+
+def test_acquire_lock_fail_open():
+    """Redis 不可用時，取鎖應 fail-open（視為取得，照常執行）"""
+    from app.services.cache_service import acquire_lock
+
+    with acquire_lock(_raising_redis(), "lock:x", ttl=5) as got:
+        assert got is True

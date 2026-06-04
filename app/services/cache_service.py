@@ -1,7 +1,8 @@
-"""Redis 快取服務（教材 6.4、6.5、6.6）"""
+"""Redis 快取服務（教材 6.4、6.5、6.6、6.9）"""
 import hashlib
 import json
 import random
+from contextlib import contextmanager
 from typing import Annotated, Optional
 
 import redis
@@ -84,3 +85,30 @@ def cache_get_or_none(r: redis.Redis, key: str):
     if raw == SENTINEL:
         return "miss-cached"
     return json.loads(raw) if raw else None
+
+
+@contextmanager
+def acquire_lock(r: redis.Redis, key: str, ttl: int = 10):
+    """分散式鎖（教材 6.9 防快取擊穿）。
+
+    用 SET NX EX 嘗試取鎖：成功 yield True，已被別人持有 yield False。
+    with 區塊結束會自動釋放（只有自己取得時才刪）。ttl 是保險，避免持鎖者
+    當掉造成死鎖。Redis 不可用時採 fail-open（視為取得鎖，照常執行）。
+
+    註：這是教學用的簡化版。正式環境若要嚴謹，釋放時應以「鎖的擁有者 token」
+    比對後再刪（避免誤刪他人的鎖），可用 Lua 腳本原子完成。
+    """
+    acquired = True
+    try:
+        # nx=True：key 不存在才設定（等於「沒人持鎖才取得」）；ex=ttl：自動過期
+        acquired = bool(r.set(key, "1", nx=True, ex=ttl))
+    except redis.RedisError:
+        acquired = True  # fail-open
+    try:
+        yield acquired
+    finally:
+        if acquired:
+            try:
+                r.delete(key)
+            except redis.RedisError:
+                pass

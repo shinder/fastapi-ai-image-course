@@ -15,6 +15,7 @@ import redis
 from fastapi import (
     APIRouter,
     BackgroundTasks,
+    Depends,
     File,
     Form,
     HTTPException,
@@ -28,15 +29,17 @@ from app.services.cache_service import (
     cache_get,
     cache_incr,
     cache_set,
+    get_redis,
     image_hash,
 )
+from app.services.rate_limit import RateLimit
 
 router = APIRouter(prefix="/api/v1/ai", tags=["ai"])
 
 
 # ---------- 5.3 + 6.5 影像分類（含快取） ----------
 
-@router.post("/classify")
+@router.post("/classify", dependencies=[Depends(RateLimit(limit=30, window=60))])
 async def classify(file: UploadFile = File(...), r: RedisDep = None):
     """以圖片 hash 為快取 key，未命中才呼叫模型，並統計命中率（教材 6.5、6.7）"""
     if not file.content_type or not file.content_type.startswith("image/"):
@@ -108,7 +111,7 @@ async def extract_invoice(file: UploadFile = File(...)):
 
 # ---------- 5.6 影像生成 ----------
 
-@router.post("/generate")
+@router.post("/generate", dependencies=[Depends(RateLimit(limit=10, window=60))])
 def generate(prompt: str = Form(..., min_length=1, max_length=1000)):
     """OpenAI DALL·E 影像生成（教材 5.6）"""
     from app.services.image_gen_service import generate_image  # lazy import
@@ -117,35 +120,40 @@ def generate(prompt: str = Form(..., min_length=1, max_length=1000)):
     return {"prompt": prompt, "image_url": url}
 
 
-# 簡易任務佇列（教材 5.6 BackgroundTasks）
-tasks: dict[str, dict] = {}
+# 任務狀態存 Redis（教材 6.10）：取代記憶體 dict，可跨 worker、可設 TTL 自動清理
+def _task_key(task_id: str) -> str:
+    return f"task:gen:{task_id}"
 
 
 def _run_generation(task_id: str, prompt: str):
+    """背景執行：產生圖片並把狀態寫進 Redis（用 get_redis 取得 client）"""
     from app.services.image_gen_service import generate_image
 
-    tasks[task_id] = {"status": "running"}
+    r = get_redis()
+    cache_set(r, _task_key(task_id), {"status": "running"}, ttl=3600)
     try:
         url = generate_image(prompt)
-        tasks[task_id] = {"status": "done", "url": url}
+        cache_set(r, _task_key(task_id), {"status": "done", "url": url}, ttl=3600)
     except Exception as e:
-        tasks[task_id] = {"status": "error", "error": str(e)}
+        cache_set(r, _task_key(task_id), {"status": "error", "error": str(e)}, ttl=3600)
 
 
 @router.post("/generate-async")
 def generate_async(
     background_tasks: BackgroundTasks,
+    r: RedisDep,
     prompt: str = Form(..., min_length=1),
 ):
     task_id = uuid4().hex
-    tasks[task_id] = {"status": "pending"}
-    background_tasks.add_task(_run_generation, task_id, prompt)
+    cache_set(r, _task_key(task_id), {"status": "pending"}, ttl=3600)  # 先標記 pending
+    background_tasks.add_task(_run_generation, task_id, prompt)         # 回應後才執行
     return {"task_id": task_id}
 
 
 @router.get("/tasks/{task_id}")
-def get_task(task_id: str):
-    return tasks.get(task_id, {"status": "not_found"})
+def get_task(task_id: str, r: RedisDep):
+    # 從 Redis 讀任務狀態；找不到（或已過期）回 not_found
+    return cache_get(r, _task_key(task_id)) or {"status": "not_found"}
 
 
 # ---------- 7.5 / 7.6 串接外部 AI API ----------
