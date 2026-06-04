@@ -7,7 +7,7 @@
 - ImagePublic   : API 回應（過濾內部欄位）
 - ImageUpdate   : PATCH 請求主體（全部選填）
 """
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 
 from sqlmodel import JSON, Column, Field, SQLModel
@@ -29,7 +29,8 @@ class Image(ImageBase, table=True):
     file_size: int
     mime_type: str
     ai_result: Optional[dict] = Field(default=None, sa_column=Column(JSON))
-    uploaded_at: datetime = Field(default_factory=datetime.utcnow)
+    # 用 timezone-aware 的 UTC 時間；datetime.utcnow 在 Python 3.12 已棄用
+    uploaded_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class ImageCreate(ImageBase):

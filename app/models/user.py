@@ -9,6 +9,9 @@ from sqlmodel import Field, Relationship, SQLModel
 
 
 class User(SQLModel, table=True):
+    # 表名明訂為 users：user 是 PostgreSQL 的保留字，當表名容易出問題
+    __tablename__ = "users"
+
     id: Optional[int] = Field(default=None, primary_key=True)
     name: str
     images: list["UserImage"] = Relationship(back_populates="owner")
@@ -20,5 +23,5 @@ class UserImage(SQLModel, table=True):
 
     id: Optional[int] = Field(default=None, primary_key=True)
     title: str
-    owner_id: Optional[int] = Field(default=None, foreign_key="user.id")
+    owner_id: Optional[int] = Field(default=None, foreign_key="users.id")
     owner: Optional[User] = Relationship(back_populates="images")
