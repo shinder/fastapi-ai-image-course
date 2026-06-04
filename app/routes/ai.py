@@ -11,6 +11,7 @@
 """
 from uuid import uuid4
 
+import redis
 from fastapi import (
     APIRouter,
     BackgroundTasks,
@@ -22,7 +23,13 @@ from fastapi import (
 from fastapi.concurrency import run_in_threadpool
 
 from app.config import settings
-from app.services.cache_service import RedisDep, cache_get, cache_set, image_hash
+from app.services.cache_service import (
+    RedisDep,
+    cache_get,
+    cache_incr,
+    cache_set,
+    image_hash,
+)
 
 router = APIRouter(prefix="/api/v1/ai", tags=["ai"])
 
@@ -39,10 +46,10 @@ async def classify(file: UploadFile = File(...), r: RedisDep = None):
     digest = image_hash(content)
     key = f"cache:ai:classify:{digest}"
 
-    # 1. 先查快取
+    # 1. 先查快取（Redis 不可用時 cache_get 會回 None，視為未命中）
     cached = cache_get(r, key)
     if cached is not None:
-        r.incr("stats:cache:hit")
+        cache_incr(r, "stats:cache:hit")
         return {"results": cached, "cached": True}
 
     # 2. 未命中：執行推論（教材 5.7 thread pool 不阻塞事件循環）
@@ -50,9 +57,9 @@ async def classify(file: UploadFile = File(...), r: RedisDep = None):
 
     results = await run_in_threadpool(classify_image_bytes, content)
 
-    # 3. 寫回快取（1 小時過期）
+    # 3. 寫回快取（1 小時過期；Redis 不可用時自動略過，不影響回應）
     cache_set(r, key, results, ttl=3600)
-    r.incr("stats:cache:miss")
+    cache_incr(r, "stats:cache:miss")
 
     return {"results": results, "cached": False}
 
@@ -167,10 +174,15 @@ async def classify_external_async(file: UploadFile = File(...)):
 
 @router.get("/cache/stats")
 def cache_stats(r: RedisDep):
-    hit = int(r.get("stats:cache:hit") or 0)
-    miss = int(r.get("stats:cache:miss") or 0)
+    # Redis 不可用時回報 available=False，而非讓端點 500
+    try:
+        hit = int(r.get("stats:cache:hit") or 0)
+        miss = int(r.get("stats:cache:miss") or 0)
+    except redis.RedisError:
+        return {"available": False, "hit": 0, "miss": 0, "total": 0, "hit_rate": 0}
     total = hit + miss
     return {
+        "available": True,
         "hit": hit,
         "miss": miss,
         "total": total,

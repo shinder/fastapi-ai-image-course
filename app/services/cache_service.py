@@ -31,7 +31,11 @@ def image_hash(content: bytes) -> str:
 
 
 def cache_get(r: redis.Redis, key: str) -> Optional[dict | list]:
-    raw = r.get(key)
+    # 快取「盡力而為」：Redis 不可用時當作未命中（回 None），不讓呼叫端崩潰
+    try:
+        raw = r.get(key)
+    except redis.RedisError:
+        return None
     if raw is None:
         return None
     try:
@@ -41,7 +45,19 @@ def cache_get(r: redis.Redis, key: str) -> Optional[dict | list]:
 
 
 def cache_set(r: redis.Redis, key: str, value: dict | list, ttl: int = 3600) -> None:
-    r.set(key, json.dumps(value, ensure_ascii=False), ex=ttl)
+    # 寫快取失敗（Redis 不可用）不應影響主流程，直接略過
+    try:
+        r.set(key, json.dumps(value, ensure_ascii=False), ex=ttl)
+    except redis.RedisError:
+        pass
+
+
+def cache_incr(r: redis.Redis, key: str) -> None:
+    """計數器 +1（如命中率統計）；Redis 不可用時略過。"""
+    try:
+        r.incr(key)
+    except redis.RedisError:
+        pass
 
 
 def cache_set_jitter(
@@ -53,7 +69,10 @@ def cache_set_jitter(
 ) -> None:
     """TTL 加抖動（教材 6.6 防雪崩）"""
     ttl = int(base_ttl * (1 + random.uniform(-jitter, jitter)))
-    r.set(key, json.dumps(value, ensure_ascii=False), ex=ttl)
+    try:
+        r.set(key, json.dumps(value, ensure_ascii=False), ex=ttl)
+    except redis.RedisError:
+        pass
 
 
 # 教材 6.6 防穿透
