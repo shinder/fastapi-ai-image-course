@@ -26,9 +26,9 @@ from app.services.cache_service import RedisDep, cache_get, cache_set, image_has
 
 router = APIRouter(prefix="/api/v1/images", tags=["images"])
 
-# 教材 3.5
-ALLOWED_TYPES = {"image/jpeg", "image/png", "image/webp"}
-MAX_SIZE = 10 * 1024 * 1024  # 10 MB
+# 教材 3.5：上傳檔案的共用驗證條件
+ALLOWED_TYPES = {"image/jpeg", "image/png", "image/webp"}  # MIME 類型白名單，擋掉非圖片
+MAX_SIZE = 10 * 1024 * 1024  # 10 MB，避免使用者上傳超大檔案塞爆磁碟/記憶體
 
 
 # ---------- 4.6 CRUD ----------
@@ -108,21 +108,32 @@ def delete_image(image_id: int, session: SessionDep):
 
 @router.post("/upload-only")
 async def upload_image_only(file: UploadFile = File(...)):
-    """單純上傳（不入庫，教材 3.5 範例）"""
+    """單純上傳（不入庫，教材 3.5 範例）。
+
+    示範完整的「驗證 → 讀取 → 產生唯一檔名 → 寫檔」流程。
+    參數 file: UploadFile = File(...)：以 multipart/form-data 接收檔案，
+    UploadFile 採串流，不會一次把整個檔案塞進記憶體。
+    """
+    # 1. 驗證 MIME 類型：擋掉非允許格式（例如使用者上傳 .exe 偽裝）
     if file.content_type not in ALLOWED_TYPES:
         raise HTTPException(400, f"不支援的格式：{file.content_type}")
 
+    # 2. 讀取整個檔案內容（await 因為 UploadFile.read 是非同步），再驗證大小
     content = await file.read()
     if len(content) > MAX_SIZE:
         raise HTTPException(400, "檔案過大（超過 10 MB）")
 
-    ext = os.path.splitext(file.filename or "")[1] or ".bin"
+    # 3. 產生唯一檔名：保留原副檔名，主檔名用 uuid 亂數避免衝突/覆蓋與路徑注入
+    ext = os.path.splitext(file.filename or "")[1] or ".bin"  # 無副檔名時退回 .bin
     new_name = f"{uuid.uuid4().hex}{ext}"
     save_path = os.path.join(settings.UPLOAD_DIR, new_name)
+
+    # 4. 確保上傳目錄存在（exist_ok=True 已存在不報錯），以二進位模式寫入
     os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
     with open(save_path, "wb") as f:
         f.write(content)
 
+    # 回傳新檔名與原始資訊，方便前端後續以 new_name 取回檔案
     return {
         "filename": new_name,
         "original_name": file.filename,
@@ -133,20 +144,30 @@ async def upload_image_only(file: UploadFile = File(...)):
 
 @router.post("/upload-multi")
 async def upload_multi(files: List[UploadFile] = File(...)):
-    """多張同時上傳（教材 3.5）"""
+    """多張同時上傳（教材 3.5）。
+
+    參數型別用 list[UploadFile]，前端在同一個欄位名（files）放多個檔案即可。
+    此範例只回報每個檔案的名稱與大小，不實際寫檔。
+    """
     results = []
-    for file in files:
-        content = await file.read()
+    for file in files:                 # 逐一處理每個上傳的檔案
+        content = await file.read()     # 非同步讀取該檔內容
         results.append({"filename": file.filename, "size": len(content)})
     return {"count": len(results), "files": results}
 
 
 @router.post("/upload-and-process")
 async def upload_and_process(file: UploadFile = File(...)):
-    """上傳並用 Pillow 處理（教材 3.5）"""
+    """上傳並用 Pillow 處理（教材 3.5）。
+
+    示範影像處理常見流程：讀取資訊 → 縮圖 → 轉檔壓縮 → 存檔。
+    全程在記憶體（BytesIO）操作，最後才寫入磁碟。
+    """
     content = await file.read()
 
+    # 用 Pillow 開啟圖片；BytesIO 把 bytes 包成「類檔案物件」，省去先落地存檔
     img = PILImage.open(BytesIO(content))
+    # 讀取原圖基本資訊（格式、色彩模式、寬高）
     info = {
         "format": img.format,
         "mode": img.mode,
@@ -154,17 +175,21 @@ async def upload_and_process(file: UploadFile = File(...)):
         "height": img.height,
     }
 
+    # 縮圖：等比例縮到最長邊不超過 800px；thumbnail 會就地修改 img
     img.thumbnail((800, 800))
+    # JPEG 不支援透明通道，RGBA / P（調色盤）需先轉成 RGB 才能存成 JPEG
     if img.mode in ("RGBA", "P"):
         img = img.convert("RGB")
 
+    # 存到記憶體緩衝區而非直接寫檔：quality 壓縮品質、optimize 進一步減少檔案大小
     output = BytesIO()
     img.save(output, format="JPEG", quality=85, optimize=True)
 
+    # 縮圖檔名加 thumb_ 前綴並用 uuid 確保唯一，避免覆蓋原圖
     save_path = os.path.join(settings.UPLOAD_DIR, f"thumb_{uuid.uuid4().hex}.jpg")
     os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
     with open(save_path, "wb") as f:
-        f.write(output.getvalue())
+        f.write(output.getvalue())  # getvalue() 取出緩衝區全部位元組
 
     return {
         "info": info,
@@ -208,36 +233,53 @@ async def upload_image(
 
 @router.get("/{filename}/download")
 def download_image(filename: str):
-    """FileResponse（教材 3.6）"""
+    """FileResponse（教材 3.6）：最常用的回傳檔案方式。
+
+    {filename} 是路徑參數，會被當成字串傳入。
+    FileResponse 由 FastAPI 高效處理檔案讀取與串流，並設定正確的標頭。
+    """
     file_path = os.path.join(settings.UPLOAD_DIR, filename)
     if not os.path.exists(file_path):
         raise HTTPException(404, "找不到檔案")
+    # 指定 filename 參數會帶上 Content-Disposition，瀏覽器視為「下載附件」
     return FileResponse(file_path, media_type="image/jpeg", filename=filename)
 
 
 @router.get("/{filename}/stream")
 def stream_image(filename: str):
-    """串流回傳（教材 3.6）"""
+    """串流回傳（教材 3.6）：適合大型檔案。
+
+    用產生器（generator）每次只讀一小塊再吐出，記憶體用量固定，
+    不會因檔案很大就一次全部載入。
+    """
     file_path = os.path.join(settings.UPLOAD_DIR, filename)
     if not os.path.exists(file_path):
         raise HTTPException(404, "找不到檔案")
 
+    # 產生器函式：每次讀 8KB，讀到空字串（檔案結束）時 while 結束、自動關檔
     def iterfile():
         with open(file_path, "rb") as f:
-            while chunk := f.read(8192):
+            while chunk := f.read(8192):  # := 海象運算子：邊賦值邊判斷
                 yield chunk
 
+    # StreamingResponse 接受一個可迭代物件，逐塊送給用戶端
     return StreamingResponse(iterfile(), media_type="image/jpeg")
 
 
 @router.get("/{filename}/base64")
 def image_base64(filename: str):
-    """Base64 回傳（教材 3.6，小圖適用）"""
+    """Base64 回傳（教材 3.6，小圖適用）。
+
+    把圖片編碼成 data URI 字串放進 JSON 回傳，前端可直接塞進 <img src>。
+    缺點是體積會比原檔大約 1/3，故只建議用在小圖（如縮圖、icon）。
+    """
     file_path = os.path.join(settings.UPLOAD_DIR, filename)
     if not os.path.exists(file_path):
         raise HTTPException(404, "找不到檔案")
     with open(file_path, "rb") as f:
+        # b64encode 回傳的是 bytes，需再 decode 成 str 才能放進 JSON
         encoded = base64.b64encode(f.read()).decode()
+    # 組成 data URI 格式：data:<mime>;base64,<編碼內容>
     return {"filename": filename, "data": f"data:image/jpeg;base64,{encoded}"}
 
 

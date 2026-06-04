@@ -38,15 +38,24 @@ class ImageQuery(BaseModel):
 
 
 class ImageCreateRequest(BaseModel):
-    """教材 3.2 接收 JSON 請求"""
-    title: str = Field(..., min_length=1)
-    url: str
-    tags: list[str] = []
+    """教材 3.2 接收 JSON 請求主體的 schema。
+
+    當路由參數型別標成這個類別時，FastAPI 會把進來的 JSON 依下列規則驗證，
+    驗證失敗自動回 422，不會進到路由函式。
+    """
+    title: str = Field(..., min_length=1)  # 必填（...），至少 1 個字元，空字串會被拒絕
+    url: str                               # 必填字串
+    tags: list[str] = []                   # 選填字串陣列，未提供時預設為空串列
 
 
 class ImageResponse(BaseModel):
-    """教材 3.3 回應模型，過濾內部欄位"""
+    """教材 3.3 回應模型，用來「過濾」對外輸出的欄位。
+
+    搭配路由的 response_model=ImageResponse 使用：函式即使回傳了額外欄位
+    （例如內部檔案路徑 file_path），只要不在這裡列出，就不會出現在回應 JSON，
+    可避免內部資訊外洩。
+    """
     id: int
     title: str
     url: str
-    uploaded_at: datetime
+    uploaded_at: datetime  # 只公開這四個欄位

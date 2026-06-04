@@ -13,8 +13,13 @@ from app.routes import ai, basic, images
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """啟動時建立資料表；如需預載 AI 模型可在此加 get_classifier() 等呼叫（教材 5.3）"""
-    init_db()
+    """啟動時建立資料表；如需預載 AI 模型可在此加 get_classifier() 等呼叫（教材 5.3）
+
+    init_db() 若連不到資料庫只會印出警告並回傳 False，不會中斷應用啟動，
+    讓沒用到資料庫的路由仍可正常運作。
+    """
+    if init_db():
+        print(f"✅ 資料庫連線成功：{settings.DATABASE_URL}")
     # 例：from app.services.ai_service import get_classifier; get_classifier()
     yield
     # 關閉時可在此清理資源
@@ -36,7 +41,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 靜態檔案掛載（教材 3.6）：http://localhost:8000/uploads/<filename>
+# 靜態檔案掛載（教材 3.6）：把整個上傳目錄掛到 /uploads 路徑底下，
+# 由 FastAPI（底層 Starlette）直接提供檔案，免自己為每個檔案寫路由。
+# 掛載前先確保目錄存在，否則 StaticFiles 會在啟動時因找不到目錄而報錯。
+# 之後 http://localhost:8000/uploads/<filename> 即可直接存取對應檔案。
 os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_DIR), name="uploads")
 

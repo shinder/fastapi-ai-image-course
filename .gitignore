@@ -39,9 +39,12 @@ uploads/*
 *.swo
 .DS_Store
 
-# 暫存圖片
+# 暫存圖片（學員自行測試的圖片不進版控）
 test_images/*
 !test_images/.gitkeep
+# 範例測試圖（教材與 api.http 會用到，需進版控供學員直接測試）
+!test_images/cat.jpg
+!test_images/text.png
 
 .vscode
 app.db

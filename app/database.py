@@ -2,6 +2,7 @@
 from typing import Annotated
 
 from fastapi import Depends
+from sqlalchemy.exc import OperationalError
 from sqlmodel import Session, SQLModel, create_engine
 
 from app.config import settings
@@ -15,9 +16,25 @@ engine = create_engine(
 )
 
 
-def init_db() -> None:
-    """應用啟動時呼叫，自動建立資料表"""
-    SQLModel.metadata.create_all(engine)
+def init_db() -> bool:
+    """應用啟動時呼叫，自動建立資料表。
+
+    連不到資料庫（例如 PostgreSQL 沒啟動）時，不讓整個應用崩潰：
+    只在終端機印出清楚的警告，並回傳 False。如此沒用到資料庫的路由
+    仍可正常運作；回傳 True 代表資料表已成功建立。
+    """
+    try:
+        SQLModel.metadata.create_all(engine)
+        return True
+    except OperationalError as exc:
+        print("=" * 70)
+        print("⚠️  無法連線到資料庫，已略過資料表建立。")
+        print(f"   DATABASE_URL：{settings.DATABASE_URL}")
+        print(f"   錯誤訊息：{exc.orig}")
+        print("   ➜ 沒有用到資料庫的功能仍可正常使用；")
+        print("     若需資料庫功能，請確認 PostgreSQL 是否已啟動、連線設定是否正確。")
+        print("=" * 70)
+        return False
 
 
 def get_session():

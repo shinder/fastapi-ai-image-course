@@ -1,4 +1,6 @@
 @baseUrl = http://localhost:8000
+# 教材 3.6 測試用：先執行上傳端點，把回傳的 filename 填到這裡
+@filename = REPLACE_WITH_UPLOADED_FILENAME
 
 ### 健康檢查
 GET {{baseUrl}}/health
@@ -97,7 +99,7 @@ GET {{baseUrl}}/api/v1/ai/cache/stats
 ### 透過依賴注入測試 Redis
 GET {{baseUrl}}/api/v1/ai/cache-test
 
-### 純 JSON 建立（教材 3.2 範例）
+### 純 JSON 建立（教材 3.2 接收 JSON 請求主體）
 POST {{baseUrl}}/api/v1/demo/images
 Content-Type: application/json
 
@@ -106,6 +108,77 @@ Content-Type: application/json
   "url": "https://example.com/cat.jpg",
   "tags": ["cat", "pet"]
 }
+
+### 回應模型過濾內部欄位（教材 3.3 回應模型與資料序列化）
+POST {{baseUrl}}/api/v1/demo/images-response
+Content-Type: application/json
+
+{
+  "title": "我的貓",
+  "url": "https://example.com/cat.jpg",
+  "tags": ["cat", "pet"]
+}
+
+### 表單資料（教材 3.4 表單資料處理）
+POST {{baseUrl}}/api/v1/contact
+Content-Type: application/x-www-form-urlencoded
+
+name=王小明&email=ming@example.com&message=你好
+
+### 單張上傳不入庫（教材 3.5 接收單張圖片）
+POST {{baseUrl}}/api/v1/images/upload-only
+Content-Type: multipart/form-data; boundary=----Boundary
+
+------Boundary
+Content-Disposition: form-data; name="file"; filename="cat.jpg"
+Content-Type: image/jpeg
+
+< ./test_images/cat.jpg
+------Boundary--
+
+### 多張同時上傳（教材 3.5 多張圖片同時上傳）
+POST {{baseUrl}}/api/v1/images/upload-multi
+Content-Type: multipart/form-data; boundary=----Boundary
+
+------Boundary
+Content-Disposition: form-data; name="files"; filename="cat.jpg"
+Content-Type: image/jpeg
+
+< ./test_images/cat.jpg
+------Boundary
+Content-Disposition: form-data; name="files"; filename="text.png"
+Content-Type: image/png
+
+< ./test_images/text.png
+------Boundary--
+
+### 上傳並用 Pillow 處理（教材 3.5 使用 Pillow 處理圖片）
+POST {{baseUrl}}/api/v1/images/upload-and-process
+Content-Type: multipart/form-data; boundary=----Boundary
+
+------Boundary
+Content-Disposition: form-data; name="file"; filename="cat.jpg"
+Content-Type: image/jpeg
+
+< ./test_images/cat.jpg
+------Boundary--
+
+# === 教材 3.6 圖片回傳 ===
+# 注意：下列三條需要實際已上傳的檔名。
+# 請先執行上方任一上傳端點（例如「單張上傳不入庫」），
+# 將回傳的 filename 填入檔案頂端的 @filename 變數。
+
+### 下載檔案 FileResponse（教材 3.6 回傳檔案）
+GET {{baseUrl}}/api/v1/images/{{filename}}/download
+
+### 串流回傳 StreamingResponse（教材 3.6 串流回傳）
+GET {{baseUrl}}/api/v1/images/{{filename}}/stream
+
+### Base64 回傳（教材 3.6 Base64 回傳）
+GET {{baseUrl}}/api/v1/images/{{filename}}/base64
+
+### 靜態目錄存取（教材 3.6 提供靜態檔案目錄）
+GET {{baseUrl}}/uploads/{{filename}}
 
 ### 練習 1：JSONPlaceholder 取單張
 GET https://jsonplaceholder.typicode.com/photos/1
