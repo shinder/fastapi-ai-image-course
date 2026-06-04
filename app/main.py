@@ -22,8 +22,8 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title=settings.APP_NAME,
-    description="FastAPI AI 影像辨識服務",
-    version="1.0.0",
+    description="FastAPI AI 服務",
+    version="0.0.1",
     lifespan=lifespan,
 )
 
