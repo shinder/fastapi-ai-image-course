@@ -44,3 +44,4 @@ test_images/*
 !test_images/.gitkeep
 
 .vscode
+app.db
