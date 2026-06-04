@@ -180,6 +180,14 @@ GET {{baseUrl}}/api/v1/images/{{filename}}/base64
 ### 靜態目錄存取（教材 3.6 提供靜態檔案目錄）
 GET {{baseUrl}}/uploads/{{filename}}
 
+# === 單元八 網頁與樣版（補充教材，Jinja2）===
+
+### 圖片列表頁（教材 8.6，建議用瀏覽器開）
+GET {{baseUrl}}/web
+
+### 上傳表單頁（教材 8.6，建議用瀏覽器開）
+GET {{baseUrl}}/web/upload
+
 ### 練習 1：JSONPlaceholder 取單張
 GET https://jsonplaceholder.typicode.com/photos/1
 

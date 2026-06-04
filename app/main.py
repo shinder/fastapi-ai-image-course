@@ -8,7 +8,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.config import settings
 from app.database import init_db
-from app.routes import ai, basic, images
+from app.routes import ai, basic, images, web
 
 
 @asynccontextmanager
@@ -95,3 +95,4 @@ def get_user(user_id: int):
 app.include_router(basic.router)
 app.include_router(images.router)
 app.include_router(ai.router)
+app.include_router(web.router)  # 單元八（補充教材）：Jinja2 樣板網頁

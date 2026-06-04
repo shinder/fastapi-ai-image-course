@@ -1,0 +1,29 @@
+{# 繼承 base.html：自動套用共用骨架，只需填寫 title 與 content 兩個 block #}
+{% extends "base.html" %}
+
+{% block title %}圖片列表{% endblock %}
+
+{% block content %}
+  <h1 class="mb-4">圖片列表</h1>
+
+  {# {% if %} 控制流程：有圖片才顯示網格，否則顯示提示 #}
+  {% if images %}
+    <div class="row row-cols-2 row-cols-md-4 g-3">
+      {# {% for %} 迴圈：逐一渲染後端傳入的 images 清單 #}
+      {% for name in images %}
+        <div class="col">
+          <div class="card h-100">
+            {# url_for('uploads', path=name)：反查 main.py 掛載的 /uploads 靜態路由 #}
+            <img src="{{ url_for('uploads', path=name) }}" class="card-img-top" alt="{{ name }}">
+            <div class="card-body">
+              {# {{ }} 輸出變數；truncate 是 Jinja2 過濾器，過長字串會被截斷 #}
+              <p class="card-text small text-truncate" title="{{ name }}">{{ name | truncate(20) }}</p>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-muted">目前沒有圖片，先去<a href="{{ url_for('upload_page') }}">上傳</a>一張吧。</p>
+  {% endif %}
+{% endblock %}

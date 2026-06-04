@@ -1,0 +1,29 @@
+{# 樣板繼承的「基礎樣板」：定義共用骨架，子樣板用 {% extends %} 繼承後填空 #}
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  {# {% block %} 定義可被子樣板覆寫的區塊；這裡給標題一個預設值 #}
+  <title>{% block title %}AI 影像服務{% endblock %}</title>
+  {# Bootstrap 5 改用 CDN 載入，免自建 static 目錄 #}
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+      {# url_for('路由函式名') 會反查出該路由的網址，路徑改了也不必改樣板 #}
+      <a class="navbar-brand" href="{{ url_for('gallery') }}">AI 影像服務</a>
+      <div class="navbar-nav">
+        <a class="nav-link" href="{{ url_for('gallery') }}">圖片列表</a>
+        <a class="nav-link" href="{{ url_for('upload_page') }}">上傳</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container py-4">
+    {# 子樣板的主要內容會填進這個 block #}
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>
