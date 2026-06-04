@@ -47,7 +47,7 @@ app.add_middleware(
 
 # 靜態檔案掛載（教材 3.6）：把整個上傳目錄掛到 /uploads 路徑底下，
 # 由 FastAPI（底層 Starlette）直接提供檔案，免自己為每個檔案寫路由。
-# 掛載前先確保目錄存在，否則 StaticFiles 會在啟動時因找不到目錄而報錯。
+# 掛載前先確保目錄存在，否則 StaticFiles 會在啟動時因找不到目錄而出錯。
 # 之後 http://localhost:8000/uploads/<filename> 即可直接存取對應檔案。
 os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_DIR), name="uploads")

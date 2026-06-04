@@ -128,7 +128,7 @@ async def upload_image_only(file: UploadFile = File(...)):
     new_name = f"{uuid.uuid4().hex}{ext}"
     save_path = os.path.join(settings.UPLOAD_DIR, new_name)
 
-    # 4. 確保上傳目錄存在（exist_ok=True 已存在不報錯），以二進位模式寫入
+    # 4. 確保上傳目錄存在（exist_ok=True 已存在不會出錯），以二進位模式寫入
     os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
     with open(save_path, "wb") as f:
         f.write(content)
