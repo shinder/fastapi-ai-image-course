@@ -116,12 +116,12 @@ async def upload_image_only(file: UploadFile = File(...)):
     """
     # 1. 驗證 MIME 類型：擋掉非允許格式（例如使用者上傳 .exe 偽裝）
     if file.content_type not in ALLOWED_TYPES:
-        raise HTTPException(400, f"不支援的格式：{file.content_type}")
+        raise HTTPException(415, f"不支援的格式：{file.content_type}")
 
     # 2. 讀取整個檔案內容（await 因為 UploadFile.read 是非同步），再驗證大小
     content = await file.read()
     if len(content) > MAX_SIZE:
-        raise HTTPException(400, "檔案過大（超過 10 MB）")
+        raise HTTPException(413, "檔案過大（超過 10 MB）")
 
     # 3. 產生唯一檔名：保留原副檔名，主檔名用 uuid 亂數避免衝突/覆蓋與路徑注入
     ext = os.path.splitext(file.filename or "")[1] or ".bin"  # 無副檔名時退回 .bin

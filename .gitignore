@@ -48,3 +48,4 @@ test_images/*
 
 .vscode
 app.db
+docs/fastapi-ai-image.md
