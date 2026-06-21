@@ -1,15 +1,45 @@
 """FastAPI 入口（教材 2.3、2.4、2.5、2.6、3.6、4.3、5.3、5.7）"""
+import logging
 import os
+import time
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.config import settings
 from app.database import init_db
 from app.db.mongo import close_mongo, connect_mongo
 from app.routes import ai, basic, images, mongo_demo, web
+
+# 主控台日誌（教材 2.6）：root 維持 WARNING，只讓自家 app.access 輸出 INFO，
+# 避免把 httpx 等第三方套件的 INFO 訊息也一起印出來
+logging.basicConfig(
+    level=logging.WARNING,
+    format="%(asctime)s %(levelname)s %(name)s | %(message)s",
+)
+logger = logging.getLogger("app.access")
+logger.setLevel(logging.INFO)
+
+
+class TimingMiddleware(BaseHTTPMiddleware):
+    """計時中介軟體（教材 2.6）：量測請求處理時間，寫入回應標頭並記錄 log"""
+
+    async def dispatch(self, request: Request, call_next):
+        start = time.perf_counter()
+        response: Response = await call_next(request)
+        elapsed_ms = (time.perf_counter() - start) * 1000
+        response.headers["X-Process-Time"] = f"{elapsed_ms:.2f}ms"
+        logger.info(
+            "%s %s -> %d (%.2fms)",
+            request.method,
+            request.url.path,
+            response.status_code,
+            elapsed_ms,
+        )
+        return response
 
 
 @asynccontextmanager
@@ -44,6 +74,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# 計時中介軟體（教材 2.6）；後加 → 較外層，計時涵蓋 CORS 與路由
+app.add_middleware(TimingMiddleware)
 
 # 靜態檔案掛載（教材 3.6）：把整個上傳目錄掛到 /uploads 路徑底下，
 # 由 FastAPI（底層 Starlette）直接提供檔案，免自己為每個檔案寫路由。
