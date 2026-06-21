@@ -8,6 +8,7 @@
 - 綜合實作：upload-and-classify
 """
 import base64
+import mimetypes
 import os
 import uuid
 from io import BytesIO
@@ -29,6 +30,15 @@ router = APIRouter(prefix="/api/v1/images", tags=["images"])
 # 教材 3.5：上傳檔案的共用驗證條件
 ALLOWED_TYPES = {"image/jpeg", "image/png", "image/webp"}  # MIME 類型白名單，擋掉非圖片
 MAX_SIZE = 10 * 1024 * 1024  # 10 MB，避免使用者上傳超大檔案塞爆磁碟/記憶體
+
+
+# 教材 3.6：把使用者傳入的 filename 安全解析到 UPLOAD_DIR 之下，擋掉路徑穿越
+def safe_upload_path(filename: str) -> str:
+    base = os.path.realpath(settings.UPLOAD_DIR)
+    target = os.path.realpath(os.path.join(base, filename))
+    if target != base and not target.startswith(base + os.sep):
+        raise HTTPException(400, "非法的檔名")
+    return target
 
 
 # ---------- 4.6 CRUD ----------
@@ -118,10 +128,11 @@ async def upload_image_only(file: UploadFile = File(...)):
     if file.content_type not in ALLOWED_TYPES:
         raise HTTPException(415, f"不支援的格式：{file.content_type}")
 
-    # 2. 讀取整個檔案內容（await 因為 UploadFile.read 是非同步），再驗證大小
-    content = await file.read()
-    if len(content) > MAX_SIZE:
+    # 2. 先用 file.size 擋掉過大的檔案，再讀進記憶體（避免大檔直接吃滿記憶體；
+    #    真正的上限防線仍應在反向代理／伺服器層設定 body 大小）
+    if file.size is not None and file.size > MAX_SIZE:
         raise HTTPException(413, "檔案過大（超過 10 MB）")
+    content = await file.read()
 
     # 3. 產生唯一檔名：保留原副檔名，主檔名用 uuid 亂數避免衝突/覆蓋與路徑注入
     ext = os.path.splitext(file.filename or "")[1] or ".bin"  # 無副檔名時退回 .bin
@@ -166,7 +177,11 @@ async def upload_and_process(file: UploadFile = File(...)):
     content = await file.read()
 
     # 用 Pillow 開啟圖片；BytesIO 把 bytes 包成「類檔案物件」，省去先落地存檔
-    img = PILImage.open(BytesIO(content))
+    # 非圖片或壞檔會丟 UnidentifiedImageError，包成 400 而非未處理的 500
+    try:
+        img = PILImage.open(BytesIO(content))
+    except Exception:
+        raise HTTPException(400, "無法解析的圖片檔")
     # 讀取原圖基本資訊（格式、色彩模式、寬高）
     info = {
         "format": img.format,
@@ -238,11 +253,11 @@ def download_image(filename: str):
     {filename} 是路徑參數，會被當成字串傳入。
     FileResponse 由 FastAPI 高效處理檔案讀取與串流，並設定正確的標頭。
     """
-    file_path = os.path.join(settings.UPLOAD_DIR, filename)
+    file_path = safe_upload_path(filename)  # 先驗證、擋路徑穿越
     if not os.path.exists(file_path):
         raise HTTPException(404, "找不到檔案")
-    # 指定 filename 參數會帶上 Content-Disposition，瀏覽器視為「下載附件」
-    return FileResponse(file_path, media_type="image/jpeg", filename=filename)
+    # 省略 media_type 讓 FileResponse 依副檔名自動判斷；指定 filename 會帶上 Content-Disposition
+    return FileResponse(file_path, filename=filename)
 
 
 @router.get("/{filename}/stream")
@@ -252,7 +267,7 @@ def stream_image(filename: str):
     用產生器（generator）每次只讀一小塊再吐出，記憶體用量固定，
     不會因檔案很大就一次全部載入。
     """
-    file_path = os.path.join(settings.UPLOAD_DIR, filename)
+    file_path = safe_upload_path(filename)  # 先驗證、擋路徑穿越
     if not os.path.exists(file_path):
         raise HTTPException(404, "找不到檔案")
 
@@ -262,8 +277,10 @@ def stream_image(filename: str):
             while chunk := f.read(8192):  # := 海象運算子：邊賦值邊判斷
                 yield chunk
 
+    # 依副檔名判斷 MIME（StreamingResponse 不會自動判斷，需明確指定）
+    media_type = mimetypes.guess_type(file_path)[0] or "application/octet-stream"
     # StreamingResponse 接受一個可迭代物件，逐塊送給用戶端
-    return StreamingResponse(iterfile(), media_type="image/jpeg")
+    return StreamingResponse(iterfile(), media_type=media_type)
 
 
 @router.get("/{filename}/base64")
@@ -273,14 +290,15 @@ def image_base64(filename: str):
     把圖片編碼成 data URI 字串放進 JSON 回傳，前端可直接塞進 <img src>。
     缺點是體積會比原檔大約 1/3，故只建議用在小圖（如縮圖、icon）。
     """
-    file_path = os.path.join(settings.UPLOAD_DIR, filename)
+    file_path = safe_upload_path(filename)  # 先驗證、擋路徑穿越
     if not os.path.exists(file_path):
         raise HTTPException(404, "找不到檔案")
     with open(file_path, "rb") as f:
         # b64encode 回傳的是 bytes，需再 decode 成 str 才能放進 JSON
         encoded = base64.b64encode(f.read()).decode()
-    # 組成 data URI 格式：data:<mime>;base64,<編碼內容>
-    return {"filename": filename, "data": f"data:image/jpeg;base64,{encoded}"}
+    # 依副檔名判斷 MIME，組成 data URI 格式：data:<mime>;base64,<編碼內容>
+    mime = mimetypes.guess_type(file_path)[0] or "application/octet-stream"
+    return {"filename": filename, "data": f"data:{mime};base64,{encoded}"}
 
 
 # ---------- 綜合實作：上傳 + 辨識 + 快取 + 入庫 ----------
