@@ -70,7 +70,7 @@ def list_images(
 ):
     statement = select(Image)
     if keyword:
-        statement = statement.where(Image.title.contains(keyword))
+        statement = statement.where(Image.title.icontains(keyword))  # icontains：不分大小寫
     statement = statement.offset(skip).limit(limit).order_by(Image.uploaded_at.desc())
     return session.exec(statement).all()
 
@@ -222,6 +222,11 @@ async def upload_image(
     file: UploadFile = File(...),
 ):
     """上傳檔案並寫入資料庫（檔案進磁碟，路徑進 DB）"""
+    # 比照 /upload-only 驗證型別與大小（正式入庫端點也應把關）
+    if file.content_type not in ALLOWED_TYPES:
+        raise HTTPException(415, f"不支援的格式：{file.content_type}")
+    if file.size is not None and file.size > MAX_SIZE:
+        raise HTTPException(413, "檔案過大（超過 10 MB）")
     content = await file.read()
 
     ext = os.path.splitext(file.filename or "")[1] or ".bin"
