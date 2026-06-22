@@ -156,6 +156,39 @@ def get_task(task_id: str, r: RedisDep):
     return cache_get(r, _task_key(task_id)) or {"status": "not_found"}
 
 
+# ---------- 6.11 任務佇列 ----------
+
+@router.post("/generate-queued")
+def generate_queued(r: RedisDep, prompt: str = Form(..., min_length=1)):
+    """方法一：手刻 LPUSH/BRPOP 佇列（教材 6.11）。
+
+    需另開 worker 消費：python -m app.workers.queue_worker
+    """
+    from app.services.queue_service import enqueue_generation  # lazy import
+
+    task_id = uuid4().hex
+    cache_set(r, f"task:gen:{task_id}", {"status": "pending"}, ttl=3600)
+    enqueue_generation(task_id, prompt)  # 丟進佇列就回應，不在此執行
+    return {"task_id": task_id}
+
+
+@router.post("/generate-rq")
+def generate_rq(r: RedisDep, prompt: str = Form(..., min_length=1)):
+    """方法二：用 RQ（教材 6.11，需 uv sync --extra queue）。
+
+    需另開 worker 消費：rq worker image-gen --url redis://localhost:6379/0
+    """
+    # lazy import：避免 app 啟動就載入 rq（屬可選依賴）
+    from app.services.queue_service import task_queue
+    from app.services.tasks import run_generation
+
+    task_id = uuid4().hex
+    cache_set(r, f"task:gen:{task_id}", {"status": "pending"}, ttl=3600)
+    # 把「函式 + 參數」排進佇列；job_timeout 防止單一任務卡死
+    task_queue.enqueue(run_generation, task_id, prompt, job_timeout=120)
+    return {"task_id": task_id}
+
+
 # ---------- 7.5 / 7.6 串接外部 AI API ----------
 
 @router.post("/classify-external")
