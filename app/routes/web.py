@@ -26,6 +26,8 @@ router = APIRouter(prefix="/web", tags=["web"])
 
 # 圖片列表頁要顯示的副檔名
 IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".webp", ".gif"}
+# 上傳允許的 MIME 類型（對應 IMAGE_EXTS）；後端驗證，不能只靠前端 accept
+ALLOWED_CONTENT_TYPES = {"image/jpeg", "image/png", "image/webp", "image/gif"}
 
 
 @router.get("", response_class=HTMLResponse)
@@ -43,9 +45,9 @@ def gallery(request: Request):
 
 
 @router.get("/upload", response_class=HTMLResponse)
-def upload_page(request: Request):
-    """顯示上傳表單頁。"""
-    return templates.TemplateResponse(request, "upload.html", {})
+def upload_page(request: Request, error: str | None = None):
+    """顯示上傳表單頁；error 不為 None 時於頁面顯示錯誤提示。"""
+    return templates.TemplateResponse(request, "upload.html", {"error": error})
 
 
 @router.post("/upload")
@@ -55,6 +57,13 @@ async def handle_upload(request: Request, file: UploadFile = File(...)):
     這裡用 PRG（Post/Redirect/Get）模式：處理完 POST 後回 303 重導到 GET 頁面，
     使用者重新整理時就不會重複送出表單。
     """
+    # 後端驗證型別：upload.html 的 accept="image/*" 只是前端提示，可被繞過；
+    # 且 uploads/ 會透過 /uploads 對外提供，存入非圖片（如 .html/.svg）有資安風險
+    if file.content_type not in ALLOWED_CONTENT_TYPES:
+        # PRG：重導回上傳頁並以 query 帶出錯誤，仍走無副作用的 GET
+        url = request.url_for("upload_page").include_query_params(error="type")
+        return RedirectResponse(url=url, status_code=303)
+
     content = await file.read()
     os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
     ext = os.path.splitext(file.filename or "")[1] or ".bin"
