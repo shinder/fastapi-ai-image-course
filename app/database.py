@@ -1,4 +1,5 @@
 """資料庫連線與 Session 依賴注入（教材 4.3、4.5）"""
+
 from typing import Annotated
 
 from fastapi import Depends

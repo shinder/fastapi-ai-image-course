@@ -3,6 +3,7 @@
 做成 FastAPI 依賴，套在昂貴的 AI 端點上，保護後端不被爆量呼叫。
 Redis 不可用時採 fail-open（放行），不讓限流元件本身成為單點故障。
 """
+
 import redis
 from fastapi import HTTPException, Request
 
@@ -25,9 +26,9 @@ class RateLimit:
         client = request.client.host if request.client else "unknown"
         key = f"ratelimit:{client}"
         try:
-            count = r.incr(key)             # 計數 +1（key 不存在會從 1 開始）
+            count = r.incr(key)  # 計數 +1（key 不存在會從 1 開始）
             if count == 1:
-                r.expire(key, self.window)   # 第一次才設過期，形成固定時間視窗
+                r.expire(key, self.window)  # 第一次才設過期，形成固定時間視窗
         except redis.RedisError:
             return  # fail-open：Redis 不可用時直接放行
 

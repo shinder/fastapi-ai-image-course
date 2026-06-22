@@ -3,6 +3,7 @@
 執行：
     uv run python scripts/client.py
 """
+
 from pathlib import Path
 
 import requests

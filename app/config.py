@@ -1,4 +1,5 @@
 """應用組態（教材 2.2）：從 .env 讀取設定，集中管理"""
+
 import os
 
 from dotenv import load_dotenv

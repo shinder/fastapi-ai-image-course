@@ -3,6 +3,7 @@
 執行：
     uv run python scripts/requests_demo.py
 """
+
 import requests
 from requests.adapters import HTTPAdapter
 from requests.auth import HTTPBasicAuth

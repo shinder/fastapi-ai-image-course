@@ -3,6 +3,7 @@
 需安裝可選依賴：
     uv sync --extra ocr
 """
+
 from io import BytesIO
 
 from PIL import Image

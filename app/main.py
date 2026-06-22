@@ -1,4 +1,5 @@
 """FastAPI 入口（教材 2.3、2.4、2.5、2.6、3.6、4.3、5.3、5.7）"""
+
 import logging
 import os
 import time
@@ -97,6 +98,7 @@ def health_check():
 
 
 # ---------- 教材 2.4 路由設計 ----------
+
 
 # 基本路由 + 查詢參數
 @app.get("/items")

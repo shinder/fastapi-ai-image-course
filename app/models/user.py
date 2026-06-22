@@ -6,6 +6,7 @@
 注意：此檔僅作示範。若要啟用，需在 app/database.py 的 init_db()
 呼叫前 import 此模組。
 """
+
 from typing import Optional
 
 from sqlmodel import Field, Relationship, SQLModel
@@ -13,14 +14,11 @@ from sqlmodel import Field, Relationship, SQLModel
 
 class ImageTagLink(SQLModel, table=True):
     """多對多的「關聯表（中介表）」：只放兩邊的外鍵，兩者合為複合主鍵"""
+
     __tablename__ = "image_tag_links"
 
-    image_id: Optional[int] = Field(
-        default=None, foreign_key="user_images.id", primary_key=True
-    )
-    tag_id: Optional[int] = Field(
-        default=None, foreign_key="tags.id", primary_key=True
-    )
+    image_id: Optional[int] = Field(default=None, foreign_key="user_images.id", primary_key=True)
+    tag_id: Optional[int] = Field(default=None, foreign_key="tags.id", primary_key=True)
 
 
 class User(SQLModel, table=True):
@@ -35,6 +33,7 @@ class User(SQLModel, table=True):
 
 class UserImage(SQLModel, table=True):
     """為避免與 app.models.image.Image 衝突，使用獨立表"""
+
     __tablename__ = "user_images"
 
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -48,10 +47,9 @@ class UserImage(SQLModel, table=True):
 
 class Tag(SQLModel, table=True):
     """標籤：一個 Tag 可貼多張圖，一張圖可有多個 Tag（多對多）"""
+
     __tablename__ = "tags"
 
     id: Optional[int] = Field(default=None, primary_key=True)
     name: str
-    images: list["UserImage"] = Relationship(
-        back_populates="tags", link_model=ImageTagLink
-    )
+    images: list["UserImage"] = Relationship(back_populates="tags", link_model=ImageTagLink)

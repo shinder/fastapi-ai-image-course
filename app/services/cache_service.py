@@ -1,4 +1,5 @@
 """Redis 快取服務（教材 6.4、6.5、6.6、6.9）"""
+
 import hashlib
 import json
 import random

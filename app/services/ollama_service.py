@@ -1,4 +1,5 @@
 """Ollama 本地視覺模型整合（教材 5.5）"""
+
 import json
 
 from ollama import Client, ResponseError

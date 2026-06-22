@@ -6,6 +6,7 @@
 若未安裝 transformers/torch，import 時會 raise ImportError；
 路由層會在實際呼叫時才觸發（lazy load）。
 """
+
 from io import BytesIO
 
 from PIL import Image

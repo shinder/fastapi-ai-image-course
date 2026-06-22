@@ -5,6 +5,7 @@
 - 方法二：用 RQ（Redis Queue），內建重試、逾時、失敗追蹤，適合正式專案。
   需安裝可選依賴：uv sync --extra queue
 """
+
 import json
 
 from redis import Redis

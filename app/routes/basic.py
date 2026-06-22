@@ -7,6 +7,7 @@
 
 註：教材 2.4 的基本路由示範直接寫在 `app/main.py`，模擬還沒拆 APIRouter 之前的狀態。
 """
+
 from datetime import datetime
 
 from fastapi import APIRouter, Form

@@ -3,6 +3,7 @@
 這些 schema 不入庫，純粹示範 Pydantic 驗證能力。
 實際 API 主要使用 app/models/image.py 中的 SQLModel。
 """
+
 from datetime import datetime
 
 from pydantic import BaseModel, Field, field_validator
@@ -10,6 +11,7 @@ from pydantic import BaseModel, Field, field_validator
 
 class ImageInfo(BaseModel):
     """教材 3.1 基本範例"""
+
     id: int
     filename: str
     size: int
@@ -19,6 +21,7 @@ class ImageInfo(BaseModel):
 
 class ImageUpload(BaseModel):
     """教材 3.1 進階驗證：Field"""
+
     title: str = Field(..., min_length=1, max_length=100)
     description: str | None = Field(None, max_length=500)
     tags: list[str] = Field(default_factory=list, max_length=10)
@@ -27,6 +30,7 @@ class ImageUpload(BaseModel):
 
 class ImageQuery(BaseModel):
     """教材 3.1 自訂驗證"""
+
     keyword: str
 
     @field_validator("keyword")
@@ -43,9 +47,10 @@ class ImageCreateRequest(BaseModel):
     當路由參數型別標成這個類別時，FastAPI 會把進來的 JSON 依下列規則驗證，
     驗證失敗自動回 422，不會進到路由函式。
     """
+
     title: str = Field(..., min_length=1)  # 必填（...），至少 1 個字元，空字串會被拒絕
-    url: str                               # 必填字串
-    tags: list[str] = []                   # 選填字串陣列，未提供時預設為空串列
+    url: str  # 必填字串
+    tags: list[str] = []  # 選填字串陣列，未提供時預設為空串列
 
 
 class ImageResponse(BaseModel):
@@ -55,6 +60,7 @@ class ImageResponse(BaseModel):
     （例如內部檔案路徑 file_path），只要不在這裡列出，就不會出現在回應 JSON，
     可避免內部資訊外洩。
     """
+
     id: int
     title: str
     url: str

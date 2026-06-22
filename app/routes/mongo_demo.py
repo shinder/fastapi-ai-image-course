@@ -7,6 +7,7 @@
 
 collection：image_notes
 """
+
 from datetime import datetime, timezone
 from typing import Optional
 
@@ -57,7 +58,7 @@ async def create_note(payload: NoteCreate):
     coll = get_collection()
     doc = payload.model_dump()
     doc["created_at"] = datetime.now(timezone.utc)
-    result = await coll.insert_one(doc)          # 寫入，回傳含 inserted_id
+    result = await coll.insert_one(doc)  # 寫入，回傳含 inserted_id
     created = await coll.find_one({"_id": result.inserted_id})
     return serialize(created)
 

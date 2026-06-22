@@ -5,6 +5,7 @@
 
     rq worker image-gen --url redis://localhost:6379/0
 """
+
 from app.services.cache_service import cache_set, get_redis
 from app.services.image_gen_service import generate_image
 

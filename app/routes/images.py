@@ -7,6 +7,7 @@
 - 4.7 影像資料儲存策略
 - 綜合實作：upload-and-classify
 """
+
 import base64
 import mimetypes
 import os
@@ -42,6 +43,7 @@ def safe_upload_path(filename: str) -> str:
 
 
 # ---------- 4.6 CRUD ----------
+
 
 @router.post("", response_model=ImagePublic, status_code=status.HTTP_201_CREATED)
 def create_image(payload: ImageCreate, session: SessionDep):
@@ -116,6 +118,7 @@ def delete_image(image_id: int, session: SessionDep):
 
 # ---------- 3.5 上傳 ----------
 
+
 @router.post("/upload-only")
 async def upload_image_only(file: UploadFile = File(...)):
     """單純上傳（不入庫，教材 3.5 範例）。
@@ -161,8 +164,8 @@ async def upload_multi(files: List[UploadFile] = File(...)):
     此範例只回報每個檔案的名稱與大小，不實際寫檔。
     """
     results = []
-    for file in files:                 # 逐一處理每個上傳的檔案
-        content = await file.read()     # 非同步讀取該檔內容
+    for file in files:  # 逐一處理每個上傳的檔案
+        content = await file.read()  # 非同步讀取該檔內容
         results.append({"filename": file.filename, "size": len(content)})
     return {"count": len(results), "files": results}
 
@@ -215,6 +218,7 @@ async def upload_and_process(file: UploadFile = File(...)):
 
 # ---------- 4.7 上傳並入庫 ----------
 
+
 @router.post("/upload", response_model=ImagePublic, status_code=201)
 async def upload_image(
     session: SessionDep,
@@ -250,6 +254,7 @@ async def upload_image(
 
 
 # ---------- 3.6 圖片回傳 ----------
+
 
 @router.get("/{filename}/download")
 def download_image(filename: str):
@@ -307,6 +312,7 @@ def image_base64(filename: str):
 
 
 # ---------- 綜合實作：上傳 + 辨識 + 快取 + 入庫 ----------
+
 
 @router.post("/upload-and-classify", response_model=ImagePublic, status_code=201)
 async def upload_and_classify(

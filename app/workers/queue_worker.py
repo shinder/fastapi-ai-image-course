@@ -5,6 +5,7 @@
 
     python -m app.workers.queue_worker
 """
+
 import json
 
 from app.services.cache_service import cache_set, get_redis

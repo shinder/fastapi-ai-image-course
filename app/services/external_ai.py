@@ -3,6 +3,7 @@
 requests 是同步、httpx 提供同步與非同步。
 FastAPI 路由內推薦用 httpx.AsyncClient；獨立腳本則 requests 即可。
 """
+
 import asyncio
 
 import httpx
@@ -60,6 +61,4 @@ async def call_multiple(content: bytes, urls: list[str]) -> dict:
             *[client.post(u, files={"file": ("i.jpg", content)}) for u in urls],
             return_exceptions=True,
         )
-    return {
-        "results": [r.json() if hasattr(r, "json") else str(r) for r in results]
-    }
+    return {"results": [r.json() if hasattr(r, "json") else str(r) for r in results]}

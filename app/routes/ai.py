@@ -9,6 +9,7 @@
 - 6.5 快取 AI 推論結果（含命中率統計）
 - 7.5 串接外部 AI API
 """
+
 from uuid import uuid4
 
 import redis
@@ -38,6 +39,7 @@ router = APIRouter(prefix="/api/v1/ai", tags=["ai"])
 
 
 # ---------- 5.3 + 6.5 影像分類（含快取） ----------
+
 
 @router.post("/classify", dependencies=[Depends(RateLimit(limit=30, window=60))])
 async def classify(file: UploadFile = File(...), r: RedisDep = None):
@@ -69,6 +71,7 @@ async def classify(file: UploadFile = File(...), r: RedisDep = None):
 
 # ---------- 5.4 OCR ----------
 
+
 @router.post("/ocr")
 async def ocr(file: UploadFile = File(...)):
     if not file.content_type or not file.content_type.startswith("image/"):
@@ -82,6 +85,7 @@ async def ocr(file: UploadFile = File(...)):
 
 
 # ---------- 5.5 Ollama 視覺模型 ----------
+
 
 @router.post("/describe")
 async def describe(
@@ -110,6 +114,7 @@ async def extract_invoice(file: UploadFile = File(...)):
 
 
 # ---------- 5.6 影像生成 ----------
+
 
 @router.post("/generate", dependencies=[Depends(RateLimit(limit=10, window=60))])
 def generate(prompt: str = Form(..., min_length=1, max_length=1000)):
@@ -146,7 +151,7 @@ def generate_async(
 ):
     task_id = uuid4().hex
     cache_set(r, _task_key(task_id), {"status": "pending"}, ttl=3600)  # 先標記 pending
-    background_tasks.add_task(_run_generation, task_id, prompt)         # 回應後才執行
+    background_tasks.add_task(_run_generation, task_id, prompt)  # 回應後才執行
     return {"task_id": task_id}
 
 
@@ -157,6 +162,7 @@ def get_task(task_id: str, r: RedisDep):
 
 
 # ---------- 6.11 任務佇列 ----------
+
 
 @router.post("/generate-queued")
 def generate_queued(r: RedisDep, prompt: str = Form(..., min_length=1)):
@@ -191,6 +197,7 @@ def generate_rq(r: RedisDep, prompt: str = Form(..., min_length=1)):
 
 # ---------- 7.5 / 7.6 串接外部 AI API ----------
 
+
 @router.post("/classify-external")
 async def classify_external(file: UploadFile = File(...)):
     """同步 requests + run_in_threadpool（教材 7.5）"""
@@ -212,6 +219,7 @@ async def classify_external_async(file: UploadFile = File(...)):
 
 
 # ---------- 6.7 命中率查詢 ----------
+
 
 @router.get("/cache/stats")
 def cache_stats(r: RedisDep):

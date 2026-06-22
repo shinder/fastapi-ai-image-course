@@ -4,6 +4,7 @@
     uv sync --extra openai
 並在 .env 設定 OPENAI_API_KEY。
 """
+
 from app.config import settings
 
 
