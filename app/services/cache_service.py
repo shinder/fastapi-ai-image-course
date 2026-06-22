@@ -81,10 +81,19 @@ SENTINEL = "__none__"
 
 
 def cache_get_or_none(r: redis.Redis, key: str):
-    raw = r.get(key)
+    # 與 cache_get 一致的盡力而為：Redis 不可用或內容非 JSON 時當作未命中
+    try:
+        raw = r.get(key)
+    except redis.RedisError:
+        return None
     if raw == SENTINEL:
         return "miss-cached"
-    return json.loads(raw) if raw else None
+    if not raw:
+        return None
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError:
+        return None
 
 
 @contextmanager
