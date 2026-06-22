@@ -51,7 +51,7 @@ async def lifespan(app: FastAPI):
     讓沒用到該資料庫的路由仍可正常運作。
     """
     if init_db():
-        print(f"✅ 資料庫連線成功：{settings.DATABASE_URL}")
+        print(f"資料庫連線成功：{settings.DATABASE_URL}")
     # 單元九：連線 MongoDB（連不到也不中斷啟動）
     await connect_mongo()
     # 例：from app.services.ai_service import get_classifier; get_classifier()

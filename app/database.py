@@ -29,10 +29,10 @@ def init_db() -> bool:
         return True
     except OperationalError as exc:
         print("=" * 70)
-        print("⚠️  無法連線到資料庫，已略過資料表建立。")
+        print("無法連線到資料庫，已略過資料表建立。")
         print(f"   DATABASE_URL：{settings.DATABASE_URL}")
         print(f"   錯誤訊息：{exc.orig}")
-        print("   ➜ 沒有用到資料庫的功能仍可正常使用；")
+        print("   → 沒有用到資料庫的功能仍可正常使用；")
         print("     若需資料庫功能，請確認 PostgreSQL 是否已啟動、連線設定是否正確。")
         print("=" * 70)
         return False

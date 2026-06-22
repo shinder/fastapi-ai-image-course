@@ -24,12 +24,12 @@ async def connect_mongo() -> bool:
         client = AsyncMongoClient(settings.MONGO_URL, serverSelectionTimeoutMS=2000)
         await client.admin.command("ping")  # 真的連一次，確認伺服器可達
         _client = client
-        print(f"✅ MongoDB 連線成功：{settings.MONGO_URL}")
+        print(f"MongoDB 連線成功：{settings.MONGO_URL}")
         return True
     except PyMongoError as exc:
         _client = None
         print("=" * 70)
-        print("⚠️  無法連線到 MongoDB，已略過。沒用到 Mongo 的功能仍可正常使用。")
+        print("無法連線到 MongoDB，已略過。沒用到 Mongo 的功能仍可正常使用。")
         print(f"   MONGO_URL：{settings.MONGO_URL}")
         print(f"   錯誤：{exc}")
         print("=" * 70)
