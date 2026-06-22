@@ -36,13 +36,21 @@ def call_external_classify(content: bytes) -> dict:
 
 
 async def call_external_classify_async(content: bytes) -> dict:
-    """非同步版（教材 7.6）"""
+    """非同步版（教材 7.6）；兜底對齊同步版的 call_external_classify"""
     files = {"file": ("img.jpg", content, "image/jpeg")}
     headers = {"X-API-Key": settings.OPENAI_API_KEY}
-    async with httpx.AsyncClient(timeout=30) as client:
-        r = await client.post(EXTERNAL_AI_URL, files=files, headers=headers)
-        r.raise_for_status()
-        return r.json()
+    try:
+        async with httpx.AsyncClient(timeout=30) as client:
+            r = await client.post(EXTERNAL_AI_URL, files=files, headers=headers)
+            r.raise_for_status()
+            return r.json()
+    except httpx.TimeoutException:
+        raise RuntimeError("外部 AI 服務逾時")
+    except httpx.HTTPStatusError as e:
+        raise RuntimeError(f"外部 AI 錯誤：{e.response.status_code}")
+    except httpx.RequestError as e:
+        # 連線失敗、DNS 錯誤等的後援（須放最後，TimeoutException 等都是它的子類）
+        raise RuntimeError(f"外部 AI 連線失敗：{e}")
 
 
 async def call_multiple(content: bytes, urls: list[str]) -> dict:
