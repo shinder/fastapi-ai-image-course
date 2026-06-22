@@ -121,6 +121,22 @@ uv run pytest -q
 
 ---
 
+## 程式碼格式化與檢查
+
+本專案用 [Ruff](https://docs.astral.sh/ruff/)（已列在 dev 相依）統一排版與靜態檢查，
+風格設定（line-length 100）寫在 `pyproject.toml` 的 `[tool.ruff]`：
+
+```bash
+uv run ruff format .   # 排版
+uv run ruff check .    # Lint 檢查
+```
+
+VSCode 使用者：專案 `.vscode/settings.json` 已設定存檔時自動以 Ruff 排版，首次開啟
+專案會提示安裝建議的擴充套件（見 `.vscode/extensions.json`）。其中
+`ruff.importStrategy: "fromEnvironment"` 會直接使用專案 `.venv` 裡的 Ruff，不需另裝。
+
+---
+
 ## 主要 API
 
 | Method | Path | 說明 | 教材 |

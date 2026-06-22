@@ -46,6 +46,8 @@ test_images/*
 !test_images/cat.jpg
 !test_images/text.png
 
-.vscode
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
 app.db
 docs/fastapi-ai-image.md
