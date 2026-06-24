@@ -3,8 +3,10 @@
 串成一條完整關聯：
     User  —(一對多)→  UserImage  ←(多對多)→  Tag
 
-注意：此檔僅作示範。若要啟用，需在 app/database.py 的 init_db()
-呼叫前 import 此模組。
+注意：此檔僅作示範，預設不會被建表。原因：SQLModel 的 table=True 模型是在
+「class 定義被執行（= 模組被 import）時」才由 metaclass 自動註冊進 SQLModel.metadata；
+本模組啟動時沒被任何地方 import，故這些表從未註冊，init_db() 的 create_all() 也不會建。
+若要啟用，需在 app/database.py 的 init_db() 呼叫前先 import 此模組（讓 class 定義被執行）。
 """
 
 from typing import Optional
