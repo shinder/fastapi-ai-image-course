@@ -86,6 +86,13 @@ app.add_middleware(TimingMiddleware)
 os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_DIR), name="uploads")
 
+# 靜態檔案掛載（教材 8.5）：另外把 app/static 掛到 /static，提供「專案自備」的 CSS/JS。
+# 與上面 /uploads 的差別：/uploads 放「使用者上傳」的檔案，/static 放「開發者預先準備」的
+# 靜態資源（樣式、前端腳本、圖示等）。
+# base.html 會用 url_for('static', path='app.css') 反查這裡的網址來載入樣式，
+# 路徑日後改了樣板也不必跟著改。
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
+
 
 @app.get("/")
 def read_root():

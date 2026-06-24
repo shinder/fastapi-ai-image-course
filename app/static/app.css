@@ -1,0 +1,26 @@
+/* 教材 8.5 示範用的「專案自備」樣式表
+ *
+ * 重點不在樣式本身，而在示範「如何在 FastAPI 提供自己的 CSS/JS」：
+ *   1. main.py 以 app.mount("/static", StaticFiles(directory="app/static"), name="static")
+ *      把本目錄掛到 /static 路徑底下。
+ *   2. base.html 以 {{ url_for('static', path='app.css') }} 反查網址後，用 <link> 載入。
+ *      之後即使改掉掛載路徑，樣板也不必跟著改——這正是 url_for 的價值。
+ *
+ * Bootstrap 5 仍由 CDN 提供（見 base.html）；這裡只放少量「專案自己的」樣式，
+ * 示範自訂 CSS 能與 CDN 樣式並存，並覆寫 Bootstrap 的預設值。
+ */
+
+/* 讓導覽列品牌名稱更醒目（加粗、加字距）：用來證明自訂 CSS 確實有套用 */
+.navbar-brand {
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+/* 自訂頁尾樣式（搭配 base.html 的 .app-footer 使用） */
+.app-footer {
+  margin-top: 2rem;
+  padding: 1rem 0;
+  color: #6c757d;
+  text-align: center;
+  font-size: 0.875rem;
+}

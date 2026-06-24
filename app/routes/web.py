@@ -5,8 +5,9 @@
 - GET  /web/upload  上傳表單頁：HTML 表單
 - POST /web/upload  接收表單上傳、存檔，再重導回列表頁（PRG 模式）
 
-樣式用 Bootstrap CDN（見 templates/base.html），故本專案不需自建 static 目錄；
-圖片本身由 main.py 掛載的 /uploads（StaticFiles）提供。
+樣式主要用 Bootstrap CDN（見 templates/base.html）；另有少量專案自備樣式放在
+app/static，由 main.py 掛載的 /static（StaticFiles，教材 8.5）提供。
+圖片本身則由 main.py 掛載的 /uploads（StaticFiles）提供。
 
 註：jinja2 已隨 fastapi[all] 一起安裝，不需另外加入相依。
 """
