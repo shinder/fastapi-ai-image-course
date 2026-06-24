@@ -51,7 +51,9 @@ Python 版本鎖定 3.12（`requires-python = ">=3.12,<3.13"`）。
 ## 架構與關鍵慣例
 
 ### 應用組裝
-`app/main.py` 是入口：定義 `lifespan`（啟動建表 + 連 Mongo、關閉清資源）、掛 CORS 與自製 `TimingMiddleware`、把 `uploads/` 目錄掛成 `/uploads` 靜態路由，最後 `include_router` 註冊各 APIRouter。教材 2.4 的基本路由刻意直接寫在 `main.py`（模擬還沒拆 router 的階段），其餘都拆進 `app/routes/`。
+`app/main.py` 是入口：定義 `lifespan`（啟動建表 + 連 Mongo、關閉清資源）、掛 CORS 與自製 `TimingMiddleware`、掛兩個 `StaticFiles`（`uploads/` → `/uploads`，放使用者上傳的圖片，教材 3.6；`app/static/` → `/static`，放專案自備的 CSS/JS，教材 8.5），最後 `include_router` 註冊各 APIRouter。教材 2.4 的基本路由刻意直接寫在 `main.py`（模擬還沒拆 router 的階段），其餘都拆進 `app/routes/`。
+
+樣式以 Bootstrap CDN 為主（見 `templates/base.html`），`app/static/app.css` 只放少量自訂樣式，示範 `StaticFiles` 掛載搭配樣板裡 `url_for('static', path=...)` 反查網址的用法。
 
 ### 優雅降級（最重要的跨檔案設計）
 所有外部依賴都做到「連不到也不讓 app 崩潰」，這是貫穿全專案的原則，修改時務必維持：
