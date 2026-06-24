@@ -45,18 +45,26 @@ class TimingMiddleware(BaseHTTPMiddleware):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """啟動時建立資料表；如需預載 AI 模型可在此加 get_classifier() 等呼叫（教材 5.3）
+    """應用生命週期（教材 4.3、5.3）：定義 app「啟動時」與「關閉時」各跑一次的程式碼。
+
+    lifespan 是一個 async context manager，用 yield 把它切成兩半：
+    - yield 之前：啟動階段（開始收請求之前執行）→ 建表、連 Mongo，也可在此預載 AI 模型。
+    - yield 之後：關閉階段（停止服務之後執行）→ 釋放資源。
+    注意：整個 app 只各跑一次（非每個請求都跑）；多 worker 部署時，每個行程會各跑一遍。
+    它取代了已棄用的 @app.on_event("startup"/"shutdown")，是目前官方推薦寫法。
 
     init_db() 與 connect_mongo() 連不到時都只印警告、不中斷啟動，
-    讓沒用到該資料庫的路由仍可正常運作。
+    讓沒用到該資料庫的路由仍可正常運作（優雅降級）。
     """
+    # ---- yield 之前：啟動階段 ----
     if init_db():
         print(f"資料庫連線成功：{settings.DATABASE_URL}")
     # 單元九：連線 MongoDB（連不到也不中斷啟動）
     await connect_mongo()
-    # 例：from app.services.ai_service import get_classifier; get_classifier()
-    yield
-    # 關閉時清理資源
+    # 想避免「第一個請求才載入模型」的冷啟動延遲，可在這裡預載（教材 5.3）：
+    #   from app.services.ai_service import get_classifier; get_classifier()
+    yield  # ← app 在此進入服務狀態，處理所有請求
+    # ---- yield 之後：關閉階段（清理資源）----
     await close_mongo()
 
 
