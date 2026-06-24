@@ -29,7 +29,11 @@ class User(SQLModel, table=True):
 
     id: Optional[int] = Field(default=None, primary_key=True)
     name: str
-    # 一對多：一個 User 有多張 UserImage
+    # 一對多「一」的一方：一個 User 有多張 UserImage。
+    # Relationship 是 Python 端的導覽屬性（非真欄位，不進資料表），
+    # 讓你直接用 user.images 取出關聯物件，ORM 會自動產生 JOIN。
+    # back_populates="owner"：值是「對方類別(UserImage)上對應屬性的名稱」，
+    # 把這兩個屬性綁成同一段關聯的正反兩面，設一邊另一邊會自動同步。
     images: list["UserImage"] = Relationship(back_populates="owner")
 
 
@@ -40,10 +44,14 @@ class UserImage(SQLModel, table=True):
 
     id: Optional[int] = Field(default=None, primary_key=True)
     title: str
-    # 一對多（多的一方）：owner_id 是真正存進表的外鍵
+    # 一對多「多」的一方：owner_id 才是真正存進資料表的外鍵欄位
     owner_id: Optional[int] = Field(default=None, foreign_key="users.id")
+    # back_populates="images" 對應 User.images，與上面那段互指、成對的另一半；
+    # 設 img.owner = user 後，user.images 會自動含有 img（同 session 內不必再查 DB）。
     owner: Optional[User] = Relationship(back_populates="images")
-    # 多對多：用 link_model 指定中介表，兩邊都是 list
+    # 多對多：back_populates 概念與一對多相同（兩邊互指、名字對應對方屬性名），
+    # 差別是多加 link_model 指定中介表（ImageTagLink），ORM 透過中介表串兩邊。
+    # 兩邊都是 list：一張圖可有多個 Tag，一個 Tag 可貼多張圖。
     tags: list["Tag"] = Relationship(back_populates="images", link_model=ImageTagLink)
 
 
@@ -54,4 +62,6 @@ class Tag(SQLModel, table=True):
 
     id: Optional[int] = Field(default=None, primary_key=True)
     name: str
+    # back_populates="tags" 對應 UserImage.tags，與上面互指成對；
+    # link_model=ImageTagLink 兩邊都要寫，ORM 才知道從哪張中介表查關聯。
     images: list["UserImage"] = Relationship(back_populates="tags", link_model=ImageTagLink)
