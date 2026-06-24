@@ -5,6 +5,16 @@
 ### 健康檢查
 GET {{baseUrl}}/health
 
+### 2.4 (基本路由)
+
+GET {{baseUrl}}/items
+
+### 2.4 (基本路由) 使用 POST 建立新項目
+POST {{baseUrl}}/items
+
+### 2.4 (基本路由) 查詢參數
+GET {{baseUrl}}/my-items?skip=0&limit=20&keyword=cat
+
 ### 列出圖片
 GET {{baseUrl}}/api/v1/images?limit=10
 

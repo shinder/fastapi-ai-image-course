@@ -100,14 +100,19 @@ def health_check():
 # ---------- 教材 2.4 路由設計 ----------
 
 
-# 基本路由 + 查詢參數
 @app.get("/items")
-def list_items(skip: int = 0, limit: int = 10, keyword: str | None = None):
+def list_items():
+    return [{"id": 1}, {"id": 2}]
+
+
+# 基本路由 + 查詢參數
+@app.get("/my-items")
+def my_list_items(skip: int = 0, limit: int = 10, keyword: str | None = None):
     """查詢參數示範：GET /items?skip=0&limit=20&keyword=cat"""
     return {"skip": skip, "limit": limit, "keyword": keyword}
 
 
-@app.post("/items")
+@app.post("/items", status_code=201)
 def create_item():
     return {"id": 3, "created": True}
 

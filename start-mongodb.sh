@@ -8,6 +8,7 @@ docker rm -f mongo-ai-image 2>/dev/null || true
 docker run -d \
   --name mongo-ai-image \
   -p 27017:27017 \
+  -v mongo-data:/data/db \
   mongo:8
 
 echo "MongoDB 已啟動：localhost:27017（資料庫：ai_image_db）"
