@@ -42,80 +42,6 @@ def safe_upload_path(filename: str) -> str:
     return target
 
 
-# ---------- 4.6 CRUD ----------
-
-
-@router.post("", response_model=ImagePublic, status_code=status.HTTP_201_CREATED)
-def create_image(payload: ImageCreate, session: SessionDep):
-    """純 JSON 建立（不含檔案）。檔案類欄位以佔位值補上，正式上傳請用 /upload"""
-    image = Image.model_validate(
-        payload,
-        update={
-            "filename": "placeholder.jpg",
-            "file_path": "/tmp/placeholder.jpg",
-            "file_size": 0,
-            "mime_type": "image/jpeg",
-        },
-    )
-    session.add(image)
-    session.commit()
-    session.refresh(image)
-    return image
-
-
-@router.get("", response_model=list[ImagePublic])
-def list_images(
-    session: SessionDep,
-    skip: int = 0,
-    limit: int = 20,
-    keyword: str | None = None,
-):
-    statement = select(Image)
-    if keyword:
-        statement = statement.where(Image.title.icontains(keyword))  # icontains：不分大小寫
-    statement = statement.offset(skip).limit(limit).order_by(Image.uploaded_at.desc())
-    return session.exec(statement).all()
-
-
-@router.get("/stats/total")
-def total_images(session: SessionDep):
-    """計數查詢（教材 4.6）"""
-    statement = select(func.count(Image.id))
-    total = session.exec(statement).one()
-    return {"total": total}
-
-
-@router.get("/{image_id}", response_model=ImagePublic)
-def get_image(image_id: int, session: SessionDep):
-    image = session.get(Image, image_id)
-    if not image:
-        raise HTTPException(404, "找不到圖片")
-    return image
-
-
-@router.patch("/{image_id}", response_model=ImagePublic)
-def update_image(image_id: int, payload: ImageUpdate, session: SessionDep):
-    image = session.get(Image, image_id)
-    if not image:
-        raise HTTPException(404, "找不到圖片")
-    update_data = payload.model_dump(exclude_unset=True)
-    for key, value in update_data.items():
-        setattr(image, key, value)
-    session.add(image)
-    session.commit()
-    session.refresh(image)
-    return image
-
-
-@router.delete("/{image_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_image(image_id: int, session: SessionDep):
-    image = session.get(Image, image_id)
-    if not image:
-        raise HTTPException(404, "找不到圖片")
-    session.delete(image)
-    session.commit()
-
-
 # ---------- 3.5 上傳 ----------
 
 
@@ -216,43 +142,6 @@ async def upload_and_process(file: UploadFile = File(...)):
     }
 
 
-# ---------- 4.7 上傳並入庫 ----------
-
-
-@router.post("/upload", response_model=ImagePublic, status_code=201)
-async def upload_image(
-    session: SessionDep,
-    title: str = Form(...),
-    file: UploadFile = File(...),
-):
-    """上傳檔案並寫入資料庫（檔案進磁碟，路徑進 DB）"""
-    # 比照 /upload-only 驗證型別與大小（正式入庫端點也應把關）
-    if file.content_type not in ALLOWED_TYPES:
-        raise HTTPException(415, f"不支援的格式：{file.content_type}")
-    if file.size is not None and file.size > MAX_SIZE:
-        raise HTTPException(413, "檔案過大（超過 10 MB）")
-    content = await file.read()
-
-    ext = os.path.splitext(file.filename or "")[1] or ".bin"
-    new_name = f"{uuid.uuid4().hex}{ext}"
-    file_path = os.path.join(settings.UPLOAD_DIR, new_name)
-    os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
-    with open(file_path, "wb") as f:
-        f.write(content)
-
-    image = Image(
-        title=title,
-        filename=new_name,
-        file_path=file_path,
-        file_size=len(content),
-        mime_type=file.content_type or "application/octet-stream",
-    )
-    session.add(image)
-    session.commit()
-    session.refresh(image)
-    return image
-
-
 # ---------- 3.6 圖片回傳 ----------
 
 
@@ -309,6 +198,117 @@ def image_base64(filename: str):
     # 依副檔名判斷 MIME，組成 data URI 格式：data:<mime>;base64,<編碼內容>
     mime = mimetypes.guess_type(file_path)[0] or "application/octet-stream"
     return {"filename": filename, "data": f"data:{mime};base64,{encoded}"}
+
+
+# ---------- 4.6 CRUD ----------
+
+
+@router.post("", response_model=ImagePublic, status_code=status.HTTP_201_CREATED)
+def create_image(payload: ImageCreate, session: SessionDep):
+    """純 JSON 建立（不含檔案）。檔案類欄位以佔位值補上，正式上傳請用 /upload"""
+    image = Image.model_validate(
+        payload,
+        update={
+            "filename": "placeholder.jpg",
+            "file_path": "/tmp/placeholder.jpg",
+            "file_size": 0,
+            "mime_type": "image/jpeg",
+        },
+    )
+    session.add(image)
+    session.commit()
+    session.refresh(image)
+    return image
+
+
+@router.get("", response_model=list[ImagePublic])
+def list_images(
+    session: SessionDep,
+    skip: int = 0,
+    limit: int = 20,
+    keyword: str | None = None,
+):
+    statement = select(Image)
+    if keyword:
+        statement = statement.where(Image.title.icontains(keyword))  # icontains：不分大小寫
+    statement = statement.offset(skip).limit(limit).order_by(Image.uploaded_at.desc())
+    return session.exec(statement).all()
+
+
+@router.get("/stats/total")
+def total_images(session: SessionDep):
+    """計數查詢（教材 4.6）"""
+    statement = select(func.count(Image.id))
+    total = session.exec(statement).one()
+    return {"total": total}
+
+
+@router.get("/{image_id}", response_model=ImagePublic)
+def get_image(image_id: int, session: SessionDep):
+    image = session.get(Image, image_id)
+    if not image:
+        raise HTTPException(404, "找不到圖片")
+    return image
+
+
+@router.patch("/{image_id}", response_model=ImagePublic)
+def update_image(image_id: int, payload: ImageUpdate, session: SessionDep):
+    image = session.get(Image, image_id)
+    if not image:
+        raise HTTPException(404, "找不到圖片")
+    update_data = payload.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(image, key, value)
+    session.add(image)
+    session.commit()
+    session.refresh(image)
+    return image
+
+
+@router.delete("/{image_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_image(image_id: int, session: SessionDep):
+    image = session.get(Image, image_id)
+    if not image:
+        raise HTTPException(404, "找不到圖片")
+    session.delete(image)
+    session.commit()
+
+
+# ---------- 4.7 上傳並入庫 ----------
+
+
+@router.post("/upload", response_model=ImagePublic, status_code=201)
+async def upload_image(
+    session: SessionDep,
+    title: str = Form(...),
+    file: UploadFile = File(...),
+):
+    """上傳檔案並寫入資料庫（檔案進磁碟，路徑進 DB）"""
+    # 比照 /upload-only 驗證型別與大小（正式入庫端點也應把關）
+    if file.content_type not in ALLOWED_TYPES:
+        raise HTTPException(415, f"不支援的格式：{file.content_type}")
+    if file.size is not None and file.size > MAX_SIZE:
+        raise HTTPException(413, "檔案過大（超過 10 MB）")
+    content = await file.read()
+
+    ext = os.path.splitext(file.filename or "")[1] or ".bin"
+    new_name = f"{uuid.uuid4().hex}{ext}"
+    file_path = os.path.join(settings.UPLOAD_DIR, new_name)
+    os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
+    with open(file_path, "wb") as f:
+        f.write(content)
+
+    image = Image(
+        title=title,
+        filename=new_name,
+        file_path=file_path,
+        file_size=len(content),
+        mime_type=file.content_type or "application/octet-stream",
+    )
+    session.add(image)
+    session.commit()
+    session.refresh(image)
+    return image
 
 
 # ---------- 綜合實作：上傳 + 辨識 + 快取 + 入庫 ----------
