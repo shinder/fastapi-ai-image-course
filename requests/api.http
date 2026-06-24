@@ -90,6 +90,24 @@ Content-Type: application/x-www-form-urlencoded
 
 name=王小明&email=ming@example.com&message=你好
 
+### 3.4 表單資料處理（multipart/form-data）
+POST {{baseUrl}}/api/v1/contact
+Content-Type: multipart/form-data; boundary=----Boundary
+
+------Boundary
+Content-Disposition: form-data; name="name"
+
+王小明
+------Boundary
+Content-Disposition: form-data; name="email"
+
+ming@example.com
+------Boundary
+Content-Disposition: form-data; name="message"
+
+你好
+------Boundary--
+
 ### 3.5 接收單張圖片：單張上傳不入庫
 POST {{baseUrl}}/api/v1/images/upload-only
 Content-Type: multipart/form-data; boundary=----Boundary
