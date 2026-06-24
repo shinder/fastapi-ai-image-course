@@ -56,7 +56,9 @@ msg_entry.pack()
 
 tk.Button(root, text="送出", command=submit).pack(pady=8)
 
-result_label = tk.Label(root, text="", fg="blue", justify="left")
+# 顯示回應結果用的標籤（不指定 fg／bg，交給系統套用預設前景色，
+# light/dark 主題下文字都清楚；早期寫死 fg="blue" 在深色模式會難以辨識）
+result_label = tk.Label(root, text="", justify="left")
 result_label.pack()
 
 root.mainloop()

@@ -64,8 +64,9 @@ tags_entry.pack()
 # command=submit：按下按鈕時呼叫 submit 函式
 tk.Button(root, text="送出", command=submit).pack(pady=8)
 
-# 顯示回應結果用的標籤
-result_label = tk.Label(root, text="", fg="blue", justify="left")
+# 顯示回應結果用的標籤（不指定 fg／bg，交給系統套用預設前景色，
+# light/dark 主題下文字都清楚；早期寫死 fg="blue" 在深色模式會難以辨識）
+result_label = tk.Label(root, text="", justify="left")
 result_label.pack()
 
 # 進入事件迴圈，視窗會持續顯示直到關閉

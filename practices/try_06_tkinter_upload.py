@@ -51,7 +51,9 @@ root.title("上傳圖片給 FastAPI")
 
 tk.Button(root, text="選擇圖片並上傳", command=choose_and_upload).pack(pady=12, padx=20)
 
-result_label = tk.Label(root, text="", fg="blue", justify="left", wraplength=360)
+# 顯示回應結果用的標籤（不指定 fg／bg，交給系統套用預設前景色，
+# light/dark 主題下文字都清楚；早期寫死 fg="blue" 在深色模式會難以辨識）
+result_label = tk.Label(root, text="", justify="left", wraplength=360)
 result_label.pack(padx=20, pady=8)
 
 root.mainloop()

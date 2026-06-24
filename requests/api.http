@@ -2,219 +2,14 @@
 # 教材 3.6 測試用：先執行上傳端點，把回傳的 filename 填到這裡
 @filename = REPLACE_WITH_UPLOADED_FILENAME
 
+# 本檔各段範例依教材單元順序排列（單元一 → 單元九），方便對照講義逐節測試。
+
 ### 健康檢查
 GET {{baseUrl}}/health
 
-### 2.4 (基本路由)
+# === 單元一 認識 HTTP：動手練習（對 JSONPlaceholder 公開測試 API）===
 
-GET {{baseUrl}}/items
-
-### 2.4 (基本路由) 使用 POST 建立新項目
-POST {{baseUrl}}/items
-
-### 2.4 (基本路由) 查詢參數
-GET {{baseUrl}}/my-items?skip=0&limit=20&keyword=cat
-
-### 列出圖片
-GET {{baseUrl}}/api/v1/images?limit=10
-
-### 上傳並辨識（multipart）
-POST {{baseUrl}}/api/v1/images/upload-and-classify
-Content-Type: multipart/form-data; boundary=----Boundary
-
-------Boundary
-Content-Disposition: form-data; name="title"
-
-我的貓
-------Boundary
-Content-Disposition: form-data; name="file"; filename="cat.jpg"
-Content-Type: image/jpeg
-
-< ./test_images/cat.jpg
-------Boundary--
-
-### 取得單張圖片
-GET {{baseUrl}}/api/v1/images/1
-
-### 純 AI 分類（不入庫）
-POST {{baseUrl}}/api/v1/ai/classify
-Content-Type: multipart/form-data; boundary=----Boundary
-
-------Boundary
-Content-Disposition: form-data; name="file"; filename="cat.jpg"
-Content-Type: image/jpeg
-
-< ./test_images/cat.jpg
-------Boundary--
-
-### 上傳並入庫（不辨識）
-POST {{baseUrl}}/api/v1/images/upload
-Content-Type: multipart/form-data; boundary=----Boundary
-
-------Boundary
-Content-Disposition: form-data; name="title"
-
-測試圖片
-------Boundary
-Content-Disposition: form-data; name="file"; filename="cat.jpg"
-Content-Type: image/jpeg
-
-< ./test_images/cat.jpg
-------Boundary--
-
-### Ollama 描述圖片
-POST {{baseUrl}}/api/v1/ai/describe
-Content-Type: multipart/form-data; boundary=----Boundary
-
-------Boundary
-Content-Disposition: form-data; name="prompt"
-
-請以繁體中文描述這張圖片
-------Boundary
-Content-Disposition: form-data; name="file"; filename="cat.jpg"
-Content-Type: image/jpeg
-
-< ./test_images/cat.jpg
-------Boundary--
-
-### OCR 文字辨識
-POST {{baseUrl}}/api/v1/ai/ocr
-Content-Type: multipart/form-data; boundary=----Boundary
-
-------Boundary
-Content-Disposition: form-data; name="file"; filename="text.png"
-Content-Type: image/png
-
-< ./test_images/text.png
-------Boundary--
-
-### 影像生成（OpenAI DALL·E）
-POST {{baseUrl}}/api/v1/ai/generate
-Content-Type: application/x-www-form-urlencoded
-
-prompt=A cute corgi wearing sunglasses on a beach, watercolor style
-
-### 啟動非同步生成
-POST {{baseUrl}}/api/v1/ai/generate-async
-Content-Type: application/x-www-form-urlencoded
-
-prompt=A futuristic city at night, cyberpunk style
-
-### 查詢任務狀態（換成上一行回傳的 task_id）
-GET {{baseUrl}}/api/v1/ai/tasks/REPLACE_TASK_ID
-
-### Redis 快取統計
-GET {{baseUrl}}/api/v1/ai/cache/stats
-
-### 透過依賴注入測試 Redis
-GET {{baseUrl}}/api/v1/ai/cache-test
-
-### 純 JSON 建立（教材 3.2 接收 JSON 請求主體）
-POST {{baseUrl}}/api/v1/demo/images
-Content-Type: application/json
-
-{
-  "title": "我的貓",
-  "url": "https://example.com/cat.jpg",
-  "tags": ["cat", "pet"]
-}
-
-### 回應模型過濾內部欄位（教材 3.3 回應模型與資料序列化）
-POST {{baseUrl}}/api/v1/demo/images-response
-Content-Type: application/json
-
-{
-  "title": "我的貓",
-  "url": "https://example.com/cat.jpg",
-  "tags": ["cat", "pet"]
-}
-
-### 表單資料（教材 3.4 表單資料處理）
-POST {{baseUrl}}/api/v1/contact
-Content-Type: application/x-www-form-urlencoded
-
-name=王小明&email=ming@example.com&message=你好
-
-### 單張上傳不入庫（教材 3.5 接收單張圖片）
-POST {{baseUrl}}/api/v1/images/upload-only
-Content-Type: multipart/form-data; boundary=----Boundary
-
-------Boundary
-Content-Disposition: form-data; name="file"; filename="cat.jpg"
-Content-Type: image/jpeg
-
-< ./test_images/cat.jpg
-------Boundary--
-
-### 多張同時上傳（教材 3.5 多張圖片同時上傳）
-POST {{baseUrl}}/api/v1/images/upload-multi
-Content-Type: multipart/form-data; boundary=----Boundary
-
-------Boundary
-Content-Disposition: form-data; name="files"; filename="cat.jpg"
-Content-Type: image/jpeg
-
-< ./test_images/cat.jpg
-------Boundary
-Content-Disposition: form-data; name="files"; filename="text.png"
-Content-Type: image/png
-
-< ./test_images/text.png
-------Boundary--
-
-### 上傳並用 Pillow 處理（教材 3.5 使用 Pillow 處理圖片）
-POST {{baseUrl}}/api/v1/images/upload-and-process
-Content-Type: multipart/form-data; boundary=----Boundary
-
-------Boundary
-Content-Disposition: form-data; name="file"; filename="cat.jpg"
-Content-Type: image/jpeg
-
-< ./test_images/cat.jpg
-------Boundary--
-
-# === 教材 3.6 圖片回傳 ===
-# 注意：下列三條需要實際已上傳的檔名。
-# 請先執行上方任一上傳端點（例如「單張上傳不入庫」），
-# 將回傳的 filename 填入檔案頂端的 @filename 變數。
-
-### 下載檔案 FileResponse（教材 3.6 回傳檔案）
-GET {{baseUrl}}/api/v1/images/{{filename}}/download
-
-### 串流回傳 StreamingResponse（教材 3.6 串流回傳）
-GET {{baseUrl}}/api/v1/images/{{filename}}/stream
-
-### Base64 回傳（教材 3.6 Base64 回傳）
-GET {{baseUrl}}/api/v1/images/{{filename}}/base64
-
-### 靜態目錄存取（教材 3.6 提供靜態檔案目錄）
-GET {{baseUrl}}/uploads/{{filename}}
-
-# === 單元八 網頁與樣版（補充教材，Jinja2）===
-
-### 圖片列表頁（教材 8.6，建議用瀏覽器開）
-GET {{baseUrl}}/web
-
-### 上傳表單頁（教材 8.6，建議用瀏覽器開）
-GET {{baseUrl}}/web/upload
-
-# === 單元九 MongoDB 留言（補充教材）===
-
-### 新增留言（教材 9.4，可多帶任意欄位如 mood）
-POST {{baseUrl}}/api/v1/notes
-Content-Type: application/json
-
-{
-  "image_filename": "cat.jpg",
-  "text": "好可愛的貓",
-  "author": "小明",
-  "mood": "開心"
-}
-
-### 列出某張圖的留言（教材 9.4）
-GET {{baseUrl}}/api/v1/notes?image_filename=cat.jpg
-
-### 練習 1：JSONPlaceholder 取單張
+### 練習 1：取單張圖片
 GET https://jsonplaceholder.typicode.com/photos/1
 
 ### 練習 2：相簿圖片列表
@@ -243,3 +38,235 @@ Content-Type: application/json
 
 ### 練習 5：刪除
 DELETE https://jsonplaceholder.typicode.com/photos/1
+
+# === 單元二 FastAPI 環境建置與路由設定 ===
+
+### 2.4 基本路由：列出項目
+GET {{baseUrl}}/items
+
+### 2.4 基本路由：用 POST 建立新項目
+POST {{baseUrl}}/items
+
+### 2.4 基本路由：查詢參數
+GET {{baseUrl}}/my-items?skip=0&limit=20&keyword=cat
+
+# === 單元三 資料的傳遞與接收 ===
+
+### 3.2 接收 JSON 請求主體：純 JSON 建立
+POST {{baseUrl}}/api/v1/demo/images
+Content-Type: application/json
+
+{
+  "title": "我的貓",
+  "url": "https://example.com/cat.jpg",
+  "tags": ["cat", "pet"]
+}
+
+### 3.2 接收 JSON 請求主體：title 空字串會回 422
+# 對應 ImageCreateRequest.title 的 min_length=1：FastAPI 在進入路由函式前就先擋下，
+# 回應 422，detail 會指出 body.title「String should have at least 1 character」。
+POST {{baseUrl}}/api/v1/demo/images
+Content-Type: application/json
+
+{
+  "title": "",
+  "url": "https://example.com/cat.jpg",
+  "tags": ["cat", "pet"]
+}
+
+### 3.3 回應模型與資料序列化（過濾內部欄位）
+POST {{baseUrl}}/api/v1/demo/images-response
+Content-Type: application/json
+
+{
+  "title": "我的貓",
+  "url": "https://example.com/cat.jpg",
+  "tags": ["cat", "pet"]
+}
+
+### 3.4 表單資料處理
+POST {{baseUrl}}/api/v1/contact
+Content-Type: application/x-www-form-urlencoded
+
+name=王小明&email=ming@example.com&message=你好
+
+### 3.5 接收單張圖片：單張上傳不入庫
+POST {{baseUrl}}/api/v1/images/upload-only
+Content-Type: multipart/form-data; boundary=----Boundary
+
+------Boundary
+Content-Disposition: form-data; name="file"; filename="cat.jpg"
+Content-Type: image/jpeg
+
+< ./test_images/cat.jpg
+------Boundary--
+
+### 3.5 多張圖片同時上傳
+POST {{baseUrl}}/api/v1/images/upload-multi
+Content-Type: multipart/form-data; boundary=----Boundary
+
+------Boundary
+Content-Disposition: form-data; name="files"; filename="cat.jpg"
+Content-Type: image/jpeg
+
+< ./test_images/cat.jpg
+------Boundary
+Content-Disposition: form-data; name="files"; filename="text.png"
+Content-Type: image/png
+
+< ./test_images/text.png
+------Boundary--
+
+### 3.5 使用 Pillow 處理圖片
+POST {{baseUrl}}/api/v1/images/upload-and-process
+Content-Type: multipart/form-data; boundary=----Boundary
+
+------Boundary
+Content-Disposition: form-data; name="file"; filename="cat.jpg"
+Content-Type: image/jpeg
+
+< ./test_images/cat.jpg
+------Boundary--
+
+# === 教材 3.6 圖片回傳 ===
+# 注意：下列四條需要實際已上傳的檔名。
+# 請先執行上方任一上傳端點（例如「3.5 單張上傳不入庫」），
+# 將回傳的 filename 填入檔案頂端的 @filename 變數。
+
+### 3.6 回傳檔案 FileResponse
+GET {{baseUrl}}/api/v1/images/{{filename}}/download
+
+### 3.6 串流回傳 StreamingResponse
+GET {{baseUrl}}/api/v1/images/{{filename}}/stream
+
+### 3.6 Base64 回傳
+GET {{baseUrl}}/api/v1/images/{{filename}}/base64
+
+### 3.6 提供靜態檔案目錄
+GET {{baseUrl}}/uploads/{{filename}}
+
+# === 單元四 資料庫整合（PostgreSQL + SQLModel）===
+
+### 4.6 CRUD：列出圖片
+GET {{baseUrl}}/api/v1/images?limit=10
+
+### 4.6 CRUD：取得單張圖片
+GET {{baseUrl}}/api/v1/images/1
+
+### 4.7 影像資料儲存：上傳並入庫（不辨識）
+POST {{baseUrl}}/api/v1/images/upload
+Content-Type: multipart/form-data; boundary=----Boundary
+
+------Boundary
+Content-Disposition: form-data; name="title"
+
+測試圖片
+------Boundary
+Content-Disposition: form-data; name="file"; filename="cat.jpg"
+Content-Type: image/jpeg
+
+< ./test_images/cat.jpg
+------Boundary--
+
+# === 單元五 AI 模型整合應用 ===
+
+### 5.3 本地模型分類（Hugging Face，不入庫）
+POST {{baseUrl}}/api/v1/ai/classify
+Content-Type: multipart/form-data; boundary=----Boundary
+
+------Boundary
+Content-Disposition: form-data; name="file"; filename="cat.jpg"
+Content-Type: image/jpeg
+
+< ./test_images/cat.jpg
+------Boundary--
+
+### 5.4 OCR 文字辨識
+POST {{baseUrl}}/api/v1/ai/ocr
+Content-Type: multipart/form-data; boundary=----Boundary
+
+------Boundary
+Content-Disposition: form-data; name="file"; filename="text.png"
+Content-Type: image/png
+
+< ./test_images/text.png
+------Boundary--
+
+### 5.5 Ollama 視覺模型描述圖片
+POST {{baseUrl}}/api/v1/ai/describe
+Content-Type: multipart/form-data; boundary=----Boundary
+
+------Boundary
+Content-Disposition: form-data; name="prompt"
+
+請以繁體中文描述這張圖片
+------Boundary
+Content-Disposition: form-data; name="file"; filename="cat.jpg"
+Content-Type: image/jpeg
+
+< ./test_images/cat.jpg
+------Boundary--
+
+### 5.6 影像生成（OpenAI DALL·E）
+POST {{baseUrl}}/api/v1/ai/generate
+Content-Type: application/x-www-form-urlencoded
+
+prompt=A cute corgi wearing sunglasses on a beach, watercolor style
+
+# === 單元六 Redis 快取與非同步任務 ===
+
+### 6.4 在 FastAPI 中使用 Redis（依賴注入示範）
+GET {{baseUrl}}/api/v1/ai/cache-test
+
+### 6.7 監控與除錯：Redis 快取統計
+GET {{baseUrl}}/api/v1/ai/cache/stats
+
+### 6.10 用 Redis 管理非同步任務：啟動非同步生成
+POST {{baseUrl}}/api/v1/ai/generate-async
+Content-Type: application/x-www-form-urlencoded
+
+prompt=A futuristic city at night, cyberpunk style
+
+### 6.10 查詢任務狀態（換成上一行回傳的 task_id）
+GET {{baseUrl}}/api/v1/ai/tasks/REPLACE_TASK_ID
+
+# === 綜合實作：上傳 + 辨識 + 快取 + 入庫（整合單元四～六）===
+
+### 綜合：上傳並辨識（multipart）
+POST {{baseUrl}}/api/v1/images/upload-and-classify
+Content-Type: multipart/form-data; boundary=----Boundary
+
+------Boundary
+Content-Disposition: form-data; name="title"
+
+我的貓
+------Boundary
+Content-Disposition: form-data; name="file"; filename="cat.jpg"
+Content-Type: image/jpeg
+
+< ./test_images/cat.jpg
+------Boundary--
+
+# === 單元八 網頁與樣版（補充教材，Jinja2）===
+
+### 8.6 圖片列表頁（建議用瀏覽器開）
+GET {{baseUrl}}/web
+
+### 8.6 上傳表單頁（建議用瀏覽器開）
+GET {{baseUrl}}/web/upload
+
+# === 單元九 MongoDB 留言（補充教材）===
+
+### 9.4 新增留言（可多帶任意欄位，如 mood）
+POST {{baseUrl}}/api/v1/notes
+Content-Type: application/json
+
+{
+  "image_filename": "cat.jpg",
+  "text": "好可愛的貓",
+  "author": "小明",
+  "mood": "開心"
+}
+
+### 9.4 列出某張圖的留言
+GET {{baseUrl}}/api/v1/notes?image_filename=cat.jpg
