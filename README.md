@@ -32,7 +32,7 @@ fastapi-ai-image/
 │   │   ├── ai_service.py            # 教材 6.3 Hugging Face 分類
 │   │   ├── ocr_service.py           # 教材 6.4 EasyOCR
 │   │   ├── ollama_service.py        # 教材 6.5 Ollama 視覺模型
-│   │   ├── image_gen_service.py     # 教材 6.6 OpenAI DALL·E
+│   │   ├── image_gen_service.py     # 教材 6.6 OpenAI gpt-image-1
 │   │   ├── external_ai.py           # 教材 5.5、5.6 外部 API
 │   │   └── cache_service.py         # 教材 7.4、7.5、7.6 Redis
 │   └── utils/
@@ -84,7 +84,7 @@ uv sync --extra ml
 # 單元 6.4 EasyOCR
 uv sync --extra ocr
 
-# 單元 6.5 進階（Ollama OpenAI 相容介面）/ 單元 6.6 DALL·E
+# 單元 6.5 進階（Ollama OpenAI 相容介面）/ 單元 6.6 gpt-image-1
 uv sync --extra openai
 
 # 單元 4.8 pgvector 向量搜尋
@@ -168,7 +168,7 @@ VSCode 使用者：專案 `.vscode/settings.json` 已設定存檔時自動以 Ru
 | POST   | `/api/v1/ai/ocr`                       | OCR 文字辨識 | 6.4 |
 | POST   | `/api/v1/ai/describe`                  | Ollama 圖片描述 | 6.5 |
 | POST   | `/api/v1/ai/extract-invoice`           | 發票結構化抽取 | 6.5 |
-| POST   | `/api/v1/ai/generate`                  | DALL·E 影像生成 | 6.6 |
+| POST   | `/api/v1/ai/generate`                  | gpt-image-1 影像生成 | 6.6 |
 | POST   | `/api/v1/ai/generate-async`            | 背景任務生成 | 6.6 |
 | GET    | `/api/v1/ai/tasks/{task_id}`           | 查任務狀態 | 6.6 |
 | POST   | `/api/v1/ai/classify-external`         | 同步 requests 串接 | 5.5 |

@@ -4,7 +4,7 @@
 - 6.3 影像分類（含 Redis 快取）
 - 6.4 OCR
 - 6.5 Ollama 視覺模型
-- 6.6 影像生成（OpenAI DALL·E、含背景任務）
+- 6.6 影像生成（OpenAI gpt-image-1、含背景任務）
 - 6.7 run_in_threadpool
 - 7.5 快取 AI 推論結果（含命中率統計）
 - 5.5 串接外部 AI API
@@ -126,7 +126,7 @@ async def extract_invoice(file: UploadFile = File(...)):
 
 @router.post("/generate", dependencies=[Depends(RateLimit(limit=10, window=60))])
 def generate(prompt: str = Form(..., min_length=1, max_length=1000)):
-    """OpenAI DALL·E 影像生成（教材 6.6）"""
+    """OpenAI gpt-image-1 影像生成（教材 6.6）"""
     from app.services.image_gen_service import generate_image  # lazy import
 
     url = generate_image(prompt)
