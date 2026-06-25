@@ -41,9 +41,9 @@ uv run mypy app
 python -m app.workers.queue_worker                          # 方法一：手刻佇列
 rq worker image-gen --url redis://localhost:6379/0          # 方法二：RQ（需 --extra queue）
 
-# 客戶端 / requests 示範腳本
-uv run python scripts/client.py
-uv run python scripts/requests_demo.py
+# 練習範例（practices/，可獨立執行；多數需先啟動 API）
+uv run python practices/try_10_requests_get.py    # requests 小範例（單元五 try_10~17）
+uv run python practices/try_18_client_app.py      # 綜合：模擬第三方串接
 ```
 
 Python 版本鎖定 3.12（`requires-python = ">=3.12,<3.13"`）。

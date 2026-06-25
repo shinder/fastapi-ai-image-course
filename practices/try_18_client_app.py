@@ -1,7 +1,13 @@
-"""模擬第三方應用串接本服務（教材 綜合實作 / 5.2）
+"""綜合範例 18：模擬第三方應用串接本服務
 
-執行：
-    uv run python scripts/client.py
+對應教材：單元五的綜合 requests 應用（搬自舊 scripts/client.py）
+對應後端：POST /api/v1/images/upload-and-classify、GET /api/v1/images
+
+把前面學到的 requests 用法串成一個小應用：上傳圖片並辨識，再查詢歷史。
+
+執行前請先啟動後端：
+    uvicorn app.main:app --reload
+（並準備一張圖片，預設讀 test_images/cat.jpg；辨識功能需要 AI 模型，見單元六）
 """
 
 from pathlib import Path

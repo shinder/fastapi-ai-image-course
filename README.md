@@ -37,9 +37,10 @@ fastapi-ai-image/
 │   │   └── cache_service.py         # 教材 7.4、7.5、7.6 Redis
 │   └── utils/
 │       └── image_utils.py  # 教材 3.5 Pillow 工具
-├── scripts/
-│   ├── client.py           # 教材 綜合實作 客戶端腳本
-│   └── requests_demo.py    # 教材 5.2、5.3、5.4 requests 用法
+├── practices/              # 教材練習：可獨立執行的小範例（多數需先啟動 API）
+│   ├── try_01~03_*.py      # Pydantic（單元三）
+│   ├── try_04~09_*.py      # tkinter 串接（單元三）
+│   └── try_10~18_*.py      # requests 串接 + 綜合應用（單元五）
 ├── requests/
 │   └── api.http            # 教材 1.6 REST Client 測試檔（含綜合實作）
 ├── tests/
@@ -177,12 +178,12 @@ VSCode 使用者：專案 `.vscode/settings.json` 已設定存檔時自動以 Ru
 
 ---
 
-## 客戶端腳本
+## 練習範例（practices/）
 
 ```bash
-# 模擬第三方串接（綜合實作）
-uv run python scripts/client.py
+# requests 串接小範例（單元五，try_10~17 各一個觀念，需先啟動 API）
+uv run python practices/try_10_requests_get.py
 
-# Requests 套件用法示範
-uv run python scripts/requests_demo.py
+# 綜合：模擬第三方串接（上傳辨識 + 查歷史）
+uv run python practices/try_18_client_app.py
 ```
