@@ -1,6 +1,8 @@
 """Requests 套件用法示範（教材 5.2、5.3、5.4）
 
-執行：
+範例打的是本專案在單元三、四寫好的 API，執行前請先啟動開發伺服器：
+    uv run fastapi dev app/main.py
+再執行：
     uv run python scripts/requests_demo.py
 """
 
@@ -18,7 +20,7 @@ from urllib3.util.retry import Retry
 
 def basic_get():
     """教材 5.2 基本 GET"""
-    r = requests.get("https://jsonplaceholder.typicode.com/photos/1")
+    r = requests.get("http://localhost:8000/api/v1/images/1")  # 單元四 4.6 取得單一圖片
     print(r.status_code)
     print(r.headers["Content-Type"])
     print(r.json())
@@ -26,8 +28,9 @@ def basic_get():
 
 def basic_post():
     """教材 5.2 基本 POST"""
-    data = {"title": "我的圖片", "url": "https://example.com/img.jpg"}
-    r = requests.post("https://jsonplaceholder.typicode.com/photos", json=data)
+    # 對應單元四 4.6 建立端點，欄位是 title / description
+    data = {"title": "我的圖片", "description": "一張示範圖片"}
+    r = requests.post("http://localhost:8000/api/v1/images", json=data)
     print(r.status_code)
     print(r.json())
 
@@ -35,7 +38,7 @@ def basic_post():
 def with_exceptions():
     """教材 5.2 例外處理"""
     try:
-        r = requests.get("https://api.example.com/data", timeout=5)
+        r = requests.get("http://localhost:8000/api/v1/images/1", timeout=5)
         r.raise_for_status()
         return r.json()
     except Timeout:
@@ -51,7 +54,7 @@ def with_exceptions():
 def with_query_headers_cookies():
     """教材 5.3 Query / Headers / Cookies / Timeout"""
     return requests.get(
-        "https://api.example.com/images",
+        "http://localhost:8000/api/v1/images",  # 單元四列表端點，支援 keyword/limit
         params={"keyword": "cat", "limit": 10},
         headers={"Authorization": "Bearer abc123", "User-Agent": "MyApp/1.0"},
         cookies={"session": "xyz"},
@@ -75,8 +78,8 @@ def session_demo():
     """教材 5.3 Session 連線重用"""
     session = requests.Session()
     session.headers.update({"Authorization": "Bearer abc123"})
-    r1 = session.get("https://api.example.com/users/me")
-    r2 = session.get("https://api.example.com/images")
+    r1 = session.get("http://localhost:8000/users/me")  # 單元二 2.4 範例路由
+    r2 = session.get("http://localhost:8000/api/v1/images")  # 單元四圖片列表
     return r1, r2
 
 
@@ -95,7 +98,7 @@ def session_with_retry():
 
 
 def auth_examples():
-    """教材 5.4 認證機制"""
+    """教材 5.4 認證機制（本服務未啟用認證，以下用示意 URL 示範認證標頭怎麼帶）"""
     api_key = "MY_KEY"
     token = "MY_TOKEN"
 
