@@ -17,7 +17,7 @@ uv sync
 # 依教材章節加裝可選依賴
 uv sync --extra ml       # 6.3 Hugging Face 分類（transformers + torch，很大）
 uv sync --extra ocr      # 6.4 EasyOCR
-uv sync --extra openai   # 6.5 / 6.6 OpenAI 相容介面、DALL·E
+uv sync --extra openai   # 6.5 / 6.6 OpenAI 相容介面、gpt-image-1
 uv sync --extra vector   # 4.8 pgvector
 uv sync --all-extras     # 全部
 
