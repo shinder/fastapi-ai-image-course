@@ -43,9 +43,26 @@
 | `try_17_requests_auth.py` | 三種認證機制的帶法 | （示意 URL，不實連） | 5.4 |
 | `try_18_client_app.py` | 綜合：模擬第三方串接 | `upload-and-classify`、`/api/v1/images` | 綜合 |
 
+## 四、httpx 非同步串接（需後端，教材 5.6）
+
+`try_20`～`27` 是 `try_10`～`17` 的 **httpx 非同步版**，一一對應：打同樣的後端端點、同樣的觀念，但改用 `httpx.AsyncClient` + `async / await`。在 FastAPI 路由內呼叫外部 API 時，用 httpx 才不會阻塞事件迴圈（requests 是同步、會卡住）。
+
+| 檔案 | 主題 | 對應同步版 | 教材 |
+| --- | --- | --- | --- |
+| `try_20_httpx_get.py` | 基本 GET | `try_10` | 5.6 |
+| `try_21_httpx_post.py` | 基本 POST | `try_11` | 5.6 |
+| `try_22_httpx_exceptions.py` | 例外處理 | `try_12` | 5.6 |
+| `try_23_httpx_query.py` | Query / Headers / Cookies | `try_13` | 5.6 |
+| `try_24_httpx_upload.py` | 上傳檔案 | `try_14` | 5.6 |
+| `try_25_httpx_session.py` | AsyncClient 重用 | `try_15` | 5.6 |
+| `try_26_httpx_retry.py` | 重試機制（傳輸層） | `try_16` | 5.6 |
+| `try_27_httpx_auth.py` | 認證機制 | `try_17` | 5.6 |
+
+後端端點與對應的 requests 版相同（見上一組表格），差別只在同步 / 非同步。
+
 ## 執行方式
 
-純本地範例（`try_01`～`try_03`，以及只示範寫法的 `try_17`）直接執行：
+純本地範例（`try_01`～`try_03`，以及只示範寫法的 `try_17`、`try_27`）直接執行：
 
 ```bash
 uv run python practices/try_01_pydantic.py
@@ -66,3 +83,4 @@ uv run python practices/try_11_requests_post.py
 - tkinter 範例（`try_04`～`try_09`）會開啟 GUI 視窗操作。
 - `try_10`（GET 單一圖片）需要資料庫裡有 `id=1` 的資料，可先跑 `try_11` 建立一筆。
 - `try_18` 的辨識功能需要本機 AI 模型（單元六，`uv sync --extra ml`）。
+- httpx 非同步範例（`try_20`～`try_27`）和對應的 requests 版執行方式相同；`httpx` 已是核心依賴，不需另外安裝。
