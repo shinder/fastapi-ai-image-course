@@ -187,3 +187,5 @@ uv run python practices/try_10_requests_get.py
 # 綜合：模擬第三方串接（上傳辨識 + 查歷史）
 uv run python practices/try_18_client_app.py
 ```
+
+各範例的完整清單與說明見 [`practices/README.md`](practices/README.md)。
