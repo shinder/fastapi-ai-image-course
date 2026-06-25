@@ -10,6 +10,7 @@
 - 5.5 串接外部 AI API
 """
 
+import time
 from uuid import uuid4
 
 import redis
@@ -79,9 +80,12 @@ async def ocr(file: UploadFile = File(...)):
     from app.services.ocr_service import extract_text  # lazy import
 
     content = await file.read()
+    # 計時：只量 AI 推論本身（OCR 第一次會載入模型，會明顯比後續請求慢）
+    start = time.perf_counter()
     results = await run_in_threadpool(extract_text, content)
+    elapsed_ms = round((time.perf_counter() - start) * 1000, 1)
     full_text = "\n".join(r["text"] for r in results)
-    return {"full_text": full_text, "details": results}
+    return {"full_text": full_text, "details": results, "elapsed_ms": elapsed_ms}
 
 
 # ---------- 6.5 Ollama 視覺模型 ----------
@@ -96,10 +100,14 @@ async def describe(
     from app.services.ollama_service import describe_image  # lazy import
 
     content = await file.read()
+    # 計時：只量 Ollama 推論本身（描述任務通常數秒，視模型與硬體而定）
+    start = time.perf_counter()
     description = await run_in_threadpool(describe_image, content, prompt)
+    elapsed_ms = round((time.perf_counter() - start) * 1000, 1)
     return {
         "model": settings.OLLAMA_VISION_MODEL,
         "description": description,
+        "elapsed_ms": elapsed_ms,
     }
 
 
