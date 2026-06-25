@@ -97,6 +97,20 @@ def cache_get_or_none(r: redis.Redis, key: str):
         return None
 
 
+def cache_set_none(r: redis.Redis, key: str, ttl: int = 60) -> None:
+    """把「查過、確實不存在」寫進快取（教材 7.6 防穿透）。
+
+    查 DB 確認 key 不存在後呼叫，下次 cache_get_or_none 就會讀到哨兵、
+    直接回 "miss-cached" 而不再打 DB——它和 cache_get_or_none 是成對的：
+    這個負責「寫哨兵」，那個負責「讀哨兵」。
+    TTL 要短：「現在不存在」不代表「永遠不存在」，避免之後補上的資料被舊哨兵擋太久。
+    """
+    try:
+        r.set(key, SENTINEL, ex=ttl)
+    except redis.RedisError:
+        pass
+
+
 @contextmanager
 def acquire_lock(r: redis.Redis, key: str, ttl: int = 10):
     """分散式鎖（教材 7.9 防快取擊穿）。
