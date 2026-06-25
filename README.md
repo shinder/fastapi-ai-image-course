@@ -12,7 +12,7 @@ FastAPI 與 AI 影像應用開發的範例專案，內容對應講義
 ```txt
 fastapi-ai-image/
 ├── pyproject.toml          # 教材 2.2 套件清單（核心 + 4 組可選）
-├── docker-compose.yml      # 教材 4.2、6.2 PostgreSQL + Redis
+├── docker-compose.yml      # 教材 4.2、7.2 PostgreSQL + Redis
 ├── Dockerfile              # 教材 部署簡記
 ├── .env / .env.example     # 教材 2.2 環境變數
 ├── app/
@@ -27,19 +27,19 @@ fastapi-ai-image/
 │   ├── routes/
 │   │   ├── basic.py        # 教材 3.2、3.3、3.4 demo 路由（單元 2 路由直接寫在 main.py）
 │   │   ├── images.py       # 教材 3.5、3.6、4.6、4.7、綜合實作
-│   │   └── ai.py           # 教材 5.3、5.4、5.5、5.6、5.7、6.5、7.5
+│   │   └── ai.py           # 教材 6.3、6.4、6.5、6.6、6.7、7.5、5.5
 │   ├── services/
-│   │   ├── ai_service.py            # 教材 5.3 Hugging Face 分類
-│   │   ├── ocr_service.py           # 教材 5.4 EasyOCR
-│   │   ├── ollama_service.py        # 教材 5.5 Ollama 視覺模型
-│   │   ├── image_gen_service.py     # 教材 5.6 OpenAI DALL·E
-│   │   ├── external_ai.py           # 教材 7.5、7.6 外部 API
-│   │   └── cache_service.py         # 教材 6.4、6.5、6.6 Redis
+│   │   ├── ai_service.py            # 教材 6.3 Hugging Face 分類
+│   │   ├── ocr_service.py           # 教材 6.4 EasyOCR
+│   │   ├── ollama_service.py        # 教材 6.5 Ollama 視覺模型
+│   │   ├── image_gen_service.py     # 教材 6.6 OpenAI DALL·E
+│   │   ├── external_ai.py           # 教材 5.5、5.6 外部 API
+│   │   └── cache_service.py         # 教材 7.4、7.5、7.6 Redis
 │   └── utils/
 │       └── image_utils.py  # 教材 3.5 Pillow 工具
 ├── scripts/
 │   ├── client.py           # 教材 綜合實作 客戶端腳本
-│   └── requests_demo.py    # 教材 7.2、7.3、7.4 requests 用法
+│   └── requests_demo.py    # 教材 5.2、5.3、5.4 requests 用法
 ├── requests/
 │   └── api.http            # 教材 1.6 REST Client 測試檔（含綜合實作）
 ├── tests/
@@ -77,13 +77,13 @@ uv run fastapi dev app/main.py
 核心 `uv sync` 不會安裝重型 ML 套件，請依需要選擇：
 
 ```bash
-# 單元 5.3 Hugging Face 影像分類（會下載 transformers + torch，較大）
+# 單元 6.3 Hugging Face 影像分類（會下載 transformers + torch，較大）
 uv sync --extra ml
 
-# 單元 5.4 EasyOCR
+# 單元 6.4 EasyOCR
 uv sync --extra ocr
 
-# 單元 5.5 進階（Ollama OpenAI 相容介面）/ 單元 5.6 DALL·E
+# 單元 6.5 進階（Ollama OpenAI 相容介面）/ 單元 6.6 DALL·E
 uv sync --extra openai
 
 # 單元 4.8 pgvector 向量搜尋
@@ -95,7 +95,7 @@ uv sync --all-extras
 
 ---
 
-## Ollama 設定（單元 5.5）
+## Ollama 設定（單元 6.5）
 
 ```bash
 # 安裝 + 下載模型
@@ -163,17 +163,17 @@ VSCode 使用者：專案 `.vscode/settings.json` 已設定存檔時自動以 Ru
 | GET    | `/api/v1/images/{filename}/stream`     | StreamingResponse | 3.6 |
 | GET    | `/api/v1/images/{filename}/base64`     | Base64 | 3.6 |
 | POST   | `/api/v1/images/upload-and-classify`   | 綜合：上傳 + 快取 + 分類 + 入庫 | 綜合 |
-| POST   | `/api/v1/ai/classify`                  | 影像分類（含快取） | 5.3、6.5 |
-| POST   | `/api/v1/ai/ocr`                       | OCR 文字辨識 | 5.4 |
-| POST   | `/api/v1/ai/describe`                  | Ollama 圖片描述 | 5.5 |
-| POST   | `/api/v1/ai/extract-invoice`           | 發票結構化抽取 | 5.5 |
-| POST   | `/api/v1/ai/generate`                  | DALL·E 影像生成 | 5.6 |
-| POST   | `/api/v1/ai/generate-async`            | 背景任務生成 | 5.6 |
-| GET    | `/api/v1/ai/tasks/{task_id}`           | 查任務狀態 | 5.6 |
-| POST   | `/api/v1/ai/classify-external`         | 同步 requests 串接 | 7.5 |
-| POST   | `/api/v1/ai/classify-external-async`   | 非同步 httpx 串接 | 7.6 |
-| GET    | `/api/v1/ai/cache/stats`               | 快取命中率 | 6.7 |
-| GET    | `/api/v1/ai/cache-test`                | RedisDep 測試 | 6.4 |
+| POST   | `/api/v1/ai/classify`                  | 影像分類（含快取） | 6.3、7.5 |
+| POST   | `/api/v1/ai/ocr`                       | OCR 文字辨識 | 6.4 |
+| POST   | `/api/v1/ai/describe`                  | Ollama 圖片描述 | 6.5 |
+| POST   | `/api/v1/ai/extract-invoice`           | 發票結構化抽取 | 6.5 |
+| POST   | `/api/v1/ai/generate`                  | DALL·E 影像生成 | 6.6 |
+| POST   | `/api/v1/ai/generate-async`            | 背景任務生成 | 6.6 |
+| GET    | `/api/v1/ai/tasks/{task_id}`           | 查任務狀態 | 6.6 |
+| POST   | `/api/v1/ai/classify-external`         | 同步 requests 串接 | 5.5 |
+| POST   | `/api/v1/ai/classify-external-async`   | 非同步 httpx 串接 | 5.6 |
+| GET    | `/api/v1/ai/cache/stats`               | 快取命中率 | 7.7 |
+| GET    | `/api/v1/ai/cache-test`                | RedisDep 測試 | 7.4 |
 
 ---
 

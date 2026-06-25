@@ -186,9 +186,9 @@ Content-Type: image/jpeg
 < ./test_images/cat.jpg
 ------Boundary--
 
-# === 單元五 AI 模型整合應用 ===
+# === 單元六 AI 模型整合應用 ===
 
-### 5.3 本地模型分類（Hugging Face，不入庫）
+### 6.3 本機模型分類（Hugging Face，不入庫）
 POST {{baseUrl}}/api/v1/ai/classify
 Content-Type: multipart/form-data; boundary=----Boundary
 
@@ -199,7 +199,7 @@ Content-Type: image/jpeg
 < ./test_images/cat.jpg
 ------Boundary--
 
-### 5.4 OCR 文字辨識
+### 6.4 OCR 文字辨識
 POST {{baseUrl}}/api/v1/ai/ocr
 Content-Type: multipart/form-data; boundary=----Boundary
 
@@ -210,7 +210,7 @@ Content-Type: image/png
 < ./test_images/text.png
 ------Boundary--
 
-### 5.5 Ollama 視覺模型描述圖片
+### 6.5 Ollama 視覺模型描述圖片
 POST {{baseUrl}}/api/v1/ai/describe
 Content-Type: multipart/form-data; boundary=----Boundary
 
@@ -225,30 +225,30 @@ Content-Type: image/jpeg
 < ./test_images/cat.jpg
 ------Boundary--
 
-### 5.6 影像生成（OpenAI DALL·E）
+### 6.6 影像生成（OpenAI DALL·E）
 POST {{baseUrl}}/api/v1/ai/generate
 Content-Type: application/x-www-form-urlencoded
 
 prompt=A cute corgi wearing sunglasses on a beach, watercolor style
 
-# === 單元六 Redis 快取與非同步任務 ===
+# === 單元七 Redis 快取與非同步任務 ===
 
-### 6.4 在 FastAPI 中使用 Redis（依賴注入示範）
+### 7.4 在 FastAPI 中使用 Redis（依賴注入示範）
 GET {{baseUrl}}/api/v1/ai/cache-test
 
-### 6.7 監控與除錯：Redis 快取統計
+### 7.7 監控與除錯：Redis 快取統計
 GET {{baseUrl}}/api/v1/ai/cache/stats
 
-### 6.10 用 Redis 管理非同步任務：啟動非同步生成
+### 7.10 用 Redis 管理非同步任務：啟動非同步生成
 POST {{baseUrl}}/api/v1/ai/generate-async
 Content-Type: application/x-www-form-urlencoded
 
 prompt=A futuristic city at night, cyberpunk style
 
-### 6.10 查詢任務狀態（換成上一行回傳的 task_id）
+### 7.10 查詢任務狀態（換成上一行回傳的 task_id）
 GET {{baseUrl}}/api/v1/ai/tasks/REPLACE_TASK_ID
 
-# === 綜合實作：上傳 + 辨識 + 快取 + 入庫（整合單元四～六）===
+# === 綜合實作：上傳 + 辨識 + 快取 + 入庫（整合單元四、六、七）===
 
 ### 綜合：上傳並辨識（multipart）
 POST {{baseUrl}}/api/v1/images/upload-and-classify
@@ -265,7 +265,7 @@ Content-Type: image/jpeg
 < ./test_images/cat.jpg
 ------Boundary--
 
-# === 單元八 網頁與樣版（補充教材，Jinja2）===
+# === 單元八 網頁與模板（補充教材，Jinja2）===
 
 ### 8.6 圖片列表頁（建議用瀏覽器開）
 GET {{baseUrl}}/web

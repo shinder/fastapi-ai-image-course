@@ -18,17 +18,17 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-# 單元 5.3：本地 Hugging Face 影像分類
+# 單元 6.3：本機 Hugging Face 影像分類
 ml = [
     "transformers>=4.45.0",
     "torch>=2.4.0",
 ]
-# 單元 5.4：OCR 文字辨識
+# 單元 6.4：OCR 文字辨識
 ocr = [
     "easyocr>=1.7.0",
     "numpy>=2.0.0",
 ]
-# 單元 5.6：OpenAI DALL·E 影像生成（也可給 Ollama 的 OpenAI 相容介面使用）
+# 單元 6.6：OpenAI DALL·E 影像生成（也可給 Ollama 的 OpenAI 相容介面使用）
 openai = [
     "openai>=1.50.0",
 ]
@@ -36,7 +36,7 @@ openai = [
 vector = [
     "pgvector>=0.3.0",
 ]
-# 單元 6.11：RQ（Redis Queue）任務佇列
+# 單元 7.11：RQ（Redis Queue）任務佇列
 queue = [
     "rq>=2.10.0",
 ]

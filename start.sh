@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# start.sh — 一鍵啟動本地開發環境
+# start.sh — 一鍵啟動本機開發環境
 #   1. 先啟動三個依賴服務的容器（PostgreSQL / Redis / MongoDB）
 #   2. 最後在前景啟動 FastAPI 開發伺服器（uvicorn）
 #

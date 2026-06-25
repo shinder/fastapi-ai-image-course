@@ -38,7 +38,7 @@ def test_demo_create_image_validation():
     assert r.status_code == 422
 
 
-# ---------- 單元八 網頁與樣版（補充教材，Jinja2）----------
+# ---------- 單元八 網頁與模板（補充教材，Jinja2）----------
 
 
 def test_web_gallery_page():
@@ -118,7 +118,7 @@ def test_notes_requires_mongo():
     assert r.status_code == 503
 
 
-# ---------- 單元六進階：速率限制 / 分散式鎖（Redis 不可用時 fail-open）----------
+# ---------- 單元七進階：速率限制 / 分散式鎖（Redis 不可用時 fail-open）----------
 
 
 def _raising_redis():

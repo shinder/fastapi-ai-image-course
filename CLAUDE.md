@@ -15,11 +15,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 uv sync
 
 # 依教材章節加裝可選依賴
-uv sync --extra ml       # 5.3 Hugging Face 分類（transformers + torch，很大）
-uv sync --extra ocr      # 5.4 EasyOCR
-uv sync --extra openai   # 5.5 / 5.6 OpenAI 相容介面、DALL·E
+uv sync --extra ml       # 6.3 Hugging Face 分類（transformers + torch，很大）
+uv sync --extra ocr      # 6.4 EasyOCR
+uv sync --extra openai   # 6.5 / 6.6 OpenAI 相容介面、DALL·E
 uv sync --extra vector   # 4.8 pgvector
-uv sync --extra queue    # 6.11 RQ 任務佇列
+uv sync --extra queue    # 7.11 RQ 任務佇列
 uv sync --all-extras     # 全部
 
 # 啟動依賴服務（PostgreSQL + Redis；MongoDB 需自行另開）
@@ -37,7 +37,7 @@ uv run ruff format .
 uv run ruff check .
 uv run mypy app
 
-# 任務佇列 worker（6.11，需先啟動 API 才有東西消費）
+# 任務佇列 worker（7.11，需先啟動 API 才有東西消費）
 python -m app.workers.queue_worker                          # 方法一：手刻佇列
 rq worker image-gen --url redis://localhost:6379/0          # 方法二：RQ（需 --extra queue）
 
@@ -66,7 +66,7 @@ Python 版本鎖定 3.12（`requires-python = ">=3.12,<3.13"`）。
 ### 可選依賴用 lazy import
 重型 / 可選套件（transformers、torch、easyocr、openai、rq）**一律在函式內 import**，不在模組頂層，這樣核心 `uv sync` 安裝下 app 仍能啟動，只有實際呼叫到該端點才會觸發 ImportError。`routes/ai.py` 的每個 AI 端點、`services/ai_service.py` 的 `get_classifier()` 都是這個模式。新增 AI 功能請照此辦理。
 
-### 同步推論不阻塞事件循環
+### 同步推論不阻塞事件迴圈
 AI 推論是同步且耗時的，async 路由中一律用 `fastapi.concurrency.run_in_threadpool` 包起來呼叫（見 `routes/ai.py`）。模型本身用模組級單例快取（`ai_service._classifier`）避免每次請求重載。
 
 ### 依賴注入別名

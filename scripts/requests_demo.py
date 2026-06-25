@@ -1,4 +1,4 @@
-"""Requests 套件用法示範（教材 7.2、7.3、7.4）
+"""Requests 套件用法示範（教材 5.2、5.3、5.4）
 
 執行：
     uv run python scripts/requests_demo.py
@@ -17,7 +17,7 @@ from urllib3.util.retry import Retry
 
 
 def basic_get():
-    """教材 7.2 基本 GET"""
+    """教材 5.2 基本 GET"""
     r = requests.get("https://jsonplaceholder.typicode.com/photos/1")
     print(r.status_code)
     print(r.headers["Content-Type"])
@@ -25,7 +25,7 @@ def basic_get():
 
 
 def basic_post():
-    """教材 7.2 基本 POST"""
+    """教材 5.2 基本 POST"""
     data = {"title": "我的圖片", "url": "https://example.com/img.jpg"}
     r = requests.post("https://jsonplaceholder.typicode.com/photos", json=data)
     print(r.status_code)
@@ -33,7 +33,7 @@ def basic_post():
 
 
 def with_exceptions():
-    """教材 7.2 例外處理"""
+    """教材 5.2 例外處理"""
     try:
         r = requests.get("https://api.example.com/data", timeout=5)
         r.raise_for_status()
@@ -49,7 +49,7 @@ def with_exceptions():
 
 
 def with_query_headers_cookies():
-    """教材 7.3 Query / Headers / Cookies / Timeout"""
+    """教材 5.3 Query / Headers / Cookies / Timeout"""
     return requests.get(
         "https://api.example.com/images",
         params={"keyword": "cat", "limit": 10},
@@ -60,7 +60,7 @@ def with_query_headers_cookies():
 
 
 def upload_file():
-    """教材 7.3 上傳檔案"""
+    """教材 5.3 上傳檔案"""
     with open("test_images/cat.jpg", "rb") as f:
         files = {"file": ("cat.jpg", f, "image/jpeg")}
         r = requests.post(
@@ -72,7 +72,7 @@ def upload_file():
 
 
 def session_demo():
-    """教材 7.3 Session 連線重用"""
+    """教材 5.3 Session 連線重用"""
     session = requests.Session()
     session.headers.update({"Authorization": "Bearer abc123"})
     r1 = session.get("https://api.example.com/users/me")
@@ -81,7 +81,7 @@ def session_demo():
 
 
 def session_with_retry():
-    """教材 7.3 重試機制"""
+    """教材 5.3 重試機制"""
     session = requests.Session()
     retries = Retry(
         total=3,
@@ -95,7 +95,7 @@ def session_with_retry():
 
 
 def auth_examples():
-    """教材 7.4 認證機制"""
+    """教材 5.4 認證機制"""
     api_key = "MY_KEY"
     token = "MY_TOKEN"
 
