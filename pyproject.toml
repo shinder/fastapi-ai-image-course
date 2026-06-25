@@ -36,10 +36,6 @@ openai = [
 vector = [
     "pgvector>=0.3.0",
 ]
-# 單元 7.11：RQ（Redis Queue）任務佇列
-queue = [
-    "rq>=2.10.0",
-]
 
 [dependency-groups]
 dev = [
