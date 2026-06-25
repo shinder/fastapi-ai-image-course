@@ -1,4 +1,4 @@
-"""本地 Hugging Face 影像分類（教材 5.3、5.7）
+"""本機 Hugging Face 影像分類（教材 6.3、6.7）
 
 需安裝可選依賴：
     uv sync --extra ml
@@ -11,7 +11,7 @@ from io import BytesIO
 
 from PIL import Image
 
-# 模組級單例（教材 5.7）
+# 模組級單例（教材 6.7）
 _classifier = None
 
 

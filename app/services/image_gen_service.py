@@ -1,4 +1,4 @@
-"""OpenAI DALL·E 影像生成（教材 5.6）
+"""OpenAI DALL·E 影像生成（教材 6.6）
 
 需安裝可選依賴：
     uv sync --extra openai

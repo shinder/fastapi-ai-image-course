@@ -324,7 +324,7 @@ async def upload_and_classify(
     """完整流程（綜合實作專案）：
 
     1. 圖片 hash 查 Redis
-    2. 未命中 → 呼叫本地 AI 模型
+    2. 未命中 → 呼叫本機 AI 模型
     3. 寫 Redis 與 PostgreSQL
     """
     if not file.content_type or not file.content_type.startswith("image/"):

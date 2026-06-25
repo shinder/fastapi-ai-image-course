@@ -1,4 +1,4 @@
-"""Redis 快取服務（教材 6.4、6.5、6.6、6.9）"""
+"""Redis 快取服務（教材 7.4、7.5、7.6、7.9）"""
 
 import hashlib
 import json
@@ -28,7 +28,7 @@ RedisDep = Annotated[redis.Redis, Depends(get_redis)]
 
 
 def image_hash(content: bytes) -> str:
-    """以圖片二進位內容做 SHA-256（教材 6.5）"""
+    """以圖片二進位內容做 SHA-256（教材 7.5）"""
     return hashlib.sha256(content).hexdigest()
 
 
@@ -69,7 +69,7 @@ def cache_set_jitter(
     base_ttl: int = 3600,
     jitter: float = 0.1,
 ) -> None:
-    """TTL 加抖動（教材 6.6 防雪崩）"""
+    """TTL 加抖動（教材 7.6 防雪崩）"""
     ttl = int(base_ttl * (1 + random.uniform(-jitter, jitter)))
     try:
         r.set(key, json.dumps(value, ensure_ascii=False), ex=ttl)
@@ -77,7 +77,7 @@ def cache_set_jitter(
         pass
 
 
-# 教材 6.6 防穿透
+# 教材 7.6 防穿透
 SENTINEL = "__none__"
 
 
@@ -99,7 +99,7 @@ def cache_get_or_none(r: redis.Redis, key: str):
 
 @contextmanager
 def acquire_lock(r: redis.Redis, key: str, ttl: int = 10):
-    """分散式鎖（教材 6.9 防快取擊穿）。
+    """分散式鎖（教材 7.9 防快取擊穿）。
 
     用 SET NX EX 嘗試取鎖：成功 yield True，已被別人持有 yield False。
     with 區塊結束會自動釋放（只有自己取得時才刪）。ttl 是保險，避免持鎖者

@@ -1,4 +1,4 @@
-"""Ollama 本地視覺模型整合（教材 5.5）"""
+"""Ollama 本機視覺模型整合（教材 6.5）"""
 
 import json
 
@@ -11,7 +11,7 @@ client = Client(host=settings.OLLAMA_HOST)
 
 
 def _chat(**kwargs):
-    """呼叫 Ollama chat，把連線／回應錯誤轉成清楚的 RuntimeError（教材 5.5）
+    """呼叫 Ollama chat，把連線／回應錯誤轉成清楚的 RuntimeError（教材 6.5）
 
     Ollama 沒啟動時，套件會丟內建的 ConnectionError；模型不存在等問題則是
     ollama.ResponseError。統一在此攔截，避免路由層出現難以理解的 500。
@@ -46,7 +46,7 @@ def describe_image(content: bytes, prompt: str = "請以繁體中文描述這張
 
 
 def extract_invoice_info(content: bytes) -> dict:
-    """從發票圖片抽取結構化資訊（教材 5.5 結構化抽取）"""
+    """從發票圖片抽取結構化資訊（教材 6.5 結構化抽取）"""
     response = _chat(
         model=settings.OLLAMA_VISION_MODEL,
         format="json",  # 強制 JSON 輸出
@@ -64,7 +64,7 @@ def extract_invoice_info(content: bytes) -> dict:
         options={"temperature": 0.0},  # 結構化任務用 0 確保穩定
     )
     raw = response["message"]["content"]
-    # 即使指定 format="json"，模型仍可能因輸出被截斷等回傳非合法 JSON，需兜底
+    # 即使指定 format="json"，模型仍可能因輸出被截斷等回傳非合法 JSON，需後援
     try:
         return json.loads(raw)
     except json.JSONDecodeError as exc:
@@ -72,7 +72,7 @@ def extract_invoice_info(content: bytes) -> dict:
 
 
 def describe_image_via_openai_compat(encoded_b64: str) -> str:
-    """進階：透過 Ollama 的 OpenAI 相容介面（教材 5.5 進階）
+    """進階：透過 Ollama 的 OpenAI 相容介面（教材 6.5 進階）
 
     需安裝可選依賴：uv sync --extra openai
     """

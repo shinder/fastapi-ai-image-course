@@ -1,4 +1,4 @@
-"""速率限制（教材 6.8）：用 Redis INCR + EXPIRE 限制呼叫頻率。
+"""速率限制（教材 7.8）：用 Redis INCR + EXPIRE 限制呼叫頻率。
 
 做成 FastAPI 依賴，套在昂貴的 AI 端點上，保護後端不被爆量呼叫。
 Redis 不可用時採 fail-open（放行），不讓限流元件本身成為單點故障。
@@ -22,7 +22,7 @@ class RateLimit:
         self.window = window
 
     def __call__(self, request: Request, r: RedisDep) -> None:
-        # 以用戶端 IP 當識別；正式環境可改用 API Key（見教材 6.8 變體）
+        # 以用戶端 IP 當識別；正式環境可改用 API Key（見教材 7.8 變體）
         client = request.client.host if request.client else "unknown"
         key = f"ratelimit:{client}"
         try:

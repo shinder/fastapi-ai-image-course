@@ -1,13 +1,13 @@
 """AI 路由：分類、OCR、Ollama 描述、影像生成、外部 API
 
 對應教材：
-- 5.3 影像分類（含 Redis 快取）
-- 5.4 OCR
-- 5.5 Ollama 視覺模型
-- 5.6 影像生成（OpenAI DALL·E、含背景任務）
-- 5.7 run_in_threadpool
-- 6.5 快取 AI 推論結果（含命中率統計）
-- 7.5 串接外部 AI API
+- 6.3 影像分類（含 Redis 快取）
+- 6.4 OCR
+- 6.5 Ollama 視覺模型
+- 6.6 影像生成（OpenAI DALL·E、含背景任務）
+- 6.7 run_in_threadpool
+- 7.5 快取 AI 推論結果（含命中率統計）
+- 5.5 串接外部 AI API
 """
 
 from uuid import uuid4
@@ -38,12 +38,12 @@ from app.services.rate_limit import RateLimit
 router = APIRouter(prefix="/api/v1/ai", tags=["ai"])
 
 
-# ---------- 5.3 + 6.5 影像分類（含快取） ----------
+# ---------- 6.3 + 7.5 影像分類（含快取） ----------
 
 
 @router.post("/classify", dependencies=[Depends(RateLimit(limit=30, window=60))])
 async def classify(file: UploadFile = File(...), r: RedisDep = None):
-    """以圖片 hash 為快取 key，未命中才呼叫模型，並統計命中率（教材 6.5、6.7）"""
+    """以圖片 hash 為快取 key，未命中才呼叫模型，並統計命中率（教材 7.5、7.7）"""
     if not file.content_type or not file.content_type.startswith("image/"):
         raise HTTPException(400, "請上傳圖片")
 
@@ -57,7 +57,7 @@ async def classify(file: UploadFile = File(...), r: RedisDep = None):
         cache_incr(r, "stats:cache:hit")
         return {"results": cached, "cached": True}
 
-    # 2. 未命中：執行推論（教材 5.7 thread pool 不阻塞事件循環）
+    # 2. 未命中：執行推論（教材 6.7 thread pool 不阻塞事件迴圈）
     from app.services.ai_service import classify_image_bytes  # lazy import
 
     results = await run_in_threadpool(classify_image_bytes, content)
@@ -69,7 +69,7 @@ async def classify(file: UploadFile = File(...), r: RedisDep = None):
     return {"results": results, "cached": False}
 
 
-# ---------- 5.4 OCR ----------
+# ---------- 6.4 OCR ----------
 
 
 @router.post("/ocr")
@@ -84,7 +84,7 @@ async def ocr(file: UploadFile = File(...)):
     return {"full_text": full_text, "details": results}
 
 
-# ---------- 5.5 Ollama 視覺模型 ----------
+# ---------- 6.5 Ollama 視覺模型 ----------
 
 
 @router.post("/describe")
@@ -92,7 +92,7 @@ async def describe(
     file: UploadFile = File(...),
     prompt: str = Form("請以繁體中文描述這張圖片"),
 ):
-    """用本地 Ollama 視覺模型描述圖片"""
+    """用本機 Ollama 視覺模型描述圖片"""
     from app.services.ollama_service import describe_image  # lazy import
 
     content = await file.read()
@@ -105,7 +105,7 @@ async def describe(
 
 @router.post("/extract-invoice")
 async def extract_invoice(file: UploadFile = File(...)):
-    """從發票圖片抽取結構化資訊（教材 5.5）"""
+    """從發票圖片抽取結構化資訊（教材 6.5）"""
     from app.services.ollama_service import extract_invoice_info  # lazy import
 
     content = await file.read()
@@ -113,19 +113,19 @@ async def extract_invoice(file: UploadFile = File(...)):
     return data
 
 
-# ---------- 5.6 影像生成 ----------
+# ---------- 6.6 影像生成 ----------
 
 
 @router.post("/generate", dependencies=[Depends(RateLimit(limit=10, window=60))])
 def generate(prompt: str = Form(..., min_length=1, max_length=1000)):
-    """OpenAI DALL·E 影像生成（教材 5.6）"""
+    """OpenAI DALL·E 影像生成（教材 6.6）"""
     from app.services.image_gen_service import generate_image  # lazy import
 
     url = generate_image(prompt)
     return {"prompt": prompt, "image_url": url}
 
 
-# 任務狀態存 Redis（教材 6.10）：取代記憶體 dict，可跨 worker、可設 TTL 自動清理
+# 任務狀態存 Redis（教材 7.10）：取代記憶體 dict，可跨 worker、可設 TTL 自動清理
 def _task_key(task_id: str) -> str:
     return f"task:gen:{task_id}"
 
@@ -161,12 +161,12 @@ def get_task(task_id: str, r: RedisDep):
     return cache_get(r, _task_key(task_id)) or {"status": "not_found"}
 
 
-# ---------- 6.11 任務佇列 ----------
+# ---------- 7.11 任務佇列 ----------
 
 
 @router.post("/generate-queued")
 def generate_queued(r: RedisDep, prompt: str = Form(..., min_length=1)):
-    """方法一：手刻 LPUSH/BRPOP 佇列（教材 6.11）。
+    """方法一：手刻 LPUSH/BRPOP 佇列（教材 7.11）。
 
     需另開 worker 消費：python -m app.workers.queue_worker
     """
@@ -180,7 +180,7 @@ def generate_queued(r: RedisDep, prompt: str = Form(..., min_length=1)):
 
 @router.post("/generate-rq")
 def generate_rq(r: RedisDep, prompt: str = Form(..., min_length=1)):
-    """方法二：用 RQ（教材 6.11，需 uv sync --extra queue）。
+    """方法二：用 RQ（教材 7.11，需 uv sync --extra queue）。
 
     需另開 worker 消費：rq worker image-gen --url redis://localhost:6379/0
     """
@@ -195,12 +195,12 @@ def generate_rq(r: RedisDep, prompt: str = Form(..., min_length=1)):
     return {"task_id": task_id}
 
 
-# ---------- 7.5 / 7.6 串接外部 AI API ----------
+# ---------- 5.5 / 5.6 串接外部 AI API ----------
 
 
 @router.post("/classify-external")
 async def classify_external(file: UploadFile = File(...)):
-    """同步 requests + run_in_threadpool（教材 7.5）"""
+    """同步 requests + run_in_threadpool（教材 5.5）"""
     from app.services.external_ai import call_external_classify
 
     content = await file.read()
@@ -210,7 +210,7 @@ async def classify_external(file: UploadFile = File(...)):
 
 @router.post("/classify-external-async")
 async def classify_external_async(file: UploadFile = File(...)):
-    """非同步 httpx（教材 7.6）"""
+    """非同步 httpx（教材 5.6）"""
     from app.services.external_ai import call_external_classify_async
 
     content = await file.read()
@@ -218,7 +218,7 @@ async def classify_external_async(file: UploadFile = File(...)):
     return result
 
 
-# ---------- 6.7 命中率查詢 ----------
+# ---------- 7.7 命中率查詢 ----------
 
 
 @router.get("/cache/stats")
@@ -241,6 +241,6 @@ def cache_stats(r: RedisDep):
 
 @router.get("/cache-test")
 def cache_test(r: RedisDep):
-    """教材 6.4 依賴注入示範"""
+    """教材 7.4 依賴注入示範"""
     r.set("hello", "world", ex=60)
     return {"value": r.get("hello")}
