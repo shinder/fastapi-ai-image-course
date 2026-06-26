@@ -21,8 +21,15 @@ uv sync --extra openai   # 6.5 / 6.6 OpenAI 相容介面、gpt-image-1
 uv sync --extra vector   # 4.8 pgvector
 uv sync --all-extras     # 全部
 
-# 啟動依賴服務（PostgreSQL + Redis；MongoDB 需自行另開）
+# 啟動依賴服務（PostgreSQL + Redis；MongoDB 需自行另開，見下方腳本）
 docker compose up -d
+
+# 或用腳本啟動（單獨 docker run，不需 docker compose，且比 compose 多含 MongoDB）
+./start.sh               # 起 PostgreSQL / Redis / MongoDB 三容器，再前景跑開發伺服器（Ctrl-C 結束）
+./start-postgres.sh      # 也可單獨啟動某個服務
+./start-redis.sh
+./start-mongodb.sh
+./stop-containers.sh     # 收工：移除上述三個容器（具名資料卷保留，下次啟動接回）
 
 # 開發伺服器（http://localhost:8000，/docs 看 Swagger）
 uv run fastapi dev app/main.py
