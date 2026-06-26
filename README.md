@@ -13,6 +13,11 @@ FastAPI 與 AI 影像應用開發的範例專案，內容對應講義
 fastapi-ai-image/
 ├── pyproject.toml          # 教材 2.2 套件清單（核心 + 4 組可選）
 ├── docker-compose.yml      # 教材 4.2、7.2 PostgreSQL + Redis
+├── start.sh                # 一鍵起三個依賴容器，再前景跑開發伺服器（替代 docker compose）
+├── start-postgres.sh       # 單獨啟動 PostgreSQL 容器
+├── start-redis.sh          # 單獨啟動 Redis 容器
+├── start-mongodb.sh        # 單獨啟動 MongoDB 容器（單元九）
+├── stop-containers.sh      # 移除上述三個依賴容器（收工用，具名資料卷保留）
 ├── Dockerfile              # 教材 部署簡記
 ├── .env / .env.example     # 教材 2.2 環境變數
 ├── app/
@@ -70,6 +75,23 @@ uv run fastapi dev app/main.py
 - <http://localhost:8000/docs>：Swagger UI
 - <http://localhost:8000/redoc>：ReDoc
 - <http://localhost:8000/uploads/<filename>>：上傳檔案直存取
+
+---
+
+## 用腳本啟動 / 停止服務（替代 docker compose）
+
+除了 `docker compose`，專案也附了一鍵腳本，改用單獨的 `docker run` 管理依賴服務容器
+——比 docker compose 多含 MongoDB（單元九），`start.sh` 還會接著在前景啟動開發伺服器：
+
+```bash
+./start.sh              # 啟動三個依賴容器（PostgreSQL / Redis / MongoDB），再前景跑開發伺服器（Ctrl-C 結束）
+./stop-containers.sh    # 收工：移除這三個容器（具名資料卷保留，下次啟動自動接回資料）
+
+# 也可單獨啟動某個服務
+./start-postgres.sh
+./start-redis.sh
+./start-mongodb.sh
+```
 
 ---
 
