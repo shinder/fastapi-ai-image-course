@@ -30,6 +30,7 @@ docker compose up -d
 ./start-redis.sh
 ./start-mongodb.sh
 ./stop-containers.sh     # 收工：移除上述三個容器（具名資料卷保留，下次啟動接回）
+# 上述腳本 Windows 需在 Git Bash 執行（非 CMD / PowerShell），相容性已處理，見下方「跨平台腳本」
 
 # 開發伺服器（http://localhost:8000，/docs 看 Swagger）
 uv run fastapi dev app/main.py
@@ -86,3 +87,11 @@ AI 推論是同步且耗時的，async 路由中一律用 `fastapi.concurrency.r
 
 ### 背景任務
 `routes/ai.py` 的影像生成用 `BackgroundTasks`（`/generate-async`）示範：同進程、回應後才執行；任務狀態存 Redis（`task:gen:{id}`，可 TTL 自動清），再用 `/tasks/{task_id}` 查詢（教材 7.10）。
+
+### 跨平台腳本（Windows Git Bash）
+學生可能在 Windows 上用 Git Bash 跑 `start*.sh` / `stop-containers.sh`，新增或修改腳本時請維持兩項防護：
+
+- **換行字元**：`.gitattributes` 已強制 `*.sh` 與 `Dockerfile` 以 `eol=lf` checkout。Git for Windows 預設 `core.autocrlf=true`，被轉成 CRLF 的腳本執行時只會報 `bad interpreter` 或 `$'\r': command not found`，看不出是換行問題。新增會交給 Linux 直譯器讀的檔案，記得一併納入。
+- **MSYS 路徑轉換**：Git Bash 會把參數中看起來像 POSIX 絕對路徑的字串改寫成 Windows 路徑（`/data` → `C:/Program Files/Git/data`）。腳本只要帶了 `-v` / `--mount` 這類含絕對路徑的參數，開頭就要 `export MSYS_NO_PATHCONV=1` 與 `export MSYS2_ARG_CONV_EXCL='*'`（分別是 Git for Windows 專有與 MSYS2 原生，各版本認的不一定相同，兩個都設；macOS / Linux 直接忽略）。三支 `start-*.sh` 已設，`stop-containers.sh` 與 `start.sh` 沒有路徑參數故不需要。
+
+其餘 Windows 注意事項（Docker Desktop 維持 Linux 容器模式、執行權限被拒改用 `bash start.sh`）寫在 README 的「Windows 使用者」小節。
