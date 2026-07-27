@@ -2,6 +2,13 @@
 # start-postgres.sh — 單獨啟動 PostgreSQL 容器（不需 docker compose）
 set -euo pipefail
 
+# 關掉 Git Bash（MSYS）的路徑自動轉換：它會把參數中看起來像 POSIX 絕對路徑的字串改寫成
+# Windows 路徑（/var/lib/postgresql/data → C:/Program Files/Git/var/lib/postgresql/data），
+# 下面 -v 的掛載點就會掛錯地方。兩個變數分別是 Git for Windows 專有與 MSYS2 原生，
+# 都設比較保險；macOS / Linux 只是多兩個沒人讀的環境變數，不影響。
+export MSYS_NO_PATHCONV=1
+export MSYS2_ARG_CONV_EXCL='*'
+
 # 資料庫名可用環境變數覆寫（例：DB_NAME=my_db ./start-postgres.sh），預設 ai_image_db。
 # 記得同步改 .env 的 DATABASE_URL，兩邊名字要一致。
 DB_NAME=${DB_NAME:-ai_image_db}

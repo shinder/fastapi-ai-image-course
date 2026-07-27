@@ -2,6 +2,13 @@
 # start-mongodb.sh — 單獨啟動 MongoDB 容器（不需 docker compose；單元九補充教材）
 set -euo pipefail
 
+# 關掉 Git Bash（MSYS）的路徑自動轉換：它會把參數中看起來像 POSIX 絕對路徑的字串改寫成
+# Windows 路徑（/data/db → C:/Program Files/Git/data/db），下面 -v 與 --mount 的掛載點
+# 就會掛錯地方。兩個變數分別是 Git for Windows 專有與 MSYS2 原生，都設比較保險；
+# macOS / Linux 只是多兩個沒人讀的環境變數，不影響。
+export MSYS_NO_PATHCONV=1
+export MSYS2_ARG_CONV_EXCL='*'
+
 # 同名容器已存在就先移除，讓這支 script 可重複執行
 docker rm -f mongo-ai-image 2>/dev/null || true
 

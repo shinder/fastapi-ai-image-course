@@ -1,0 +1,14 @@
+# 換行字元規則
+#
+# 背景：Git for Windows 安裝時的預設選項是 core.autocrlf=true，也就是「commit 時轉 LF、
+# checkout 時轉 CRLF」。對一般文字檔沒差，但下面這幾種檔案的內容最後是交給「Linux 上的
+# 直譯器」讀的，多出來的 \r 會直接讓它們壞掉，而且錯誤訊息完全看不出是換行字元的問題。
+
+# shell script：CRLF 會讓 Git Bash 執行時報
+#   bash: ./start.sh: /usr/bin/env: bad interpreter: No such file or directory
+#   或  $'\r': command not found
+# （\r 被當成 shebang 路徑或指令的一部分了）
+*.sh text eol=lf
+
+# Dockerfile：內容會在建置時送進容器裡的 shell 執行，同樣不能有 \r
+Dockerfile text eol=lf

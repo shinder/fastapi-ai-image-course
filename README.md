@@ -93,6 +93,18 @@ uv run fastapi dev app/main.py
 ./start-mongodb.sh
 ```
 
+### Windows 使用者
+
+這些腳本請在 **Git Bash** 執行（Git for Windows 內附），不是 CMD 或 PowerShell。另外：
+
+- 腳本開頭已關掉 MSYS 的路徑自動轉換，`-v` / `--mount` 的掛載路徑不會被改寫成
+  Windows 路徑；`.gitattributes` 也已強制 `*.sh` 以 LF 換行 checkout。若你是在加入這兩項
+  設定「之前」clone 的，工作目錄裡的腳本可能還是 CRLF，執行時會報 `bad interpreter`
+  或 `$'\r': command not found`，重新 clone 一份即可。
+- Docker Desktop 請維持預設的 **Linux 容器模式**（腳本用到的 tmpfs 掛載需要它）。
+- `./start.sh` 若因執行權限被拒，改用 `bash start.sh`。
+- `start.sh` 最後前景跑的 uvicorn，在 Git Bash 下 Ctrl-C 偶爾要按兩次才停得下來。
+
 ---
 
 ## 可選依賴（依教材章節）
