@@ -43,6 +43,8 @@ fastapi-ai-image/
 │   │   └── cache_service.py         # 教材 7.4、7.5、7.6 Redis
 │   └── utils/
 │       └── image_utils.py  # 教材 3.5 Pillow 工具
+├── docs/                   # 補充文件
+│   └── stop-windows-services.md  # Windows 原生服務佔用埠號時的停用／恢復指南
 ├── practices/              # 教材練習：可獨立執行的小範例（多數需先啟動 API）
 │   ├── try_01~03_*.py      # Pydantic（單元三）
 │   ├── try_04~09_*.py      # tkinter 串接（單元三）
@@ -139,7 +141,7 @@ cmd-start-mongodb.bat
 - Docker Desktop 請維持預設的 **Linux 容器模式**（腳本用到的 tmpfs 掛載需要它）。
 - 需要 `uv` 已安裝且在 PATH 中（`sh-start.sh` / `cmd-start.bat` 最後會用 `uv run` 啟動伺服器）。
 - 若原本就在 Windows 裝過 PostgreSQL / MongoDB 服務，會先佔走 5432 / 27017 埠號害容器起不來，
-  處理方式見 [`stop-windows-services.md`](stop-windows-services.md)。
+  處理方式見 [`docs/stop-windows-services.md`](docs/stop-windows-services.md)。
 
 ---
 

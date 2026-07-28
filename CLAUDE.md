@@ -118,4 +118,4 @@ CMD），前綴之後的名稱一一對應（`sh-start.sh` ↔ `cmd-start.bat`�
 
 其餘 Windows 注意事項（Docker Desktop 維持 Linux 容器模式、`sh-*.sh` 版執行權限被拒改用
 `bash sh-start.sh`、`set DB_NAME=` 覆寫資料庫名）寫在 README 的「Windows 使用者」小節；
-Windows 原生服務佔用埠號（5432 / 27017）的排除方式另見 `stop-windows-services.md`。
+Windows 原生服務佔用埠號（5432 / 27017）的排除方式另見 `docs/stop-windows-services.md`。
