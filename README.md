@@ -18,6 +18,7 @@ fastapi-ai-image/
 ├── start-redis.sh          # 單獨啟動 Redis 容器
 ├── start-mongodb.sh        # 單獨啟動 MongoDB 容器（單元九）
 ├── stop-containers.sh      # 移除上述三個依賴容器（收工用，具名資料卷保留）
+├── *.bat                   # 上述五支腳本的 Windows CMD 版（start.bat、stop-containers.bat…）
 ├── Dockerfile              # 教材 部署簡記
 ├── .env / .env.example     # 教材 2.2 環境變數
 ├── app/
@@ -95,15 +96,41 @@ uv run fastapi dev app/main.py
 
 ### Windows 使用者
 
-這些腳本請在 **Git Bash** 執行（Git for Windows 內附），不是 CMD 或 PowerShell。另外：
+每支腳本都備有 **CMD 版的 `.bat`**，內容與 `.sh` 版一致，兩者擇一即可：
+
+```bat
+rem 在 CMD（或 PowerShell）直接執行，不需要 Git Bash
+start.bat
+stop-containers.bat
+
+rem 也可單獨啟動某個服務
+start-postgres.bat
+start-redis.bat
+start-mongodb.bat
+```
+
+用 CMD 版時：
+
+- 這些 `.bat` 開頭都有 `chcp 65001`，把主控台切成 UTF-8，中文訊息才不會變亂碼
+  （繁中 Windows 的 cmd 預設是 cp950）；副作用是這個視窗之後的編碼也會維持 UTF-8。
+- 想換資料庫名稱：先 `set DB_NAME=my_db` 再執行 `start-postgres.bat`，並同步改 `.env`
+  的 `DATABASE_URL`。
+- PowerShell 執行要加 `.\`（例：`.\start.bat`）；`.bat` 是交給 cmd.exe 跑的，
+  不受 PowerShell 執行原則（ExecutionPolicy）限制。
+
+若改用 `.sh` 版，請在 **Git Bash** 執行（Git for Windows 內附），不是 CMD 或 PowerShell：
 
 - 腳本開頭已關掉 MSYS 的路徑自動轉換，`-v` / `--mount` 的掛載路徑不會被改寫成
   Windows 路徑；`.gitattributes` 也已強制 `*.sh` 以 LF 換行 checkout。若你是在加入這兩項
   設定「之前」clone 的，工作目錄裡的腳本可能還是 CRLF，執行時會報 `bad interpreter`
   或 `$'\r': command not found`，重新 clone 一份即可。
-- Docker Desktop 請維持預設的 **Linux 容器模式**（腳本用到的 tmpfs 掛載需要它）。
 - `./start.sh` 若因執行權限被拒，改用 `bash start.sh`。
 - `start.sh` 最後前景跑的 uvicorn，在 Git Bash 下 Ctrl-C 偶爾要按兩次才停得下來。
+
+兩種版本共通：
+
+- Docker Desktop 請維持預設的 **Linux 容器模式**（腳本用到的 tmpfs 掛載需要它）。
+- 需要 `uv` 已安裝且在 PATH 中（`start.sh` / `start.bat` 最後會用 `uv run` 啟動伺服器）。
 
 ---
 
