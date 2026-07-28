@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# start.sh — 一鍵啟動本機開發環境
+# sh-start.sh — 一鍵啟動本機開發環境
 #   1. 先啟動三個依賴服務的容器（PostgreSQL / Redis / MongoDB）
 #   2. 最後在前景啟動 FastAPI 開發伺服器（uvicorn）
 #
@@ -14,7 +14,7 @@ cd "$(dirname "$0")"
 # 1. 啟動三個依賴服務 —— 採「盡力而為」：某支起不來（連接埠被占、Docker
 #    沒開…）只印警告、不中斷，因為 app 對外部依賴都有優雅降級。
 echo "==> 啟動依賴服務容器"
-for s in start-postgres.sh start-redis.sh start-mongodb.sh; do
+for s in sh-start-postgres.sh sh-start-redis.sh sh-start-mongodb.sh; do
   echo "--> $s"
   bash "$s" || echo "警告：$s 啟動失敗，伺服器仍會以優雅降級方式繼續啟動"
 done

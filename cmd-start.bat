@@ -1,5 +1,5 @@
 @echo off
-rem start.bat — 一鍵啟動本機開發環境（Windows CMD 版，對應 start.sh）
+rem cmd-start.bat — 一鍵啟動本機開發環境（Windows CMD 版，對應 sh-start.sh）
 rem   1. 先啟動三個依賴服務的容器（PostgreSQL / Redis / MongoDB）
 rem   2. 最後在前景啟動 FastAPI 開發伺服器（uvicorn）
 rem
@@ -21,7 +21,7 @@ rem 注意兩個 cmd 慣例：
 rem   - 呼叫另一支 .bat 一定要加 call，否則控制權一去不回（跳過去執行完就結束，不會回來跑下面幾行）。
 rem   - echo 的內容含 > 要寫成 ^>，否則會被當成「把輸出導向到某個檔案」。
 echo ==^> 啟動依賴服務容器
-for %%s in (start-postgres.bat start-redis.bat start-mongodb.bat) do (
+for %%s in (cmd-start-postgres.bat cmd-start-redis.bat cmd-start-mongodb.bat) do (
   echo --^> %%s
   call "%%s" || echo 警告：%%s 啟動失敗，伺服器仍會以優雅降級方式繼續啟動
 )

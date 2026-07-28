@@ -1,5 +1,5 @@
 @echo off
-rem start-mongodb.bat — 單獨啟動 MongoDB 容器（Windows CMD 版，對應 start-mongodb.sh；單元九補充教材）
+rem cmd-start-mongodb.bat — 單獨啟動 MongoDB 容器（Windows CMD 版，對應 sh-start-mongodb.sh；單元九補充教材）
 rem
 rem 編碼：本檔以 UTF-8「無 BOM」儲存，chcp 65001 把主控台切成 UTF-8，中文才不會變亂碼。
 chcp 65001 >nul

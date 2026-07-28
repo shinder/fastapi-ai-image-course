@@ -5,7 +5,7 @@
 # 直譯器」讀的，多出來的 \r 會直接讓它們壞掉，而且錯誤訊息完全看不出是換行字元的問題。
 
 # shell script：CRLF 會讓 Git Bash 執行時報
-#   bash: ./start.sh: /usr/bin/env: bad interpreter: No such file or directory
+#   bash: ./sh-start.sh: /usr/bin/env: bad interpreter: No such file or directory
 #   或  $'\r': command not found
 # （\r 被當成 shebang 路徑或指令的一部分了）
 *.sh text eol=lf

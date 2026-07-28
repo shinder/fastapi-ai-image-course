@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# start-mongodb.sh — 單獨啟動 MongoDB 容器（不需 docker compose；單元九補充教材）
+# sh-start-mongodb.sh — 單獨啟動 MongoDB 容器（不需 docker compose；單元九補充教材）
 set -euo pipefail
 
 # 關掉 Git Bash（MSYS）的路徑自動轉換：它會把參數中看起來像 POSIX 絕對路徑的字串改寫成

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# start-redis.sh — 單獨啟動 Redis 容器（不需 docker compose）
+# sh-start-redis.sh — 單獨啟動 Redis 容器（不需 docker compose）
 set -euo pipefail
 
 # 關掉 Git Bash（MSYS）的路徑自動轉換：它會把參數中看起來像 POSIX 絕對路徑的字串改寫成

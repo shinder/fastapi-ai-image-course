@@ -1,5 +1,5 @@
 @echo off
-rem start-postgres.bat — 單獨啟動 PostgreSQL 容器（Windows CMD 版，對應 start-postgres.sh）
+rem cmd-start-postgres.bat — 單獨啟動 PostgreSQL 容器（Windows CMD 版，對應 sh-start-postgres.sh）
 rem
 rem 編碼：本檔以 UTF-8「無 BOM」儲存，下面的 chcp 65001 把主控台切成 UTF-8，中文才不會變亂碼
 rem （繁中 Windows 的 cmd 預設是 cp950）。千萬別存成「UTF-8 with BOM」：cmd 不認 BOM，
@@ -39,7 +39,7 @@ if errorlevel 1 (
 rem ---- 等到資料庫「真的」可用 ----
 rem docker run -d 一返回只代表容器建起來了，不代表 PostgreSQL 已能接受連線。實測：
 rem docker run 約 0.2 秒返回、TCP 5432 約 0.3 秒就通，但真正能查詢要約 1.5 秒
-rem （資料卷全新時還得先跑 initdb，更久）。start.bat 起完容器隨即啟動 uvicorn，
+rem （資料卷全新時還得先跑 initdb，更久）。cmd-start.bat 起完容器隨即啟動 uvicorn，
 rem 這段空窗會讓 init_db() 撲空，印出「無法連線到資料庫」而且沒建表——所以這裡等到真的就緒才返回。
 rem
 rem 就緒判準要選對：只看 TCP 埠通不通會誤判（埠會先通，此時連線拿到 the database system is

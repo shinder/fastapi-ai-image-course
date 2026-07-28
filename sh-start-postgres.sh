@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# start-postgres.sh — 單獨啟動 PostgreSQL 容器（不需 docker compose）
+# sh-start-postgres.sh — 單獨啟動 PostgreSQL 容器（不需 docker compose）
 set -euo pipefail
 
 # 關掉 Git Bash（MSYS）的路徑自動轉換：它會把參數中看起來像 POSIX 絕對路徑的字串改寫成
@@ -9,7 +9,7 @@ set -euo pipefail
 export MSYS_NO_PATHCONV=1
 export MSYS2_ARG_CONV_EXCL='*'
 
-# 資料庫名可用環境變數覆寫（例：DB_NAME=my_db ./start-postgres.sh），預設 ai_image_db。
+# 資料庫名可用環境變數覆寫（例：DB_NAME=my_db ./sh-start-postgres.sh），預設 ai_image_db。
 # 記得同步改 .env 的 DATABASE_URL，兩邊名字要一致。
 DB_NAME=${DB_NAME:-ai_image_db}
 
@@ -28,7 +28,7 @@ docker run -d \
 # ---- 等到資料庫「真的」可用 ----
 # docker run -d 一返回只代表容器建起來了，不代表 PostgreSQL 已能接受連線。實測：
 # docker run 約 0.2 秒返回、TCP 5432 約 0.3 秒就通，但真正能查詢要約 1.5 秒
-# （資料卷全新時還得先跑 initdb，更久）。start.sh 起完容器隨即啟動 uvicorn，
+# （資料卷全新時還得先跑 initdb，更久）。sh-start.sh 起完容器隨即啟動 uvicorn，
 # 這段空窗會讓 init_db() 撲空，印出「無法連線到資料庫」而且沒建表，
 # 得再重啟一次伺服器才正常——所以這裡等到真的就緒才返回。
 #
