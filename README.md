@@ -84,7 +84,8 @@ uv run fastapi dev app/main.py
 ## 用腳本啟動 / 停止服務（替代 docker compose）
 
 除了 `docker compose`，專案也附了一鍵腳本，改用單獨的 `docker run` 管理依賴服務容器
-——比 docker compose 多含 MongoDB（單元九），`sh-start.sh` 還會接著在前景啟動開發伺服器。
+——比 docker compose 多含 MongoDB（單元九），`sh-start.sh` / `cmd-start.bat` 還會接著在前景
+啟動開發伺服器。
 
 同一件事各有兩份實作，**用檔名前綴區分，選一套用就好**：
 
@@ -105,10 +106,17 @@ uv run fastapi dev app/main.py
 
 ### Windows 使用者
 
-每支腳本都備有 **CMD 版的 `cmd-*.bat`**，內容與 `sh-*.sh` 版一致，兩者擇一即可：
+#### 先決條件
+
+- **Docker Desktop**：維持預設的 **Linux 容器模式**（腳本用到的 tmpfs 掛載需要它）。
+- **uv**：已安裝且在 PATH 中——`cmd-start.bat` / `sh-start.sh` 最後會用 `uv run` 啟動伺服器。
+- **Git for Windows**：只有要跑 `sh-*.sh` 版才需要（Git Bash 是它內附的）；走 `cmd-*.bat` 版可以不裝。
+
+#### 建議走 CMD 版（`cmd-*.bat`）
+
+在 CMD 或 PowerShell 直接執行，不需要 Git Bash：
 
 ```bat
-rem 在 CMD（或 PowerShell）直接執行，不需要 Git Bash
 cmd-start.bat
 cmd-stop-containers.bat
 
@@ -118,30 +126,44 @@ cmd-start-redis.bat
 cmd-start-mongodb.bat
 ```
 
-用 CMD 版時：
-
-- 這些 `.bat` 開頭都有 `chcp 65001`，把主控台切成 UTF-8，中文訊息才不會變亂碼
-  （繁中 Windows 的 cmd 預設是 cp950）；副作用是這個視窗之後的編碼也會維持 UTF-8。
-- 想換資料庫名稱：先 `set DB_NAME=my_db` 再執行 `cmd-start-postgres.bat`，並同步改 `.env`
-  的 `DATABASE_URL`。
 - PowerShell 執行要加 `.\`（例：`.\cmd-start.bat`）；`.bat` 是交給 cmd.exe 跑的，
   不受 PowerShell 執行原則（ExecutionPolicy）限制。
+- 想換資料庫名稱：CMD 是先 `set DB_NAME=my_db`、PowerShell 是先 `$env:DB_NAME="my_db"`，
+  再執行 `cmd-start-postgres.bat`，並同步改 `.env` 的 `DATABASE_URL`。
+- 這些 `.bat` 開頭都有 `chcp 65001`，把主控台切成 UTF-8，中文訊息才不會變亂碼
+  （繁中 Windows 的 cmd 預設是 cp950）；副作用是這個視窗之後的編碼也會維持 UTF-8。
 
-若改用 `sh-*.sh` 版，請在 **Git Bash** 執行（Git for Windows 內附），不是 CMD 或 PowerShell：
+#### 改用 bash 版（`sh-*.sh`）
 
-- 腳本開頭已關掉 MSYS 的路徑自動轉換，`-v` / `--mount` 的掛載路徑不會被改寫成
-  Windows 路徑；`.gitattributes` 也已強制 `*.sh` 以 LF 換行 checkout。若你是在加入這兩項
-  設定「之前」clone 的，工作目錄裡的腳本可能還是 CRLF，執行時會報 `bad interpreter`
-  或 `$'\r': command not found`，重新 clone 一份即可。
+請在 **Git Bash** 執行（不是 CMD 或 PowerShell），指令與上面 macOS / Linux 那段完全相同：
+
 - `./sh-start.sh` 若因執行權限被拒，改用 `bash sh-start.sh`。
 - `sh-start.sh` 最後前景跑的 uvicorn，在 Git Bash 下 Ctrl-C 偶爾要按兩次才停得下來。
+- 腳本開頭已關掉 MSYS 的路徑自動轉換，`-v` / `--mount` 的掛載路徑不會被改寫成 Windows 路徑，
+  這點不必自己處理。
 
-兩種版本共通：
+#### 常見問題
 
-- Docker Desktop 請維持預設的 **Linux 容器模式**（腳本用到的 tmpfs 掛載需要它）。
-- 需要 `uv` 已安裝且在 PATH 中（`sh-start.sh` / `cmd-start.bat` 最後會用 `uv run` 啟動伺服器）。
-- 若原本就在 Windows 裝過 PostgreSQL / MongoDB 服務，會先佔走 5432 / 27017 埠號害容器起不來，
-  處理方式見 [`docs/stop-windows-services.md`](docs/stop-windows-services.md)。
+**容器起不來，說 5432 / 27017 / 6379 被佔用**
+
+多半是你先前用安裝程式裝過 PostgreSQL 或 MongoDB，那些服務開機就自動啟動了。
+判斷是誰佔著埠號、以及停用／恢復的完整步驟見
+[`docs/stop-windows-services.md`](docs/stop-windows-services.md)。
+
+**在 CMD 輸入 `sh-start.sh` 跳出「選擇開啟方式」對話框**
+
+`.sh` 不是 CMD 能執行的東西。改用 `cmd-start.bat`，或到 Git Bash 裡執行。
+
+**Git Bash 執行 `.sh` 報 `bad interpreter` 或 `$'\r': command not found`**
+
+工作目錄裡的腳本被轉成 CRLF 了（Git for Windows 預設 `core.autocrlf=true`）。
+`.gitattributes` 已強制 `*.sh` 以 LF checkout，若你是在加入這項設定「之前」clone 的，
+重新 clone 一份即可。
+
+**訊息裡的中文是亂碼**
+
+`cmd-*.bat` 版已自行 `chcp 65001` 不會有這問題；若是你自己開的視窗（例如要看 `docker logs`），
+先執行一次 `chcp 65001` 再操作。
 
 ---
 
