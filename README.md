@@ -35,15 +35,15 @@ fastapi-ai-image/
 │   │   ├── images_raw.py   # 教材 5.x 對照：psycopg3 原生驅動，不經 ORM
 │   │   ├── web.py          # 教材 6.2、6.7、6.11 Jinja2 頁面路由
 │   │   ├── mongo_demo.py   # 教材 9.4 MongoDB 留言 CRUD
-│   │   └── ai.py           # 教材 7.4、7.6、附錄 E、8.4、附錄 D
+│   │   └── ai.py           # 教材 8.4、8.6、附錄 E、7.4、附錄 D
 │   ├── services/
 │   │   ├── ai_service.py            # 教材 附錄 D Hugging Face 分類
 │   │   ├── ocr_service.py           # 教材 附錄 D EasyOCR
-│   │   ├── ollama_service.py        # 教材 7.3、7.4 Ollama 視覺模型
+│   │   ├── ollama_service.py        # 教材 8.3、8.4 Ollama 視覺模型
 │   │   ├── image_gen_service.py     # 教材 附錄 D OpenAI gpt-image-1
-│   │   ├── external_ai.py           # 教材 8.4、附錄 C 外部 API
+│   │   ├── external_ai.py           # 教材 7.4、附錄 C 公開 API（Picsum / Dog CEO）
 │   │   ├── hand_landmark.py         # 附錄 D MediaPipe 手部偵測（Tasks API）
-│   │   ├── memo_cache.py            # 教材 7.5 以圖片 hash 為 key 的記憶體快取
+│   │   ├── memo_cache.py            # 教材 8.5 以圖片 hash 為 key 的記憶體快取
 │   │   └── cache_service.py         # 教材 附錄 E Redis
 │   ├── db/
 │   │   └── mongo.py        # 教材 9.3 MongoDB 連線
@@ -66,7 +66,7 @@ fastapi-ai-image/
 │   ├── try_40_mediapipe_hand.py  # 附錄 D MediaPipe 手部關鍵點
 │   ├── try_01~03_*.py      # Pydantic（單元三）
 │   ├── try_04~09_*.py      # tkinter 串接（單元三）
-│   ├── try_10~18_*.py      # requests 串接 + 綜合應用（單元八）
+│   ├── try_10~18_*.py      # requests 串接 + 綜合應用（單元七）
 │   └── try_20~27_*.py      # httpx 非同步串接（附錄 C）
 ├── requests/
 │   └── api.http            # 教材 1.6 REST Client 測試檔（含綜合實作）
@@ -162,7 +162,7 @@ uv sync --all-extras
 
 ---
 
-## Ollama 設定（教材 7.3）
+## Ollama 設定（教材 8.3）
 
 ```bash
 # 安裝 + 下載模型
@@ -247,8 +247,8 @@ VSCode 使用者：專案 `.vscode/settings.json` 已設定存檔時自動以 Ru
 | POST   | `/api/v1/ai/generate`                  | gpt-image-1 影像生成 | 附錄 D |
 | POST   | `/api/v1/ai/generate-async`            | 背景任務生成 | 附錄 D |
 | GET    | `/api/v1/ai/tasks/{task_id}`           | 查任務狀態 | 附錄 D |
-| POST   | `/api/v1/ai/classify-external`         | 同步 requests 串接 | 8.4 |
-| POST   | `/api/v1/ai/classify-external-async`   | 非同步 httpx 串接 | 附錄 C |
+| POST   | `/api/v1/ai/import-random`             | 從公開圖庫抓圖存檔入庫 | 7.4 |
+| GET    | `/api/v1/ai/fetch-many`                | 並行抓多張圖 | 附錄 C |
 | GET    | `/api/v1/ai/cache/stats`               | 快取命中率 | 9.7 |
 | GET    | `/api/v1/ai/cache-test`                | RedisDep 測試 | 9.4 |
 
@@ -257,7 +257,7 @@ VSCode 使用者：專案 `.vscode/settings.json` 已設定存檔時自動以 Ru
 ## 練習範例（practices/）
 
 ```bash
-# requests 串接小範例（單元八，try_10~17 各一個觀念，需先啟動 API）
+# requests 串接小範例（單元七，try_10~17 各一個觀念，需先啟動 API）
 uv run python practices/try_10_requests_get.py
 
 # 綜合：模擬第三方串接（上傳辨識 + 查歷史）

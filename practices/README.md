@@ -43,7 +43,7 @@ uv run python -m practices.try_32_hashlib
 | `try_08_tkinter_form_thread.py` | 送表單（Thread 版） | 同 `try_05` | 3.4 |
 | `try_09_tkinter_upload_thread.py` | 上傳圖片（Thread 版） | 同 `try_06` | 3.5 |
 
-## 三、requests HTTP 串接（需後端，教材 8.2、8.3、附錄 C + 綜合）
+## 三、requests HTTP 串接（需後端，教材 7.2、7.3、附錄 C + 綜合）
 
 用 requests 套件打本專案在前面單元寫好的 API，每個觀念拆成一個小範例。
 

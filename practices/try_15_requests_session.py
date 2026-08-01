@@ -1,6 +1,6 @@
 """requests 範例 15：Session 物件（連線重用、共用設定）
 
-對應教材 8.3（單元八 API 串接）
+對應教材 7.3（單元七 API 串接）
 對應後端：GET /users/me（教材 2.4）、GET /api/v1/images（教材 5.7）
 
 重點：

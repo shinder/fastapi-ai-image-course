@@ -1,6 +1,6 @@
 """requests 範例 11：基本 POST 請求（送 JSON）
 
-對應教材 8.2（單元八 API 串接）
+對應教材 7.2（單元七 API 串接）
 對應後端：POST /api/v1/images（建立圖片，教材 5.7）
 
 重點：

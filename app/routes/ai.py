@@ -9,6 +9,7 @@
 - 附錄 D 影像分類、OCR、影像生成
 """
 
+import os
 import time
 from uuid import uuid4
 
@@ -25,6 +26,8 @@ from fastapi import (
 from fastapi.concurrency import run_in_threadpool
 
 from app.config import settings
+from app.database import SessionDep
+from app.models.image import Image
 from app.services.cache_service import (
     RedisDep,
     cache_get,
@@ -57,7 +60,7 @@ async def classify(file: UploadFile = File(...), r: RedisDep = None):
         cache_incr(r, "stats:cache:hit")
         return {"results": cached, "cached": True}
 
-    # 2. 未命中：執行推論（教材 7.4 thread pool 不阻塞事件迴圈）
+    # 2. 未命中：執行推論（教材 8.4 thread pool 不阻塞事件迴圈）
     from app.services.ai_service import classify_image_bytes  # lazy import
 
     results = await run_in_threadpool(classify_image_bytes, content)
@@ -118,7 +121,7 @@ async def describe_cached(
     file: UploadFile = File(...),
     prompt: str = Form("請以繁體中文描述這張圖片"),
 ):
-    """與 /describe 相同，但先查快取（教材 7.5）。
+    """與 /describe 相同，但先查快取（教材 8.5）。
 
     同一張圖第二次呼叫會直接回傳上次的結果，elapsed_seconds 幾乎是 0。
     快取 key 用的是「圖片內容的 sha256」，所以換個檔名重傳一樣會命中。
@@ -147,7 +150,7 @@ async def describe_cached(
 
 @router.get("/describe-cached/stats")
 def describe_cache_stats():
-    """記憶體快取的命中率統計（教材 7.5）。
+    """記憶體快取的命中率統計（教材 8.5）。
 
     對照 /cache/stats——那是 Redis 版（教材 附錄 E）。
     """
@@ -158,7 +161,7 @@ def describe_cache_stats():
 
 @router.post("/extract-invoice")
 async def extract_invoice(file: UploadFile = File(...)):
-    """從發票圖片抽取結構化資訊（教材 7.4）"""
+    """從發票圖片抽取結構化資訊（教材 8.4）"""
     from app.services.ollama_service import extract_invoice_info  # lazy import
 
     content = await file.read()
@@ -214,30 +217,53 @@ def get_task(task_id: str, r: RedisDep):
     return cache_get(r, _task_key(task_id)) or {"status": "not_found"}
 
 
-# ---------- 5.5 / 5.6 串接外部 AI API ----------
+# ---------- 7.4 / 附錄 C 串接外部公開 API ----------
 
 
-@router.post("/classify-external")
-async def classify_external(file: UploadFile = File(...)):
-    """同步 requests + run_in_threadpool（教材 8.4）"""
-    from app.services.external_ai import call_external_classify
+@router.post("/import-random")
+async def import_random(session: SessionDep):
+    """從公開圖庫（Lorem Picsum）抓一張圖，存檔並寫進資料庫（教材 7.4）。
 
-    content = await file.read()
-    result = await run_in_threadpool(call_external_classify, content)
-    return result
+    requests 是同步的，一定要丟到 thread pool——否則那 15 秒的逾時期間，
+    整個服務一個請求都處理不了。
+    """
+    from app.services.external_ai import fetch_random_image
+
+    try:
+        content, filename = await run_in_threadpool(fetch_random_image)
+    except RuntimeError as exc:
+        # 外部服務出問題屬於「上游壞了」，回 502 比 500 精確
+        raise HTTPException(502, str(exc))
+
+    new_name = f"{uuid4().hex}.jpg"
+    file_path = os.path.join(settings.UPLOAD_DIR, new_name)
+    os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
+    with open(file_path, "wb") as f:
+        f.write(content)
+
+    image = Image(
+        title=f"picsum：{filename}",
+        filename=new_name,
+        file_path=file_path,
+        file_size=len(content),
+        mime_type="image/jpeg",
+    )
+    session.add(image)
+    session.commit()
+    session.refresh(image)
+    return {"id": image.id, "filename": new_name, "size": len(content)}
 
 
-@router.post("/classify-external-async")
-async def classify_external_async(file: UploadFile = File(...)):
-    """非同步 httpx（教材 附錄 C）"""
-    from app.services.external_ai import call_external_classify_async
+@router.get("/fetch-many")
+async def fetch_many(count: int = 3):
+    """並行抓多張圖，比較 asyncio.gather 與逐一抓的差別（教材 附錄 C）。"""
+    from app.services.external_ai import fetch_many_async
 
-    content = await file.read()
-    result = await call_external_classify_async(content)
-    return result
+    sizes = await fetch_many_async(count)
+    return {"count": len(sizes), "sizes": sizes}
 
 
-# ---------- 7.7 命中率查詢 ----------
+# ---------- 附錄 E 命中率查詢 ----------
 
 
 @router.get("/cache/stats")

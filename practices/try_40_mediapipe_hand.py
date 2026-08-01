@@ -1,6 +1,6 @@
 """附錄 D：MediaPipe 手部關鍵點偵測
 
-和 Ollama 視覺模型（教材 7.4）是互補的兩種工具：
+和 Ollama 視覺模型（教材 8.4）是互補的兩種工具：
   - MediaPipe：幾 MB 的專用模型，數十毫秒就回傳「手在哪裡」的結構化座標
   - 視覺模型：幾 GB 的通用模型，數秒回傳「這是什麼、代表什麼」的自然語言
 
@@ -30,7 +30,7 @@ NAMED_POINTS = {
 
 
 def build_detector(num_hands: int = 2):
-    """建立偵測器。載入一次重複使用——同教材 7.4 的 Client 重用原則。"""
+    """建立偵測器。載入一次重複使用——同教材 8.4 的 Client 重用原則。"""
     from mediapipe.tasks import python as mp_python
     from mediapipe.tasks.python import vision
 

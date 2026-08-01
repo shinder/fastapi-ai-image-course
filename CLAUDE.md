@@ -44,7 +44,7 @@ uv run ruff check .
 uv run mypy app
 
 # 練習範例（practices/，可獨立執行；多數需先啟動 API）
-uv run python practices/try_10_requests_get.py    # requests 小範例（單元八 try_10~17）
+uv run python practices/try_10_requests_get.py    # requests 小範例（單元七 try_10~17）
 uv run python practices/try_18_client_app.py      # 綜合：模擬第三方串接
 ```
 

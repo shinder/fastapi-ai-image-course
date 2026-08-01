@@ -1,6 +1,6 @@
 """requests 範例 14：上傳檔案（multipart）
 
-對應教材 8.3（單元八 API 串接）
+對應教材 7.3（單元七 API 串接）
 對應後端：POST /api/v1/images/upload（教材 5.8）
 
 重點：
