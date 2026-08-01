@@ -19,5 +19,14 @@
       "source.organizeImports.ruff": "explicit"
     }
   },
-  "ruff.importStrategy": "fromEnvironment"
+  "ruff.importStrategy": "fromEnvironment",
+  "files.associations": {
+    "**/templates/**/*.html": "jinja-html"
+  },
+  "emmet.includeLanguages": {
+    "jinja-html": "html"
+  },
+  "[jinja-html]": {
+    "editor.formatOnSave": false
+  }
 }

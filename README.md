@@ -203,6 +203,11 @@ VSCode 使用者：專案 `.vscode/settings.json` 已設定存檔時自動以 Ru
 專案會提示安裝建議的擴充套件（見 `.vscode/extensions.json`）。其中
 `ruff.importStrategy: "fromEnvironment"` 會直接使用專案 `.venv` 裡的 Ruff，不需另裝。
 
+另外 `files.associations` 把 `app/templates/**/*.html` 關聯成 `jinja-html`
+（需 Better Jinja 擴充套件）——模板檔名維持 `.html` 才能保有 Jinja 的 autoescape
+（教材 6.3），但編輯時當成 Jinja 看，就不會被 HTML 檢查器一直報錯。
+`app/static/demos/` 底下的純 HTML 測試頁不受影響。
+
 ---
 
 ## 主要 API
