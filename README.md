@@ -42,6 +42,7 @@ fastapi-ai-image/
 │   │   ├── ollama_service.py        # 教材 7.3、7.4 Ollama 視覺模型
 │   │   ├── image_gen_service.py     # 教材 附錄 D OpenAI gpt-image-1
 │   │   ├── external_ai.py           # 教材 8.4、附錄 C 外部 API
+│   │   ├── memo_cache.py            # 教材 7.5 以圖片 hash 為 key 的記憶體快取
 │   │   └── cache_service.py         # 教材 9.4、9.5、附錄 E Redis
 │   ├── db/
 │   │   └── mongo.py        # 教材 10.3 MongoDB 連線
@@ -225,6 +226,8 @@ VSCode 使用者：專案 `.vscode/settings.json` 已設定存檔時自動以 Ru
 | POST   | `/api/v1/ai/classify`                  | 影像分類（含快取） | 附錄 D、9.5 |
 | POST   | `/api/v1/ai/ocr`                       | OCR 文字辨識 | 附錄 D |
 | POST   | `/api/v1/ai/describe`                  | Ollama 圖片描述 | 7.4 |
+| POST   | `/api/v1/ai/describe-cached`           | 同上，但先查記憶體快取 | 7.5 |
+| GET    | `/api/v1/ai/describe-cached/stats`     | 記憶體快取命中率 | 7.5 |
 | POST   | `/api/v1/ai/extract-invoice`           | 發票結構化抽取 | 7.4 |
 | POST   | `/api/v1/ai/generate`                  | gpt-image-1 影像生成 | 附錄 D |
 | POST   | `/api/v1/ai/generate-async`            | 背景任務生成 | 附錄 D |

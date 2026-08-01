@@ -1,13 +1,12 @@
-"""AI 路由：分類、OCR、Ollama 描述、影像生成、外部 API
+"""AI 路由：Ollama 描述、分類、OCR、影像生成、外部 API
 
 對應教材：
-- 6.3 影像分類（含 Redis 快取）
-- 6.4 OCR
-- 6.5 Ollama 視覺模型
-- 6.6 影像生成（OpenAI gpt-image-1、含背景任務）
-- 6.7 run_in_threadpool
-- 7.5 快取 AI 推論結果（含命中率統計）
-- 5.5 串接外部 AI API
+- 7.4 在 FastAPI 中呼叫 Ollama 視覺模型（含 run_in_threadpool）
+- 7.5 用檔案雜湊快取辨識結果（記憶體 dict 版）
+- 7.6 雲端模型與 OpenAI 相容介面
+- 8.4 串接外部 AI API
+- 9.5、9.7 換成 Redis 的快取與命中率統計
+- 附錄 D 影像分類、OCR、影像生成
 """
 
 import time
@@ -109,6 +108,52 @@ async def describe(
         "description": description,
         "elapsed_seconds": elapsed_seconds,
     }
+
+
+# ---------- 7.5 用檔案雜湊快取辨識結果（記憶體 dict 版）----------
+
+
+@router.post("/describe-cached")
+async def describe_cached(
+    file: UploadFile = File(...),
+    prompt: str = Form("請以繁體中文描述這張圖片"),
+):
+    """與 /describe 相同，但先查快取（教材 7.5）。
+
+    同一張圖第二次呼叫會直接回傳上次的結果，elapsed_seconds 幾乎是 0。
+    快取 key 用的是「圖片內容的 sha256」，所以換個檔名重傳一樣會命中。
+    """
+    from app.services import memo_cache
+    from app.services.ollama_service import describe_image  # lazy import
+
+    content = await file.read()
+    key = memo_cache.image_key(content, "describe")
+
+    # 1. 先查快取
+    cached = memo_cache.get(key)
+    if cached is not None:
+        return {**cached, "cached": True, "elapsed_seconds": 0.0}
+
+    # 2. 未命中才真的跑模型
+    start = time.perf_counter()
+    description = await run_in_threadpool(describe_image, content, prompt)
+    elapsed_seconds = round(time.perf_counter() - start, 2)
+
+    # 3. 把結果寫回快取，下次就不必再算
+    result = {"model": settings.OLLAMA_VISION_MODEL, "description": description}
+    memo_cache.set(key, result)
+    return {**result, "cached": False, "elapsed_seconds": elapsed_seconds}
+
+
+@router.get("/describe-cached/stats")
+def describe_cache_stats():
+    """記憶體快取的命中率統計（教材 7.5）。
+
+    對照 /cache/stats——那是 Redis 版（教材 9.7）。
+    """
+    from app.services import memo_cache
+
+    return memo_cache.stats()
 
 
 @router.post("/extract-invoice")
