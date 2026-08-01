@@ -2,13 +2,20 @@
 <html lang="zh-Hant">
 <!-- 教材 2.6：CORS 實測頁
 
-  用法：
-  1. 先「不要」在 main.py 加 CORSMiddleware，用 file:// 直接開這個檔（或用另一個
-     連接埠開），按「載入資料」——瀏覽器主控台會出現 CORS 錯誤，畫面沒有資料。
-  2. 加上 CORSMiddleware 之後重新整理，同一顆按鈕就拿得到資料了。
+  用法（重點是「網頁」與「API」要在不同來源）：
+  1. 在這個檔上按右鍵 → Open with Live Server，瀏覽器會開在 127.0.0.1:5500，
+     而 API 在 localhost:8000——埠不同，就是跨來源。
+     （沒裝 Live Server 的話：切到本目錄執行 python -m http.server 5500）
+  2. 先「不要」在 main.py 加 CORSMiddleware，按「載入資料」——
+     Console 出現 CORS 錯誤，畫面沒有資料。
+  3. 加上 CORSMiddleware 後重新整理，同一顆按鈕就拿得到資料了。
 
   重點：錯誤是「瀏覽器擋下來的」，不是伺服器沒回應。切到開發者工具的 Network
-  分頁會看到請求其實成功了（200），只是 JavaScript 讀不到回應內容。
+  分頁會看到請求其實成功了（200），只是 JavaScript 讀不到回應內容；
+  解掉之後回應標頭會多一行 access-control-allow-origin。
+
+  注意：不要用 file:// 直接點兩下開——那樣的來源是 null，錯誤訊息不一樣，
+  而且無法用 allow_origins 授權。
 -->
 <head>
   <meta charset="utf-8">
@@ -23,9 +30,9 @@
 
   <script>
     const loadData = () => {
-      // 刻意用 127.0.0.1 而非 localhost：兩者雖然指向同一台機器，
-      // 但「來源」字串不同，仍算跨來源（教材 2.6 的同源三要素）
-      fetch('http://127.0.0.1:8000/health')
+      // 用 Live Server 開這一頁時，網頁在 127.0.0.1:5500、API 在 localhost:8000，
+      // 協定相同但主機字串與埠都不同——跨來源（教材 2.6 的同源三要素）
+      fetch('http://localhost:8000/health')
         .then(r => r.json())
         .then(obj => { out.textContent = JSON.stringify(obj, null, 2) })
         .catch(err => { out.textContent = '失敗：' + err + '\n（看 Console 的 CORS 錯誤訊息）' })
