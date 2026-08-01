@@ -19,8 +19,8 @@
          href="{{ url_for('users_page') }}">用戶</a>
       <a class="nav-link {% if request.url.path == url_for('upload_page').path %}active{% endif %}"
          href="{{ url_for('upload_page') }}">上傳</a>
-      <a class="nav-link {% if request.url.path == url_for('webrtc_page').path %}active{% endif %}"
-         href="{{ url_for('webrtc_page') }}">相機</a>
+      <a class="nav-link {% if request.url.path == url_for('camera_page').path %}active{% endif %}"
+         href="{{ url_for('camera_page') }}">相機</a>
     </div>
   </div>
 </nav>

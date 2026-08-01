@@ -69,9 +69,9 @@ def users_page(request: Request, session: SessionDep, skip: int = 0, limit: int 
 
 
 @router.get("/camera", response_class=HTMLResponse)
-def webrtc_page(request: Request):
+def camera_page(request: Request):
     """相機拍照上傳頁（教材 6.12、4.6）：由一個現成的獨立 HTML 頁改寫而來。"""
-    return templates.TemplateResponse(request, "webrtc.html")
+    return templates.TemplateResponse(request, "camera.html")
 
 
 @router.get("/upload", response_class=HTMLResponse)
