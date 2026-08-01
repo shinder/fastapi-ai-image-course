@@ -248,29 +248,12 @@ prompt=A futuristic city at night, cyberpunk style
 ### 7.10 查詢任務狀態（換成上一行回傳的 task_id）
 GET {{baseUrl}}/api/v1/ai/tasks/REPLACE_TASK_ID
 
-# === 綜合實作：上傳 + 辨識 + 快取 + 入庫（整合單元四、六、七）===
+# === 單元六 網頁與模板（Jinja2）===
 
-### 綜合：上傳並辨識（multipart）
-POST {{baseUrl}}/api/v1/images/upload-and-classify
-Content-Type: multipart/form-data; boundary=----Boundary
-
-------Boundary
-Content-Disposition: form-data; name="title"
-
-我的貓
-------Boundary
-Content-Disposition: form-data; name="file"; filename="cat.jpg"
-Content-Type: image/jpeg
-
-< ./test_images/cat.jpg
-------Boundary--
-
-# === 單元八 網頁與模板（補充教材，Jinja2）===
-
-### 8.6 圖片列表頁（建議用瀏覽器開）
+### 6.10 圖片列表頁（建議用瀏覽器開）
 GET {{baseUrl}}/web
 
-### 8.6 上傳表單頁（建議用瀏覽器開）
+### 6.11 上傳表單頁（建議用瀏覽器開）
 GET {{baseUrl}}/web/upload
 
 # === 單元九 MongoDB 留言（補充教材）===

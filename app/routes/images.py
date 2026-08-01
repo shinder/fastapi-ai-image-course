@@ -1,32 +1,27 @@
-"""影像路由：CRUD、上傳、回傳檔案、上傳並辨識（綜合）
+"""影像路由：CRUD、上傳、回傳檔案
 
 對應教材：
 - 3.5 圖片上傳與儲存
 - 3.6 圖片回傳（FileResponse、StreamingResponse、Base64）
-- 4.6 CRUD
-- 4.7 影像資料儲存策略
-- 綜合實作：upload-and-classify
+- 5.7 CRUD 操作實作
+- 5.8 影像資料的儲存策略
 """
 
 import base64
 import mimetypes
 import os
-import time
 import uuid
 from io import BytesIO
 from typing import List
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile, status
-from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import FileResponse, StreamingResponse
 from PIL import Image as PILImage
 from sqlmodel import func, select
 
 from app.config import settings
-from app.services import memo_cache
 from app.database import SessionDep
 from app.models.image import Image, ImageCreate, ImagePublic, ImageUpdate
-from app.services.cache_service import RedisDep, cache_get, cache_set, image_hash
 
 router = APIRouter(prefix="/api/v1/images", tags=["images"])
 
@@ -310,133 +305,6 @@ async def upload_image(
         file_path=file_path,
         file_size=len(content),
         mime_type=file.content_type or "application/octet-stream",
-    )
-    session.add(image)
-    session.commit()
-    session.refresh(image)
-    return image
-
-
-# ---------- 綜合實作：上傳 + 描述 + 快取 + 入庫（正課版）----------
-
-
-@router.post("/upload-and-describe", response_model=ImagePublic, status_code=201)
-async def upload_and_describe(
-    session: SessionDep,
-    title: str = Form(...),
-    file: UploadFile = File(...),
-):
-    """綜合實作專案的主端點——只用正課教過的東西。
-
-    SQLite（5.4）+ Ollama（7.4）+ 記憶體快取（7.5），不需要 Redis 也不需要
-    PostgreSQL。流程是五步：驗證 → 存檔 → 查快取 → 未命中才跑模型 → 入庫。
-    """
-    # 1. 驗證（3.5）
-    if file.content_type not in ALLOWED_TYPES:
-        raise HTTPException(415, f"不支援的格式：{file.content_type}")
-    if file.size is not None and file.size > MAX_SIZE:
-        raise HTTPException(413, "檔案過大（超過 10 MB）")
-    content = await file.read()
-
-    # 2. 存檔（3.5）
-    ext = os.path.splitext(file.filename or "")[1] or ".bin"
-    new_name = f"{uuid.uuid4().hex}{ext}"
-    file_path = os.path.join(settings.UPLOAD_DIR, new_name)
-    os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
-    with open(file_path, "wb") as f:
-        f.write(content)
-
-    # 3. 查快取（3.7 + 7.5）
-    key = memo_cache.image_key(content, "describe")
-    cached = memo_cache.get(key)
-
-    if cached is not None:
-        ai_result = {**cached, "cached": True, "elapsed_seconds": 0.0}
-    else:
-        # 4. 未命中才跑模型（7.4）；同步函式丟到 thread pool 不阻塞事件迴圈
-        from app.services.ollama_service import describe_image  # lazy import
-
-        start = time.perf_counter()
-        try:
-            description = await run_in_threadpool(
-                describe_image, content, "請以繁體中文描述這張圖片"
-            )
-            elapsed = round(time.perf_counter() - start, 2)
-            result = {"model": settings.OLLAMA_VISION_MODEL, "description": description}
-            memo_cache.set(key, result)
-            ai_result = {**result, "cached": False, "elapsed_seconds": elapsed}
-        except Exception as exc:
-            # AI 失敗不該讓整個上傳失敗——圖片已經存好了，只是描述沒生成成功。
-            # 記下錯誤，之後可以再補跑。
-            ai_result = {"error": str(exc)}
-
-    # 5. 入庫（5.8）
-    image = Image(
-        title=title,
-        filename=new_name,
-        file_path=file_path,
-        file_size=len(content),
-        mime_type=file.content_type or "application/octet-stream",
-        ai_result=ai_result,
-    )
-    session.add(image)
-    session.commit()
-    session.refresh(image)
-    return image
-
-
-# ---------- 綜合實作（附錄版）：上傳 + 分類 + Redis 快取 + 入庫 ----------
-
-
-@router.post("/upload-and-classify", response_model=ImagePublic, status_code=201)
-async def upload_and_classify(
-    session: SessionDep,
-    r: RedisDep,
-    title: str = Form(...),
-    file: UploadFile = File(...),
-):
-    """完整流程（綜合實作專案）：
-
-    1. 圖片 hash 查 Redis
-    2. 未命中 → 呼叫本機 AI 模型
-    3. 寫 Redis 與 PostgreSQL
-    """
-    if not file.content_type or not file.content_type.startswith("image/"):
-        raise HTTPException(400, "請上傳圖片")
-
-    content = await file.read()
-    digest = image_hash(content)
-
-    # 1. 查快取
-    cache_key = f"cache:ai:classify:{digest}"
-    ai_result = cache_get(r, cache_key)
-    cache_hit = ai_result is not None
-
-    # 2. 未命中 → AI 推論（需 uv sync --extra ml）
-    if not cache_hit:
-        from app.services.ai_service import classify_image_bytes
-
-        ai_result = await run_in_threadpool(classify_image_bytes, content)
-        cache_set(r, cache_key, ai_result, ttl=86400)  # 24 小時
-
-    # 3. 儲存圖片（以 hash 命名，避免重複儲存）
-    ext = os.path.splitext(file.filename or "")[1] or ".jpg"
-    new_name = f"{digest}{ext}"
-    file_path = os.path.join(settings.UPLOAD_DIR, new_name)
-    os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
-
-    if not os.path.exists(file_path):
-        with open(file_path, "wb") as f:
-            f.write(content)
-
-    # 4. 寫入資料庫
-    image = Image(
-        title=title,
-        filename=new_name,
-        file_path=file_path,
-        file_size=len(content),
-        mime_type=file.content_type,
-        ai_result={"results": ai_result, "from_cache": cache_hit},
     )
     session.add(image)
     session.commit()

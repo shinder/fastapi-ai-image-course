@@ -57,7 +57,7 @@ uv run python -m practices.try_32_hashlib
 | `try_15_requests_session.py` | Session 連線重用 | `GET /users/me`、`/api/v1/images` | 5.3 |
 | `try_16_requests_retry.py` | 自動重試機制 | `GET /api/v1/images` | 5.3 |
 | `try_17_requests_auth.py` | 三種認證機制的帶法 | （示意 URL，不實連） | 5.4 |
-| `try_18_client_app.py` | 綜合：模擬第三方串接 | `upload-and-classify`、`/api/v1/images` | 綜合 |
+| `try_18_client_app.py` | 綜合：模擬第三方串接 | `/api/v1/images/upload`、`/api/v1/images` | 7.x |
 
 ## 四、httpx 非同步串接（需後端，教材 附錄 C）
 

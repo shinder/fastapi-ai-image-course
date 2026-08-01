@@ -58,7 +58,12 @@ def detect(image_path: str) -> list[dict]:
             {
                 "side": side,
                 "points": [
-                    {"index": k, "name": NAMED_POINTS.get(k), "x": round(p.x, 4), "y": round(p.y, 4)}
+                    {
+                        "index": k,
+                        "name": NAMED_POINTS.get(k),
+                        "x": round(p.x, 4),
+                        "y": round(p.y, 4),
+                    }
                     for k, p in enumerate(landmarks)
                 ],
             }
@@ -104,7 +109,9 @@ def main() -> None:
 
     print(f"偵測到 {len(hands)} 隻手\n")
     for i, hand in enumerate(hands, 1):
-        print(f"第 {i} 隻手（{hand['side']}）：伸出約 {count_extended_fingers(hand['points'])} 根手指")
+        print(
+            f"第 {i} 隻手（{hand['side']}）：伸出約 {count_extended_fingers(hand['points'])} 根手指"
+        )
         for p in hand["points"]:
             if p["name"]:
                 print(f"    {p['name']:<10} ({p['x']}, {p['y']})")

@@ -1,11 +1,11 @@
 """AI 路由：Ollama 描述、分類、OCR、影像生成、外部 API
 
 對應教材：
-- 7.4 在 FastAPI 中呼叫 Ollama 視覺模型（含 run_in_threadpool）
-- 7.5 用檔案雜湊快取辨識結果（記憶體 dict 版）
-- 7.6 雲端模型與 OpenAI 相容介面
-- 8.4 串接外部 AI API
-- 9.5、9.7 換成 Redis 的快取與命中率統計
+- 8.4 在 FastAPI 中呼叫 Ollama 視覺模型（含 run_in_threadpool）
+- 8.5 用檔案雜湊快取辨識結果（記憶體 dict 版）
+- 8.6 雲端模型與 OpenAI 相容介面
+- 7.4 串接外部公開 API
+- 附錄 E 換成 Redis 的快取與命中率統計
 - 附錄 D 影像分類、OCR、影像生成
 """
 
@@ -113,7 +113,7 @@ async def describe(
     }
 
 
-# ---------- 7.5 用檔案雜湊快取辨識結果（記憶體 dict 版）----------
+# ---------- 8.5 用檔案雜湊快取辨識結果（記憶體 dict 版）----------
 
 
 @router.post("/describe-cached")
