@@ -207,6 +207,9 @@ uv sync --extra ml
 uv sync --extra ocr
 
 # 附錄 D MediaPipe 手部／臉部／姿勢偵測（輕量本機模型）
+# 注意：不支援 Intel Mac——MediaPipe 的 x86_64 macOS wheel 停在 0.10.21，
+# 而 Apple Silicon 的 wheel 從 0.10.30 才開始，兩者沒有交集。
+# 另外這個 extra 會連帶裝進 opencv-contrib-python（約 236 MB），下載需要一點時間。
 uv sync --extra mediapipe
 # 另需下載模型檔（7.5 MB，未進版控）：
 uv run python scripts/download_models.py

@@ -34,9 +34,12 @@ openai = [
 ]
 # 附錄 D：MediaPipe 手部／臉部／姿勢偵測（輕量本機模型）
 mediapipe = [
-    "mediapipe>=0.10.14",
+    # 下限設 0.10.30：Apple Silicon(arm64) 的 wheel 從這個版本才開始提供。
+    # 注意 Intel Mac(x86_64) 的 wheel 在 0.10.21 之後就停止供應，兩者沒有交集，
+    # 因此本專案不支援 Intel Mac 跑 MediaPipe（附錄 D 有說明替代作法）。
+    "mediapipe>=0.10.30",
 ]
-# 附錄 G：pgvector 向量搜尋
+# 附錄 F：pgvector 向量搜尋
 vector = [
     "pgvector>=0.3.0",
 ]
