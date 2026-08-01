@@ -1,4 +1,4 @@
-"""MongoDB 圖片留言/註記 CRUD（教材單元九，補充教材）
+"""MongoDB 圖片留言/註記 CRUD（教材單元十，補充教材）
 
 用 PyMongo 原生 async 操作文件型資料庫，示範：
 - collection 與 document（document 本質就是 dict）

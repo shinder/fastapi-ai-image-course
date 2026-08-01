@@ -1,7 +1,7 @@
 """requests 範例 10：基本 GET 請求
 
-對應教材 5.2（單元五 API 串接）
-對應後端：GET /api/v1/images/{id}（取得單一圖片，教材 4.6）
+對應教材 8.2（單元八 API 串接）
+對應後端：GET /api/v1/images/{id}（取得單一圖片，教材 5.7）
 
 重點：
 - requests.get(url) 送出 GET 請求，回傳一個 Response 物件。
@@ -18,7 +18,7 @@
 
 import requests
 
-# 打本專案單元四的「取得單一圖片」端點
+# 打本專案單元五的「取得單一圖片」端點
 URL = "http://localhost:8000/api/v1/images/1"
 
 

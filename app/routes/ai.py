@@ -44,7 +44,7 @@ router = APIRouter(prefix="/api/v1/ai", tags=["ai"])
 
 @router.post("/classify", dependencies=[Depends(RateLimit(limit=30, window=60))])
 async def classify(file: UploadFile = File(...), r: RedisDep = None):
-    """以圖片 hash 為快取 key，未命中才呼叫模型，並統計命中率（教材 7.5、7.7）"""
+    """以圖片 hash 為快取 key，未命中才呼叫模型，並統計命中率（教材 9.5、9.7）"""
     if not file.content_type or not file.content_type.startswith("image/"):
         raise HTTPException(400, "請上傳圖片")
 
@@ -58,7 +58,7 @@ async def classify(file: UploadFile = File(...), r: RedisDep = None):
         cache_incr(r, "stats:cache:hit")
         return {"results": cached, "cached": True}
 
-    # 2. 未命中：執行推論（教材 6.7 thread pool 不阻塞事件迴圈）
+    # 2. 未命中：執行推論（教材 7.4 thread pool 不阻塞事件迴圈）
     from app.services.ai_service import classify_image_bytes  # lazy import
 
     results = await run_in_threadpool(classify_image_bytes, content)
@@ -113,7 +113,7 @@ async def describe(
 
 @router.post("/extract-invoice")
 async def extract_invoice(file: UploadFile = File(...)):
-    """從發票圖片抽取結構化資訊（教材 6.5）"""
+    """從發票圖片抽取結構化資訊（教材 7.4）"""
     from app.services.ollama_service import extract_invoice_info  # lazy import
 
     content = await file.read()
@@ -126,14 +126,14 @@ async def extract_invoice(file: UploadFile = File(...)):
 
 @router.post("/generate", dependencies=[Depends(RateLimit(limit=10, window=60))])
 def generate(prompt: str = Form(..., min_length=1, max_length=1000)):
-    """OpenAI gpt-image-1 影像生成（教材 6.6）"""
+    """OpenAI gpt-image-1 影像生成（教材 附錄 D）"""
     from app.services.image_gen_service import generate_image  # lazy import
 
     url = generate_image(prompt)
     return {"prompt": prompt, "image_url": url}
 
 
-# 任務狀態存 Redis（教材 7.10）：取代記憶體 dict，可跨 worker、可設 TTL 自動清理
+# 任務狀態存 Redis（教材 附錄 E）：取代記憶體 dict，可跨 worker、可設 TTL 自動清理
 def _task_key(task_id: str) -> str:
     return f"task:gen:{task_id}"
 
@@ -174,7 +174,7 @@ def get_task(task_id: str, r: RedisDep):
 
 @router.post("/classify-external")
 async def classify_external(file: UploadFile = File(...)):
-    """同步 requests + run_in_threadpool（教材 5.5）"""
+    """同步 requests + run_in_threadpool（教材 8.4）"""
     from app.services.external_ai import call_external_classify
 
     content = await file.read()
@@ -184,7 +184,7 @@ async def classify_external(file: UploadFile = File(...)):
 
 @router.post("/classify-external-async")
 async def classify_external_async(file: UploadFile = File(...)):
-    """非同步 httpx（教材 5.6）"""
+    """非同步 httpx（教材 附錄 C）"""
     from app.services.external_ai import call_external_classify_async
 
     content = await file.read()
@@ -215,6 +215,6 @@ def cache_stats(r: RedisDep):
 
 @router.get("/cache-test")
 def cache_test(r: RedisDep):
-    """教材 7.4 依賴注入示範"""
+    """教材 9.4 依賴注入示範"""
     r.set("hello", "world", ex=60)
     return {"value": r.get("hello")}

@@ -1,4 +1,4 @@
-"""OpenAI gpt-image-1 影像生成（教材 6.6）
+"""OpenAI gpt-image-1 影像生成（教材 附錄 D）
 
 需安裝可選依賴：
     uv sync --extra openai

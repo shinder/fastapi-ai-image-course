@@ -1,7 +1,7 @@
 """requests 範例 11：基本 POST 請求（送 JSON）
 
-對應教材 5.2（單元五 API 串接）
-對應後端：POST /api/v1/images（建立圖片，教材 4.6）
+對應教材 8.2（單元八 API 串接）
+對應後端：POST /api/v1/images（建立圖片，教材 5.7）
 
 重點：
 - requests.post(url, json=data) 會把 dict 序列化成 JSON，

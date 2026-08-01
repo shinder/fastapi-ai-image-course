@@ -1,4 +1,4 @@
-"""資料庫連線與 Session 依賴注入（教材 4.3、4.5）"""
+"""資料庫連線與 Session 依賴注入（教材 5.4、5.6）"""
 
 from typing import Annotated
 
@@ -52,5 +52,5 @@ def get_session():
         yield session
 
 
-# 為了方便重用，建立型別別名（教材 4.5）
+# 為了方便重用，建立型別別名（教材 5.6）
 SessionDep = Annotated[Session, Depends(get_session)]

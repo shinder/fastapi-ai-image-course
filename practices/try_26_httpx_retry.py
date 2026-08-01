@@ -1,6 +1,6 @@
 """httpx 範例 26：自動重試機制（非同步）
 
-對應教材 5.6（httpx 非同步寫法）；對應 try_16 的 requests 重試版。
+對應教材 附錄 C（httpx 非同步寫法）；對應 try_16 的 requests 重試版。
 
 重點（與 requests 的重要差異）：
 - httpx 內建的重試在「傳輸層」設定：httpx.AsyncHTTPTransport(retries=N)，

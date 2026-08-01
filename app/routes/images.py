@@ -237,7 +237,7 @@ def list_images(
 
 @router.get("/stats/total")
 def total_images(session: SessionDep):
-    """計數查詢（教材 4.6）"""
+    """計數查詢（教材 5.7）"""
     statement = select(func.count(Image.id))
     total = session.exec(statement).one()
     return {"total": total}

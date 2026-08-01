@@ -1,7 +1,7 @@
 """requests 範例 13：查詢參數、自訂標頭、Cookie、逾時
 
-對應教材 5.3（單元五 API 串接）
-對應後端：GET /api/v1/images（列表，支援 keyword / limit，教材 4.6）
+對應教材 8.3（單元八 API 串接）
+對應後端：GET /api/v1/images（列表，支援 keyword / limit，教材 5.7）
 
 重點：
 - params=：自動把 dict 組成查詢字串（?keyword=cat&limit=10），不必自己拼接 URL。

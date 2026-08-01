@@ -1,4 +1,4 @@
-/* 教材 8.5 示範用的「專案自備」樣式表
+/* 教材 6.7 示範用的「專案自備」樣式表
  *
  * 重點不在樣式本身，而在示範「如何在 FastAPI 提供自己的 CSS/JS」：
  *   1. main.py 以 app.mount("/static", StaticFiles(directory="app/static"), name="static")

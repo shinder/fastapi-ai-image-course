@@ -1,7 +1,7 @@
 """httpx 範例 24：上傳檔案（multipart，非同步）
 
-對應教材 5.6（httpx 非同步寫法）；對應 try_14 的 requests 同步版。
-對應後端：POST /api/v1/images/upload（教材 4.7）
+對應教材 附錄 C（httpx 非同步寫法）；對應 try_14 的 requests 同步版。
+對應後端：POST /api/v1/images/upload（教材 5.8）
 
 重點：
 - files= 的用法和 requests 一樣（multipart/form-data），改成 await client.post。

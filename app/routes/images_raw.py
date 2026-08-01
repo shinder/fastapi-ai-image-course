@@ -1,4 +1,4 @@
-"""對照範例：不使用 SQLModel／不經任何 ORM，用 psycopg3 原生驅動直接下 SQL（教材 4.x 對照）
+"""對照範例：不使用 SQLModel／不經任何 ORM，用 psycopg3 原生驅動直接下 SQL（教材 5.x 對照）
 
 這個檔案是「同一組影像 CRUD，改用原生 PostgreSQL 驅動程式重寫」的對照版，
 拿來跟既有的 SQLModel 版三件套並排閱讀：

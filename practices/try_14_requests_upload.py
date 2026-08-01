@@ -1,7 +1,7 @@
 """requests 範例 14：上傳檔案（multipart）
 
-對應教材 5.3（單元五 API 串接）
-對應後端：POST /api/v1/images/upload（教材 4.7）
+對應教材 8.3（單元八 API 串接）
+對應後端：POST /api/v1/images/upload（教材 5.8）
 
 重點：
 - files=：以 multipart/form-data 送出檔案，對應後端的 UploadFile = File(...)。

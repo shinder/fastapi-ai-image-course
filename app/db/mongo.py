@@ -1,8 +1,8 @@
-"""MongoDB 連線（教材單元九，補充教材）
+"""MongoDB 連線（教材單元十，補充教材）
 
 用 PyMongo 原生 async（AsyncMongoClient）連線；Motor 已被官方棄用，FastAPI 改用此 API。
 連不到時不讓整個應用崩潰：印警告並讓 client 保持 None，沒用到 Mongo 的路由仍可運作
-（與單元四 init_db 的優雅降級精神一致）。
+（與單元五 init_db 的優雅降級精神一致）。
 """
 
 from typing import Optional

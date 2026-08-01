@@ -1,7 +1,7 @@
 """httpx 範例 20：基本 GET 請求（非同步）
 
-對應教材 5.6（httpx 非同步寫法）；對應 try_10 的 requests 同步版。
-對應後端：GET /api/v1/images/{id}（取得單一圖片，教材 4.6）
+對應教材 附錄 C（httpx 非同步寫法）；對應 try_10 的 requests 同步版。
+對應後端：GET /api/v1/images/{id}（取得單一圖片，教材 5.7）
 
 重點：
 - httpx.AsyncClient 是非同步 HTTP 用戶端，用 async with 管理生命週期

@@ -1,4 +1,4 @@
-"""FastAPI 入口（教材 2.3、2.4、2.5、2.6、3.6、4.3、6.3、6.7）"""
+"""FastAPI 入口（教材 2.3、2.4、2.5、2.6、3.6、5.4、6.7、附錄 D）"""
 
 import logging
 import os
@@ -45,7 +45,7 @@ class TimingMiddleware(BaseHTTPMiddleware):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """應用生命週期（教材 4.3、6.3）：定義 app「啟動時」與「關閉時」各跑一次的程式碼。
+    """應用生命週期（教材 5.4、附錄 D）：定義 app「啟動時」與「關閉時」各跑一次的程式碼。
 
     lifespan 是一個 async context manager，用 yield 把它切成兩半：
     - yield 之前：啟動階段（開始收請求之前執行）→ 建表、連 Mongo，也可在此預載 AI 模型。
@@ -59,9 +59,9 @@ async def lifespan(app: FastAPI):
     # ---- yield 之前：啟動階段 ----
     if init_db():
         print(f"資料庫連線成功：{settings.DATABASE_URL}")
-    # 單元九：連線 MongoDB（連不到也不中斷啟動）
+    # 單元十：連線 MongoDB（連不到也不中斷啟動）
     await connect_mongo()
-    # 想避免「第一個請求才載入模型」的冷啟動延遲，可在這裡預載（教材 6.3）：
+    # 想避免「第一個請求才載入模型」的冷啟動延遲，可在這裡預載（教材 附錄 D）：
     #   from app.services.ai_service import get_classifier; get_classifier()
     yield  # ← app 在此進入服務狀態，處理所有請求
     # ---- yield 之後：關閉階段（清理資源）----
@@ -94,7 +94,7 @@ app.add_middleware(TimingMiddleware)
 os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_DIR), name="uploads")
 
-# 靜態檔案掛載（教材 8.5）：另外把 app/static 掛到 /static，提供「專案自備」的 CSS/JS。
+# 靜態檔案掛載（教材 6.7）：另外把 app/static 掛到 /static，提供「專案自備」的 CSS/JS。
 # 與上面 /uploads 的差別：/uploads 放「使用者上傳」的檔案，/static 放「開發者預先準備」的
 # 靜態資源（樣式、前端腳本、圖示等）。
 # base.html 會用 url_for('static', path='app.css') 反查這裡的網址來載入樣式，
@@ -154,5 +154,5 @@ def get_user(user_id: int):
 app.include_router(basic.router)
 app.include_router(images.router)
 app.include_router(ai.router)
-app.include_router(web.router)  # 單元八（補充教材）：Jinja2 樣板網頁
-app.include_router(mongo_demo.router)  # 單元九（補充教材）：MongoDB 留言
+app.include_router(web.router)  # 單元六：Jinja2 樣板網頁
+app.include_router(mongo_demo.router)  # 單元十（補充教材）：MongoDB 留言

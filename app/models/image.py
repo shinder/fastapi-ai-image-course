@@ -1,4 +1,4 @@
-"""SQLModel 影像資料表（教材 4.4）
+"""SQLModel 影像資料表（教材 5.5）
 
 模型分層：
 - ImageBase     : 共用欄位（非 table）

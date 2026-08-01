@@ -1,7 +1,7 @@
 """httpx 範例 22：例外處理（非同步）
 
-對應教材 5.6（httpx 非同步寫法）；對應 try_12 的 requests 同步版。
-對應後端：GET /api/v1/images/{id}（教材 4.6）
+對應教材 附錄 C（httpx 非同步寫法）；對應 try_12 的 requests 同步版。
+對應後端：GET /api/v1/images/{id}（教材 5.7）
 
 重點：httpx 的例外名稱和 requests 不同，但對應關係很直接：
   - httpx.TimeoutException ↔ requests.Timeout

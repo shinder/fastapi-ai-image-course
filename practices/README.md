@@ -27,7 +27,7 @@
 | `try_08_tkinter_form_thread.py` | 送表單（Thread 版） | 同 `try_05` | 3.4 |
 | `try_09_tkinter_upload_thread.py` | 上傳圖片（Thread 版） | 同 `try_06` | 3.5 |
 
-## 三、requests HTTP 串接（需後端，教材 5.2～5.4 + 綜合）
+## 三、requests HTTP 串接（需後端，教材 8.2、8.3、附錄 C + 綜合）
 
 用 requests 套件打本專案在前面單元寫好的 API，每個觀念拆成一個小範例。
 
@@ -43,7 +43,7 @@
 | `try_17_requests_auth.py` | 三種認證機制的帶法 | （示意 URL，不實連） | 5.4 |
 | `try_18_client_app.py` | 綜合：模擬第三方串接 | `upload-and-classify`、`/api/v1/images` | 綜合 |
 
-## 四、httpx 非同步串接（需後端，教材 5.6）
+## 四、httpx 非同步串接（需後端，教材 附錄 C）
 
 `try_20`～`27` 是 `try_10`～`17` 的 **httpx 非同步版**，一一對應：打同樣的後端端點、同樣的觀念，但改用 `httpx.AsyncClient` + `async / await`。在 FastAPI 路由內呼叫外部 API 時，用 httpx 才不會阻塞事件迴圈（requests 是同步、會卡住）。
 
@@ -82,5 +82,5 @@ uv run python practices/try_11_requests_post.py
 
 - tkinter 範例（`try_04`～`try_09`）會開啟 GUI 視窗操作。
 - `try_10`（GET 單一圖片）需要資料庫裡有 `id=1` 的資料，可先跑 `try_11` 建立一筆。
-- `try_18` 的辨識功能需要本機 AI 模型（單元六，`uv sync --extra ml`）。
+- `try_18` 的辨識功能需要本機 AI 模型（附錄 D，`uv sync --extra ml`）。
 - httpx 非同步範例（`try_20`～`try_27`）和對應的 requests 版執行方式相同；`httpx` 已是核心依賴，不需另外安裝。

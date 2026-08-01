@@ -1,7 +1,7 @@
 """httpx 範例 21：基本 POST 請求（送 JSON，非同步）
 
-對應教材 5.6（httpx 非同步寫法）；對應 try_11 的 requests 同步版。
-對應後端：POST /api/v1/images（建立圖片，教材 4.6）
+對應教材 附錄 C（httpx 非同步寫法）；對應 try_11 的 requests 同步版。
+對應後端：POST /api/v1/images（建立圖片，教材 5.7）
 
 重點：
 - await client.post(url, json=data)：和 requests 一樣用 json= 送出，

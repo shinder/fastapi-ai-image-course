@@ -4,13 +4,13 @@ version = "0.1.0"
 description = "FastAPI 與 AI 影像應用開發 範例專案"
 requires-python = ">=3.12,<3.13"
 dependencies = [
-    "fastapi[all]>=0.115.0",
-    "sqlmodel>=0.0.22",
-    "psycopg[binary]>=3.2.0",
-    "pillow>=11.0.0",
-    "redis>=5.2.0",
-    "ollama>=0.4.0",
-    "requests>=2.32.0",
+    "fastapi[all]>=0.140.0",
+    "sqlmodel>=0.0.39",
+    "psycopg[binary]>=3.3.0",
+    "pillow>=12.0.0",
+    "redis>=8.1.0",
+    "ollama>=0.6.0",
+    "requests>=2.34.0",
     "httpx>=0.27.0",
     "python-dotenv>=1.0.1",
     "pymongo>=4.13.0",
@@ -18,21 +18,21 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-# 單元 6.3：本機 Hugging Face 影像分類
+# 附錄 D：本機 Hugging Face 影像分類
 ml = [
     "transformers>=4.45.0",
     "torch>=2.4.0",
 ]
-# 單元 6.4：OCR 文字辨識
+# 附錄 D：OCR 文字辨識
 ocr = [
     "easyocr>=1.7.0",
     "numpy>=2.0.0",
 ]
-# 單元 6.6：OpenAI DALL·E 影像生成（也可給 Ollama 的 OpenAI 相容介面使用）
+# 附錄 D：OpenAI gpt-image-1 影像生成（也可給 7.6 Ollama 的 OpenAI 相容介面使用）
 openai = [
     "openai>=1.50.0",
 ]
-# 單元 4.8：pgvector 向量搜尋
+# 教材 5.9：pgvector 向量搜尋
 vector = [
     "pgvector>=0.3.0",
 ]

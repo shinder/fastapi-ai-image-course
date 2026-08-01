@@ -1,4 +1,4 @@
-"""網頁與樣板路由（教材單元八，補充教材）
+"""網頁與樣板路由（教材單元六）
 
 用 Jinja2 做伺服器端渲染（SSR），提供三條路由：
 - GET  /web         圖片列表頁：掃描 uploads/ 目錄列出已上傳的圖片
@@ -6,7 +6,7 @@
 - POST /web/upload  接收表單上傳、存檔，再重導回列表頁（PRG 模式）
 
 樣式主要用 Bootstrap CDN（見 templates/base.html）；另有少量專案自備樣式放在
-app/static，由 main.py 掛載的 /static（StaticFiles，教材 8.5）提供。
+app/static，由 main.py 掛載的 /static（StaticFiles，教材 6.7）提供。
 圖片本身則由 main.py 掛載的 /uploads（StaticFiles）提供。
 
 註：jinja2 已隨 fastapi[all] 一起安裝，不需另外加入相依。

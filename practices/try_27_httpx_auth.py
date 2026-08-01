@@ -1,6 +1,6 @@
 """httpx 範例 27：三種認證機制的帶法（非同步）
 
-對應教材 5.6（httpx 非同步寫法）；對應 try_17 的 requests 版。
+對應教材 附錄 C（httpx 非同步寫法）；對應 try_17 的 requests 版。
 
 注意：本專案的端點未啟用認證，以下用示意 URL（api.example.com）
 單純示範認證資訊放在請求的哪裡；帶法和 requests 幾乎一樣，只是改成 AsyncClient。
