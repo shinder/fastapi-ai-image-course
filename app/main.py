@@ -59,7 +59,7 @@ async def lifespan(app: FastAPI):
     # ---- yield 之前：啟動階段 ----
     if init_db():
         print(f"資料庫連線成功：{settings.DATABASE_URL}")
-    # 單元十：連線 MongoDB（連不到也不中斷啟動）
+    # 單元九：連線 MongoDB（連不到也不中斷啟動）
     await connect_mongo()
     # 想避免「第一個請求才載入模型」的冷啟動延遲，可在這裡預載（教材 附錄 D）：
     #   from app.services.ai_service import get_classifier; get_classifier()
@@ -156,4 +156,4 @@ app.include_router(images.router)
 app.include_router(users.router)  # 教材 5.7：最小 CRUD
 app.include_router(ai.router)
 app.include_router(web.router)  # 單元六：Jinja2 樣板網頁
-app.include_router(mongo_demo.router)  # 單元十（補充教材）：MongoDB 留言
+app.include_router(mongo_demo.router)  # 單元九（補充教材）：MongoDB 留言

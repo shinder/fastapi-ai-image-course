@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# start-mongodb.sh — 單獨啟動 MongoDB 容器（不需 docker compose；單元十補充教材）
+# start-mongodb.sh — 單獨啟動 MongoDB 容器（不需 docker compose；單元九補充教材）
 set -euo pipefail
 
 # 同名容器已存在就先移除，讓這支 script 可重複執行

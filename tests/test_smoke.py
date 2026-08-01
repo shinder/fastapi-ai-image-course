@@ -92,7 +92,7 @@ def test_web_upload_prg(tmp_path, monkeypatch):
     assert len(list(tmp_path.iterdir())) == 1
 
 
-# ---------- 單元十 MongoDB 留言（補充教材）----------
+# ---------- 單元九 MongoDB 留言（補充教材）----------
 # 測試以 TestClient 直接建構（不進 lifespan），因此未呼叫 connect_mongo，
 # Mongo client 維持 None，正好用來驗證「未連線時的優雅行為」。
 
@@ -118,7 +118,7 @@ def test_notes_requires_mongo():
     assert r.status_code == 503
 
 
-# ---------- 單元九進階：速率限制 / 分散式鎖（Redis 不可用時 fail-open）----------
+# ---------- 附錄 E：速率限制 / 分散式鎖（Redis 不可用時 fail-open）----------
 
 
 def _raising_redis():

@@ -53,3 +53,6 @@ app.db
 docs/fastapi-ai-image.md
 docs-endpoints.png
 .playwright-mcp/
+
+# 附錄 D：MediaPipe 模型檔（7.8 MB，依 README 說明自行下載）
+ml_models/*.task

@@ -1,4 +1,4 @@
-"""Redis 快取服務（教材 9.4、9.5、附錄 E、附錄 E）"""
+"""Redis 快取服務（教材 附錄 E）"""
 
 import hashlib
 import json
@@ -28,7 +28,7 @@ RedisDep = Annotated[redis.Redis, Depends(get_redis)]
 
 
 def image_hash(content: bytes) -> str:
-    """以圖片二進位內容做 SHA-256（教材 9.5）"""
+    """以圖片二進位內容做 SHA-256（教材 附錄 E）"""
     return hashlib.sha256(content).hexdigest()
 
 

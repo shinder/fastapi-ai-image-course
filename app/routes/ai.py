@@ -43,7 +43,7 @@ router = APIRouter(prefix="/api/v1/ai", tags=["ai"])
 
 @router.post("/classify", dependencies=[Depends(RateLimit(limit=30, window=60))])
 async def classify(file: UploadFile = File(...), r: RedisDep = None):
-    """以圖片 hash 為快取 key，未命中才呼叫模型，並統計命中率（教材 9.5、9.7）"""
+    """以圖片 hash 為快取 key，未命中才呼叫模型，並統計命中率（教材 附錄 E）"""
     if not file.content_type or not file.content_type.startswith("image/"):
         raise HTTPException(400, "請上傳圖片")
 
@@ -149,7 +149,7 @@ async def describe_cached(
 def describe_cache_stats():
     """記憶體快取的命中率統計（教材 7.5）。
 
-    對照 /cache/stats——那是 Redis 版（教材 9.7）。
+    對照 /cache/stats——那是 Redis 版（教材 附錄 E）。
     """
     from app.services import memo_cache
 
@@ -260,6 +260,6 @@ def cache_stats(r: RedisDep):
 
 @router.get("/cache-test")
 def cache_test(r: RedisDep):
-    """教材 9.4 依賴注入示範"""
+    """教材 附錄 E 依賴注入示範"""
     r.set("hello", "world", ex=60)
     return {"value": r.get("hello")}

@@ -32,7 +32,11 @@ ocr = [
 openai = [
     "openai>=1.50.0",
 ]
-# 教材 5.9：pgvector 向量搜尋
+# 附錄 D：MediaPipe 手部／臉部／姿勢偵測（輕量本機模型）
+mediapipe = [
+    "mediapipe>=0.10.14",
+]
+# 附錄 G：pgvector 向量搜尋
 vector = [
     "pgvector>=0.3.0",
 ]

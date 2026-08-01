@@ -12,11 +12,11 @@ FastAPI 與 AI 影像應用開發的範例專案，內容對應講義 `fastapi-a
 ```txt
 fastapi-ai-image/
 ├── pyproject.toml          # 教材 2.2 套件清單（核心 + 4 組可選）
-├── docker-compose.yml      # 教材 5.3、9.2 PostgreSQL + Redis
+├── docker-compose.yml      # 附錄 G PostgreSQL、附錄 E Redis
 ├── start.sh / start.bat            # 啟動開發伺服器（.sh 版會先起三個依賴容器）
-├── start-postgres.sh / .bat        # 單獨啟動 PostgreSQL 容器（教材 5.3）
-├── start-redis.sh / .bat           # 單獨啟動 Redis 容器（單元九）
-├── start-mongodb.sh / .bat         # 單獨啟動 MongoDB 容器（單元十）
+├── start-postgres.sh / .bat        # 單獨啟動 PostgreSQL 容器（附錄 G）
+├── start-redis.sh / .bat           # 單獨啟動 Redis 容器（附錄 E）
+├── start-mongodb.sh / .bat         # 單獨啟動 MongoDB 容器（單元九）
 ├── stop-containers.sh / .bat       # 移除上述三個依賴容器（收工用，具名資料卷保留）
 ├── Dockerfile              # 教材 部署簡記
 ├── .env / .env.example     # 教材 2.2 環境變數
@@ -34,8 +34,8 @@ fastapi-ai-image/
 │   │   ├── images.py       # 教材 3.5、3.6、5.7、5.8、綜合實作
 │   │   ├── images_raw.py   # 教材 5.x 對照：psycopg3 原生驅動，不經 ORM
 │   │   ├── web.py          # 教材 6.2、6.7、6.11 Jinja2 頁面路由
-│   │   ├── mongo_demo.py   # 教材 10.4 MongoDB 留言 CRUD
-│   │   └── ai.py           # 教材 7.4、7.6、9.5、8.4、附錄 D
+│   │   ├── mongo_demo.py   # 教材 9.4 MongoDB 留言 CRUD
+│   │   └── ai.py           # 教材 7.4、7.6、附錄 E、8.4、附錄 D
 │   ├── services/
 │   │   ├── ai_service.py            # 教材 附錄 D Hugging Face 分類
 │   │   ├── ocr_service.py           # 教材 附錄 D EasyOCR
@@ -43,9 +43,9 @@ fastapi-ai-image/
 │   │   ├── image_gen_service.py     # 教材 附錄 D OpenAI gpt-image-1
 │   │   ├── external_ai.py           # 教材 8.4、附錄 C 外部 API
 │   │   ├── memo_cache.py            # 教材 7.5 以圖片 hash 為 key 的記憶體快取
-│   │   └── cache_service.py         # 教材 9.4、9.5、附錄 E Redis
+│   │   └── cache_service.py         # 教材 附錄 E Redis
 │   ├── db/
-│   │   └── mongo.py        # 教材 10.3 MongoDB 連線
+│   │   └── mongo.py        # 教材 9.3 MongoDB 連線
 │   ├── templates/          # 教材單元六 Jinja2 模板
 │   │   ├── base.html       # 6.4 骨架（extends 的基底）
 │   │   ├── index.html      # 6.9 圖片列表頁
@@ -62,6 +62,7 @@ fastapi-ai-image/
 │       └── image_utils.py  # 教材 3.5 Pillow 工具
 ├── practices/              # 教材練習：可獨立執行的小範例（多數需先啟動 API）
 │   ├── try_30~32_*.py      # generator / 模組匯入 / hashlib（5.1、3.7）
+│   ├── try_40_mediapipe_hand.py  # 附錄 D MediaPipe 手部關鍵點
 │   ├── try_01~03_*.py      # Pydantic（單元三）
 │   ├── try_04~09_*.py      # tkinter 串接（單元三）
 │   ├── try_10~18_*.py      # requests 串接 + 綜合應用（單元八）
@@ -105,7 +106,7 @@ docker compose up -d        # 或 ./start-postgres.sh
 ## 用腳本啟動 / 停止服務（替代 docker compose）
 
 除了 `docker compose`，專案也附了一鍵腳本，改用單獨的 `docker run` 管理依賴服務容器
-——比 docker compose 多含 MongoDB（單元十），`start.sh` 還會接著在前景啟動開發伺服器：
+——比 docker compose 多含 MongoDB（單元九），`start.sh` 還會接著在前景啟動開發伺服器：
 
 macOS / Linux：
 
@@ -143,10 +144,17 @@ uv sync --extra ml
 # 附錄 D EasyOCR
 uv sync --extra ocr
 
+# 附錄 D MediaPipe 手部／臉部／姿勢偵測（輕量本機模型）
+uv sync --extra mediapipe
+# 另需下載模型檔（7.8 MB，未進版控）：
+mkdir -p ml_models
+curl -o ml_models/hand_landmarker.task \
+  https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task
+
 # 7.6 Ollama 的 OpenAI 相容介面 / 附錄 D gpt-image-1
 uv sync --extra openai
 
-# 5.9 pgvector 向量搜尋
+# 附錄 G pgvector 向量搜尋
 uv sync --extra vector
 
 # 全部一次裝
