@@ -13,7 +13,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from app.config import settings
 from app.database import init_db
 from app.db.mongo import close_mongo, connect_mongo
-from app.routes import ai, basic, images, mongo_demo, web
+from app.routes import ai, basic, images, mongo_demo, users, web
 
 # 主控台日誌（教材 2.6）：root 維持 WARNING，只讓自家 app.access 輸出 INFO，
 # 避免把 httpx 等第三方套件的 INFO 訊息也一起印出來
@@ -153,6 +153,7 @@ def get_user(user_id: int):
 
 app.include_router(basic.router)
 app.include_router(images.router)
+app.include_router(users.router)  # 教材 5.7：最小 CRUD
 app.include_router(ai.router)
 app.include_router(web.router)  # 單元六：Jinja2 樣板網頁
 app.include_router(mongo_demo.router)  # 單元十（補充教材）：MongoDB 留言

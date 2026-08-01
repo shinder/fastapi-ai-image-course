@@ -1,0 +1,26 @@
+{# 教材 6.5、6.8：可重複使用的「片段樣板」
+
+   與 base.html 的差別：
+   - base.html 是「骨架」，子樣板用 {% extends %} 繼承它、填 block；
+   - navbar.html 是「片段」，任何樣板用 {% include %} 把它嵌進來。
+   include 進來的片段與呼叫端共用同一組 context，所以下面可以直接用 request。
+
+   教材 6.8：用 request.url_path 判斷目前在哪一頁，替該連結加上 active 樣式。
+   這也順帶示範「樣板裡拿得到 request」——前提是 TemplateResponse 有把它傳進來。
+#}
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container">
+    {# url_for('路由函式名') 會反查出該路由的網址，路徑改了也不必改樣板 #}
+    <a class="navbar-brand" href="{{ url_for('gallery') }}">AI 影像服務</a>
+    <div class="navbar-nav">
+      <a class="nav-link {% if request.url.path == url_for('gallery').path %}active{% endif %}"
+         href="{{ url_for('gallery') }}">圖片列表</a>
+      <a class="nav-link {% if request.url.path == url_for('users_page').path %}active{% endif %}"
+         href="{{ url_for('users_page') }}">用戶</a>
+      <a class="nav-link {% if request.url.path == url_for('upload_page').path %}active{% endif %}"
+         href="{{ url_for('upload_page') }}">上傳</a>
+      <a class="nav-link {% if request.url.path == url_for('webrtc_page').path %}active{% endif %}"
+         href="{{ url_for('webrtc_page') }}">相機</a>
+    </div>
+  </div>
+</nav>

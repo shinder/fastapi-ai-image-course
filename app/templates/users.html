@@ -1,0 +1,54 @@
+{# 教材 6.9：把資料庫查出來的資料呈現到頁面上
+
+   這一頁與 5.7 的 GET /api/v1/users 是「同一份查詢、兩種輸出」：
+   那條路由回 JSON 給程式吃，這一頁把同樣的資料填進 HTML 給人看。
+#}
+{% extends "base.html" %}
+
+{% block title %}用戶列表{% endblock %}
+
+{% block content %}
+  <h1 class="mb-4">用戶列表</h1>
+
+  {# {% if %} 先擋掉「查無資料」的情況——空表格對使用者是沒有意義的畫面 #}
+  {% if users %}
+    <table class="table table-bordered table-striped table-hover">
+      <thead class="table-dark">
+        <tr>
+          <th style="width: 6rem">編號</th>
+          <th>姓名</th>
+          <th style="width: 8rem">圖片數</th>
+        </tr>
+      </thead>
+      <tbody>
+        {# {% for %} 逐列渲染；loop.index 是 Jinja2 內建的迴圈計數（從 1 開始） #}
+        {% for user in users %}
+          <tr>
+            <td>{{ user.id }}</td>
+            <td>{{ user.name }}</td>
+            {# user.images 是 SQLModel 的 Relationship 導覽屬性，樣板裡可直接取用 #}
+            <td>{{ user.images | length }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    {# 教材 6.9：分頁。沿用 5.7 已經寫過的 skip / limit，
+       同一組參數在 JSON 端點與頁面路由通用。 #}
+    <nav>
+      <ul class="pagination">
+        <li class="page-item {% if skip <= 0 %}disabled{% endif %}">
+          <a class="page-link" href="?skip={{ [skip - limit, 0] | max }}&limit={{ limit }}">上一頁</a>
+        </li>
+        <li class="page-item {% if users | length < limit %}disabled{% endif %}">
+          <a class="page-link" href="?skip={{ skip + limit }}&limit={{ limit }}">下一頁</a>
+        </li>
+      </ul>
+    </nav>
+  {% else %}
+    <p class="text-muted">
+      目前沒有用戶資料。可用 REST Client 或 Swagger UI 先新增幾筆：
+      <code>POST /api/v1/users</code>
+    </p>
+  {% endif %}
+{% endblock %}

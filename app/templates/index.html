@@ -1,4 +1,8 @@
-{# 繼承 base.html：自動套用共用骨架，只需填寫 title 與 content 兩個 block #}
+{# 教材 6.10：呈現圖片
+
+   後端傳進來的 images 是「Image 資料表的物件清單」（不是檔名字串），
+   所以除了圖片本身，還能一併顯示標題、大小、上傳時間這些中繼資料。
+#}
 {% extends "base.html" %}
 
 {% block title %}圖片列表{% endblock %}
@@ -10,19 +14,40 @@
   {% if images %}
     <div class="row row-cols-2 row-cols-md-4 g-3">
       {# {% for %} 迴圈：逐一渲染後端傳入的 images 清單 #}
-      {% for name in images %}
+      {% for img in images %}
         <div class="col">
           <div class="card h-100">
-            {# url_for('uploads', path=name)：反查 main.py 掛載的 /uploads 靜態路由 #}
-            <img src="{{ url_for('uploads', path=name) }}" class="card-img-top" alt="{{ name }}">
+            {# url_for('uploads', path=img.filename)：反查 main.py 掛載的 /uploads 靜態路由。
+               注意這裡取的是 filename 欄位——資料庫存的是檔名，不是圖片內容。 #}
+            <img src="{{ url_for('uploads', path=img.filename) }}"
+                 class="card-img-top" alt="{{ img.title }}">
             <div class="card-body">
-              {# {{ }} 輸出變數；truncate 是 Jinja2 過濾器，過長字串會被截斷 #}
-              <p class="card-text small text-truncate" title="{{ name }}">{{ name | truncate(20) }}</p>
+              {# {{ }} 輸出變數；| 後面接過濾器，truncate 會截斷過長字串 #}
+              <p class="card-text small text-truncate mb-1" title="{{ img.title }}">
+                {{ img.title | truncate(20) }}
+              </p>
+              {# 這些欄位是「查資料表」才拿得到的，掃目錄拿不到 #}
+              <p class="card-text text-muted" style="font-size: .75rem">
+                {{ (img.file_size / 1024) | round(1) }} KB ·
+                {{ img.uploaded_at.strftime('%Y-%m-%d') }}
+              </p>
             </div>
           </div>
         </div>
       {% endfor %}
     </div>
+
+    {# 分頁：與 6.9 的用戶列表用同一組 skip / limit 參數 #}
+    <nav class="mt-4">
+      <ul class="pagination">
+        <li class="page-item {% if skip <= 0 %}disabled{% endif %}">
+          <a class="page-link" href="?skip={{ [skip - limit, 0] | max }}&limit={{ limit }}">上一頁</a>
+        </li>
+        <li class="page-item {% if images | length < limit %}disabled{% endif %}">
+          <a class="page-link" href="?skip={{ skip + limit }}&limit={{ limit }}">下一頁</a>
+        </li>
+      </ul>
+    </nav>
   {% else %}
     <p class="text-muted">目前沒有圖片，先去<a href="{{ url_for('upload_page') }}">上傳</a>一張吧。</p>
   {% endif %}

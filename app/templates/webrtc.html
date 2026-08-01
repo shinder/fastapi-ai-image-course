@@ -1,0 +1,79 @@
+{# 教材 6.12：把一個「現成的 HTML 頁」改寫成樣板
+
+   原始素材是一個獨立的 .html 檔（自己有完整的 <html>／<head>／<body>）。
+   改寫成樣板只有四個步驟：
+     1. 開頭加 {% extends "base.html" %}（必須是第一行）
+     2. <head> 裡頁面專屬的東西 → {% block head_extra %}
+     3. <body> 的主要內容 → {% block content %}
+     4. 頁尾的 <script> → {% block scripts %}
+   原本的 <html>／<head>／<body> 標籤全部刪掉——那些骨架 base.html 已經有了。
+
+   本頁同時是教材 4.6「從相機取得影像」的成品：取相機畫面 → canvas 截圖 → 上傳。
+#}
+{% extends "base.html" %}
+
+{% block title %}相機拍照上傳{% endblock %}
+
+{% block content %}
+  <h1 class="mb-4">相機拍照上傳</h1>
+
+  <div class="alert alert-info">
+    需要 <strong>HTTPS 或 localhost</strong> 才能取用相機。用手機測試時，
+    請搭配教材 4.5 的 cloudflared 產生一個 https 網址。
+  </div>
+
+  <div class="row g-3">
+    <div class="col-md-6">
+      <video id="preview" class="w-100 border rounded" autoplay playsinline muted></video>
+      <div class="mt-2">
+        <button id="btn-start" class="btn btn-secondary">開啟相機</button>
+        <button id="btn-shot" class="btn btn-primary" disabled>拍照並上傳</button>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <canvas id="canvas" class="w-100 border rounded"></canvas>
+      <p id="msg" class="mt-2 text-muted small">尚未拍照。</p>
+    </div>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const preview = document.querySelector('#preview');
+  const canvas = document.querySelector('#canvas');
+  const msg = document.querySelector('#msg');
+  let stream = null;
+
+  // 1. 取得相機串流（getUserMedia 回傳 Promise）
+  document.querySelector('#btn-start').addEventListener('click', async () => {
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+      preview.srcObject = stream;
+      document.querySelector('#btn-shot').disabled = false;
+      msg.textContent = '相機已開啟，可以拍照了。';
+    } catch (err) {
+      msg.textContent = '無法取得相機：' + err.name;
+    }
+  });
+
+  // 2. 把當下的影格畫到 canvas，再轉成 Blob 上傳
+  document.querySelector('#btn-shot').addEventListener('click', () => {
+    canvas.width = preview.videoWidth;
+    canvas.height = preview.videoHeight;
+    canvas.getContext('2d').drawImage(preview, 0, 0);
+
+    // toBlob 是非同步的：把 canvas 內容編碼成 JPEG 二進位
+    canvas.toBlob(async (blob) => {
+      const fd = new FormData();
+      // 欄位名 file 要和後端 UploadFile 的參數名一致（教材 4.3）
+      fd.append('file', blob, 'camera.jpg');
+      msg.textContent = '上傳中…';
+      const r = await fetch('/api/v1/images/upload-only', { method: 'POST', body: fd });
+      const result = await r.json();
+      msg.innerHTML = r.ok
+        ? `上傳成功：<a href="/uploads/${result.filename}" target="_blank">${result.filename}</a>`
+        : `上傳失敗：${result.detail}`;
+    }, 'image/jpeg', 0.85);
+  });
+</script>
+{% endblock %}
