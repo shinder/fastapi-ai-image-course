@@ -13,7 +13,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from app.config import settings
 from app.database import init_db
 from app.db.mongo import close_mongo, connect_mongo
-from app.routes import ai, basic, images, mongo_demo, users, web
+from app.routes import ai, basic, hands, images, mongo_demo, users, web
 
 # 主控台日誌（教材 2.6）：root 維持 WARNING，只讓自家 app.access 輸出 INFO，
 # 避免把 httpx 等第三方套件的 INFO 訊息也一起印出來
@@ -61,11 +61,17 @@ async def lifespan(app: FastAPI):
         print(f"資料庫連線成功：{settings.DATABASE_URL}")
     # 單元九：連線 MongoDB（連不到也不中斷啟動）
     await connect_mongo()
-    # 想避免「第一個請求才載入模型」的冷啟動延遲，可在這裡預載（教材 附錄 D）：
+    # 附錄 D：預載 MediaPipe 手部模型。模型檔不存在時只印警告、不中斷啟動，
+    # 手部端點會回 503（與 init_db 相同的優雅降級策略）
+    from app.services import hand_landmark
+
+    hand_landmark.load_detector()
+    # 想避免「第一個請求才載入模型」的冷啟動延遲，Hugging Face 也可在這裡預載：
     #   from app.services.ai_service import get_classifier; get_classifier()
     yield  # ← app 在此進入服務狀態，處理所有請求
     # ---- yield 之後：關閉階段（清理資源）----
     await close_mongo()
+    hand_landmark.close_detector()
 
 
 app = FastAPI(
@@ -155,5 +161,6 @@ app.include_router(basic.router)
 app.include_router(images.router)
 app.include_router(users.router)  # 教材 5.7：最小 CRUD
 app.include_router(ai.router)
+app.include_router(hands.router)  # 附錄 D：MediaPipe 手部偵測
 app.include_router(web.router)  # 單元六：Jinja2 樣板網頁
 app.include_router(mongo_demo.router)  # 單元九（補充教材）：MongoDB 留言

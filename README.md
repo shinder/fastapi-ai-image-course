@@ -42,6 +42,7 @@ fastapi-ai-image/
 │   │   ├── ollama_service.py        # 教材 7.3、7.4 Ollama 視覺模型
 │   │   ├── image_gen_service.py     # 教材 附錄 D OpenAI gpt-image-1
 │   │   ├── external_ai.py           # 教材 8.4、附錄 C 外部 API
+│   │   ├── hand_landmark.py         # 附錄 D MediaPipe 手部偵測（Tasks API）
 │   │   ├── memo_cache.py            # 教材 7.5 以圖片 hash 為 key 的記憶體快取
 │   │   └── cache_service.py         # 教材 附錄 E Redis
 │   ├── db/
@@ -146,10 +147,8 @@ uv sync --extra ocr
 
 # 附錄 D MediaPipe 手部／臉部／姿勢偵測（輕量本機模型）
 uv sync --extra mediapipe
-# 另需下載模型檔（7.8 MB，未進版控）：
-mkdir -p ml_models
-curl -o ml_models/hand_landmarker.task \
-  https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task
+# 另需下載模型檔（7.5 MB，未進版控）：
+uv run python scripts/download_models.py
 
 # 7.6 Ollama 的 OpenAI 相容介面 / 附錄 D gpt-image-1
 uv sync --extra openai
@@ -241,6 +240,8 @@ VSCode 使用者：專案 `.vscode/settings.json` 已設定存檔時自動以 Ru
 | POST   | `/api/v1/ai/ocr`                       | OCR 文字辨識 | 附錄 D |
 | POST   | `/api/v1/ai/describe`                  | Ollama 圖片描述 | 7.4 |
 | POST   | `/api/v1/ai/describe-cached`           | 同上，但先查記憶體快取 | 7.5 |
+| POST   | `/api/v1/hands/detect`                 | MediaPipe 手部關鍵點（只偵測） | 附錄 D |
+| POST   | `/api/v1/hands/upload`                 | 手部偵測 + 存檔入庫 | 附錄 D |
 | GET    | `/api/v1/ai/describe-cached/stats`     | 記憶體快取命中率 | 7.5 |
 | POST   | `/api/v1/ai/extract-invoice`           | 發票結構化抽取 | 7.4 |
 | POST   | `/api/v1/ai/generate`                  | gpt-image-1 影像生成 | 附錄 D |
