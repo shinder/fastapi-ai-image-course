@@ -19,6 +19,7 @@
 執行前請先啟動後端：
     uvicorn app.main:app --reload
 """
+
 import threading
 import tkinter as tk
 

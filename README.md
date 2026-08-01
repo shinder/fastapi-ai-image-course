@@ -50,10 +50,17 @@ fastapi-ai-image/
 │   │   ├── index.html      # 6.9 圖片列表頁
 │   │   └── upload.html     # 6.11 上傳表單頁（PRG）
 │   ├── static/
-│   │   └── app.css         # 教材 6.7 專案自備樣式（驗證 /static 掛載）
+│   │   ├── app.css         # 教材 6.7 專案自備樣式（驗證 /static 掛載）
+│   │   └── demos/          # 教材單元四：瀏覽器端測試頁
+│   │       ├── cors01.html         # 2.6 CORS 實測
+│   │       ├── form01~04.html      # 4.2 HTML 表單四連發
+│   │       ├── upload01~02.html    # 4.3 AJAX 上傳
+│   │       ├── preview-01.html     # 4.4 createObjectURL 預覽
+│   │       └── base64-01.html      # 4.4 FileReader / Base64
 │   └── utils/
 │       └── image_utils.py  # 教材 3.5 Pillow 工具
 ├── practices/              # 教材練習：可獨立執行的小範例（多數需先啟動 API）
+│   ├── try_30~32_*.py      # generator / 模組匯入 / hashlib（5.1、3.7）
 │   ├── try_01~03_*.py      # Pydantic（單元三）
 │   ├── try_04~09_*.py      # tkinter 串接（單元三）
 │   ├── try_10~18_*.py      # requests 串接 + 綜合應用（單元八）

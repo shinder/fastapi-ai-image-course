@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<!-- 教材 4.4 之一：用 createObjectURL 做上傳前預覽
+
+  重點：這裡「完全沒有連上伺服器」。使用者選好檔案後，瀏覽器直接產生一個
+  指向本機記憶體的暫時網址（blob:...），<img> 就能顯示。
+
+  URL.createObjectURL 不必讀取檔案內容，速度快、也不吃記憶體——
+  大圖預覽首選。用完可用 URL.revokeObjectURL 釋放。
+-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>前端預覽：createObjectURL</title>
+</head>
+<body class="container py-4">
+  <h1 class="mb-3">上傳前預覽（createObjectURL）</h1>
+  <button type="button" class="btn btn-primary" onclick="my_file.click()">選擇圖檔</button>
+  <div class="mt-3" style="max-width: 400px">
+    <img id="my_img" class="img-fluid rounded border" alt="">
+  </div>
+  <p id="info" class="mt-2 text-muted small"></p>
+
+  <form hidden>
+    <input type="file" id="my_file" accept="image/*">
+  </form>
+
+  <script>
+    const my_file = document.querySelector('#my_file');
+    my_file.addEventListener('change', () => {
+      const file = my_file.files[0];
+      if (!file) return;
+      // 產生一個指向本機檔案的暫時網址，不必讀內容
+      my_img.src = URL.createObjectURL(file);
+      info.textContent = `${file.name} · ${(file.size / 1024).toFixed(1)} KB · ${file.type}`;
+    });
+  </script>
+</body>
+</html>

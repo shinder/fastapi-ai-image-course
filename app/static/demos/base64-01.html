@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<!-- 教材 4.4 之二：用 FileReader 轉成 Base64 data URI
+
+  和 preview-01 一樣是本機預覽，但作法不同：FileReader 會把整個檔案讀進來，
+  編碼成一長串 Base64 文字（data:image/jpeg;base64,/9j/4AAQ...）。
+
+  下面的 textarea 就是要讓你「看見」Base64 長什麼樣、以及它有多長——
+  體積大約會膨脹 33%。這也解釋了教材 3.6 的後端 Base64 回傳為什麼只適合小圖。
+-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>前端預覽：FileReader / Base64</title>
+</head>
+<body class="container py-4">
+  <h1 class="mb-3">Base64 data URI（FileReader）</h1>
+  <button type="button" class="btn btn-primary" onclick="my_file.click()">選擇圖檔</button>
+  <div class="row mt-3">
+    <div class="col-md-4">
+      <img id="my_img" class="img-fluid rounded border" alt="">
+      <p id="info" class="mt-2 text-muted small"></p>
+    </div>
+    <div class="col-md-8">
+      <textarea id="ta" class="form-control font-monospace" rows="16" readonly
+                placeholder="選擇圖檔後，這裡會出現 Base64 字串"></textarea>
+    </div>
+  </div>
+
+  <form hidden>
+    <input type="file" id="my_file" accept="image/*">
+  </form>
+
+  <script>
+    const my_file = document.querySelector('#my_file');
+    const reader = new FileReader();
+
+    // FileReader 是非同步的：讀完才會觸發 onload
+    reader.onload = () => {
+      my_img.src = reader.result;     // data URI 可直接當 <img src>
+      ta.value = reader.result;
+    };
+
+    my_file.addEventListener('change', () => {
+      const file = my_file.files[0];
+      if (!file) return;
+      reader.readAsDataURL(file);     // 讀成 Base64 data URI
+      reader.onloadend = () => {
+        const kb = (file.size / 1024).toFixed(1);
+        const b64kb = (reader.result.length / 1024).toFixed(1);
+        info.textContent = `原檔 ${kb} KB → Base64 ${b64kb} KB（膨脹約 33%）`;
+      };
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<!-- 教材 4.2 之二：傳統表單送到「只收 JSON」的端點會失敗
+
+  /api/v1/demo/images 的參數是 Pydantic 模型，FastAPI 預期請求主體是 JSON。
+  傳統表單送出的是 application/x-www-form-urlencoded，型別對不上，
+  會拿到 422 Unprocessable Entity 與一段說明「應為 JSON」的錯誤。
+
+  這正是教材 3.2 那句「FastAPI 預設只接受 JSON」的實際樣子。
+-->
+<head>
+  <meta charset="utf-8">
+  <title>表單基礎 2：送到只收 JSON 的端點</title>
+</head>
+<body>
+  <h1>傳統表單 → 只收 JSON 的端點（會 422）</h1>
+  <form action="http://localhost:8000/api/v1/demo/images" method="post">
+    <p><input type="text" name="title" value="我的主題"></p>
+    <p><input type="text" name="url" value="http://example.com/a.jpg"></p>
+    <p><input type="submit" value="送出"></p>
+  </form>
+</body>
+</html>

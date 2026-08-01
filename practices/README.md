@@ -3,6 +3,22 @@
 搭配《FastAPI 與 AI 影像應用》講義的可獨立執行小範例。命名慣例 `try_NN_主題.py`，
 每個檔聚焦單一觀念、編號大致依教材單元順序；各檔開頭的 docstring 都有詳細說明與對應的後端端點。
 
+## 〇、Python 觀念補充（純本地，教材 5.1、3.7）
+
+| 檔案 | 主題 | 對應教材 |
+| ---- | ---- | -------- |
+| `try_30_generator.py` | 產生器函式與 yield（鋪陳依賴注入） | 5.1 |
+| `try_31_module.py` + `module_a.py` | 模組匯入機制（鋪陳 table=True 註冊） | 5.1 |
+| `try_32_hashlib.py` | 字串與檔案的 SHA-256 雜湊 | 3.7 |
+
+```bash
+uv run python -m practices.try_30_generator
+uv run python -m practices.try_31_module
+uv run python -m practices.try_32_hashlib
+```
+
+---
+
 ## 一、Pydantic 資料驗證（純本地，教材 3.1）
 
 不需啟動後端，直接執行即可觀察 Pydantic 的驗證與轉換行為。

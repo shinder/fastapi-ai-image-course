@@ -6,7 +6,7 @@
 本範例的關鍵字欄位：不允許空格，並自動轉成小寫。
 """
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, field_validator
 
 
 class ImageQuery(BaseModel):
@@ -31,5 +31,5 @@ data = ImageQuery(
 
 # 註：因為上面建立實例時就會出錯，下面兩行其實不會被執行到。
 # 若把 keyword 改成不含空格（例如 "cat"），才會順利印出結果。
-print(data.model_dump())            # 轉成 dict
+print(data.model_dump())  # 轉成 dict
 print(data.model_dump_json(indent=2))  # 轉成 JSON 字串

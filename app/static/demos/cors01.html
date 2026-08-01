@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<!-- 教材 2.6：CORS 實測頁
+
+  用法：
+  1. 先「不要」在 main.py 加 CORSMiddleware，用 file:// 直接開這個檔（或用另一個
+     連接埠開），按「載入資料」——瀏覽器主控台會出現 CORS 錯誤，畫面沒有資料。
+  2. 加上 CORSMiddleware 之後重新整理，同一顆按鈕就拿得到資料了。
+
+  重點：錯誤是「瀏覽器擋下來的」，不是伺服器沒回應。切到開發者工具的 Network
+  分頁會看到請求其實成功了（200），只是 JavaScript 讀不到回應內容。
+-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CORS 測試</title>
+</head>
+<body>
+  <h1>CORS 測試</h1>
+  <p>開啟開發者工具的 Console 與 Network 分頁再按下面的按鈕。</p>
+  <button onclick="loadData()">載入資料</button>
+  <pre id="out"></pre>
+
+  <script>
+    const loadData = () => {
+      // 刻意用 127.0.0.1 而非 localhost：兩者雖然指向同一台機器，
+      // 但「來源」字串不同，仍算跨來源（教材 2.6 的同源三要素）
+      fetch('http://127.0.0.1:8000/health')
+        .then(r => r.json())
+        .then(obj => { out.textContent = JSON.stringify(obj, null, 2) })
+        .catch(err => { out.textContent = '失敗：' + err + '\n（看 Console 的 CORS 錯誤訊息）' })
+    }
+  </script>
+</body>
+</html>

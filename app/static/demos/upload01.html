@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<!-- 教材 4.3 之一：用 FormData + fetch 做 AJAX 上傳
+
+  和 form04.html 的差別：那個是傳統表單，送出後整頁會跳走；
+  這裡用 fetch 在背景送，頁面不動，還能拿回 JSON 結果並更新畫面。
+
+  FormData 會自動幫你設好 multipart/form-data 與 boundary——
+  千萬不要自己手動設 Content-Type，那會把 boundary 弄丟。
+-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>AJAX 上傳</title>
+</head>
+<body class="container py-4">
+  <h1 class="mb-3">AJAX 上傳（FormData + fetch）</h1>
+  <button type="button" class="btn btn-primary" onclick="my_file.click()">選擇並上傳</button>
+  <div class="mt-3" style="max-width: 400px">
+    <img id="my_img" class="img-fluid rounded border" alt="">
+  </div>
+  <pre id="out" class="mt-3 small"></pre>
+
+  <form name="form1" hidden>
+    <input type="file" name="file" id="my_file" accept="image/*">
+  </form>
+
+  <script>
+    const my_file = document.querySelector('#my_file');
+
+    my_file.addEventListener('change', async () => {
+      // 直接把整個 <form> 包成 FormData，欄位名沿用 input 的 name
+      const fd = new FormData(document.form1);
+
+      const r = await fetch('http://localhost:8000/api/v1/images/upload-only', {
+        method: 'POST',
+        body: fd,           // 不要自己設 Content-Type
+      });
+      const result = await r.json();
+      out.textContent = JSON.stringify(result, null, 2);
+
+      if (r.ok) {
+        // 後端回傳存檔後的檔名，組出 /uploads/xxx 的網址顯示
+        my_img.src = `http://localhost:8000/uploads/${result.filename}`;
+      }
+    });
+  </script>
+</body>
+</html>

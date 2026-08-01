@@ -13,10 +13,10 @@ from datetime import datetime
 # 繼承 BaseModel 即可建立一個資料模型，類別屬性就是欄位定義。
 # 每個欄位都用「型別標註」描述它應該是什麼型別，Pydantic 會據此驗證。
 class ImageInfo(BaseModel):
-    id: int                  # 必填，必須是整數（字串 "1" 也會自動轉成 int 1）
-    filename: str            # 必填，字串
-    size: int                # 必填，整數（檔案大小，單位 byte）
-    uploaded_at: datetime    # 必填，日期時間；可接受 datetime 物件或 ISO 格式字串
+    id: int  # 必填，必須是整數（字串 "1" 也會自動轉成 int 1）
+    filename: str  # 必填，字串
+    size: int  # 必填，整數（檔案大小，單位 byte）
+    uploaded_at: datetime  # 必填，日期時間；可接受 datetime 物件或 ISO 格式字串
     description: str | None = None  # 選填欄位：型別為 str 或 None，並給定預設值 None
 
 

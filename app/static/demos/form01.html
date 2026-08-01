@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<!-- 教材 4.2 之一：表單欄位一定要有 name
+
+  按下送出後看網址列：只有 name2 的值被帶上去（?name2=...），
+  第一個欄位因為沒有 name 屬性，瀏覽器根本不會送出它。
+  這是初學最常見的「資料怎麼不見了」。
+-->
+<head>
+  <meta charset="utf-8">
+  <title>表單基礎 1：name 屬性</title>
+</head>
+<body>
+  <h1>沒有 name 的欄位不會被送出</h1>
+  <form action="" method="get">
+    <p><input type="text" id="name1" placeholder="我沒有 name 屬性"></p>
+    <p><input type="text" name="name2" placeholder="我有 name 屬性"></p>
+    <p><input type="submit" value="送出"></p>
+  </form>
+  <p>送出後看網址列的查詢字串。</p>
+</body>
+</html>

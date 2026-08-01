@@ -130,13 +130,17 @@ async def upload_and_process(file: UploadFile = File(...)):
     img.save(output, format="JPEG", quality=85, optimize=True)
 
     # 縮圖檔名加 thumb_ 前綴並用 uuid 確保唯一，避免覆蓋原圖
-    save_path = os.path.join(settings.UPLOAD_DIR, f"thumb_{uuid.uuid4().hex}.jpg")
+    thumb_name = f"thumb_{uuid.uuid4().hex}.jpg"
+    save_path = os.path.join(settings.UPLOAD_DIR, thumb_name)
     os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
     with open(save_path, "wb") as f:
         f.write(output.getvalue())  # getvalue() 取出緩衝區全部位元組
 
+    # 回傳 thumbnail（檔名）讓前端能組出 /uploads/<檔名> 直接顯示
+    # （教材 4.3 的 upload02.html 就是這樣用的）
     return {
         "info": info,
+        "thumbnail": thumb_name,
         "thumbnail_size": len(output.getvalue()),
         "saved_to": save_path,
     }

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<!-- 教材 4.2 之三：後端改用 Form(...) 就收得到了
+
+  /api/v1/contact 的參數宣告成 Form(...)，兩種表單編碼都收得到：
+    - application/x-www-form-urlencoded（預設）
+    - multipart/form-data
+  把下面的 enctype 換掉再送一次，結果一樣——差別要到 form04 傳檔案時才看得出來。
+-->
+<head>
+  <meta charset="utf-8">
+  <title>表單基礎 3：Form(...) 接收</title>
+</head>
+<body>
+  <h1>傳統表單 → Form(...) 端點</h1>
+  <form action="http://localhost:8000/api/v1/contact" method="post"
+        enctype="application/x-www-form-urlencoded">
+    <p><input type="text" name="name" value="王小明"></p>
+    <p><input type="email" name="email" value="ming@example.com"></p>
+    <p><input type="text" name="message" value="您好"></p>
+    <p><input type="submit" value="送出"></p>
+  </form>
+  <p>可把 enctype 改成 <code>multipart/form-data</code> 再送一次，後端一樣收得到。</p>
+</body>
+</html>

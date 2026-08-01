@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<!-- 教材 4.2 之四：要傳檔案，enctype 一定得是 multipart/form-data
+
+  試試看把 enctype 拿掉（或改成 x-www-form-urlencoded）再送出：
+  瀏覽器只會把「檔名」當成純文字送出，檔案內容根本不會上路，後端拿不到檔案。
+
+  原因：x-www-form-urlencoded 是把欄位編碼成 a=1&b=2 的字串，沒辦法夾帶二進位資料。
+-->
+<head>
+  <meta charset="utf-8">
+  <title>表單基礎 4：上傳檔案</title>
+</head>
+<body>
+  <h1>表單上傳檔案</h1>
+  <form action="http://localhost:8000/api/v1/images/upload-only" method="post"
+        enctype="multipart/form-data">
+    <!-- name="file" 要和後端 UploadFile 的參數名一致 -->
+    <p><input type="file" name="file" accept="image/*"></p>
+    <p><input type="submit" value="上傳"></p>
+  </form>
+</body>
+</html>
