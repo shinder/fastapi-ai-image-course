@@ -210,11 +210,13 @@ uv sync --extra ocr
 uv sync --extra mediapipe
 # 另需下載模型檔（7.5 MB，未進版控）：
 uv run python scripts/download_models.py
+# 開課前／上課前先驗一次，確認檔案完整（比對 SHA-256，不重新下載）：
+uv run python scripts/download_models.py --check
 
 # 7.6 Ollama 的 OpenAI 相容介面 / 附錄 D gpt-image-1
 uv sync --extra openai
 
-# 附錄 G pgvector 向量搜尋
+# 附錄 F pgvector 向量搜尋
 uv sync --extra vector
 
 # 全部一次裝
