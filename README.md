@@ -222,7 +222,8 @@ VSCode 使用者：專案 `.vscode/settings.json` 已設定存檔時自動以 Ru
 | GET    | `/api/v1/images/{filename}/download`   | FileResponse | 3.6 |
 | GET    | `/api/v1/images/{filename}/stream`     | StreamingResponse | 3.6 |
 | GET    | `/api/v1/images/{filename}/base64`     | Base64 | 3.6 |
-| POST   | `/api/v1/images/upload-and-classify`   | 綜合：上傳 + 快取 + 分類 + 入庫 | 綜合 |
+| POST   | `/api/v1/images/upload-and-describe`   | 綜合實作：上傳 + Ollama 描述 + 記憶體快取 + 入庫 | 綜合 |
+| POST   | `/api/v1/images/upload-and-classify`   | 綜合（附錄版）：上傳 + Redis 快取 + HF 分類 + 入庫 | 綜合 |
 | POST   | `/api/v1/ai/classify`                  | 影像分類（含快取） | 附錄 D、9.5 |
 | POST   | `/api/v1/ai/ocr`                       | OCR 文字辨識 | 附錄 D |
 | POST   | `/api/v1/ai/describe`                  | Ollama 圖片描述 | 7.4 |
