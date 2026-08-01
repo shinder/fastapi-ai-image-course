@@ -286,6 +286,15 @@ def cache_stats(r: RedisDep):
 
 @router.get("/cache-test")
 def cache_test(r: RedisDep):
-    """教材 附錄 E 依賴注入示範"""
-    r.set("hello", "world", ex=60)
-    return {"value": r.get("hello")}
+    """教材 附錄 E 依賴注入示範。
+
+    這裡刻意直接呼叫 r.set()/r.get()（不經 cache_service 的 helper），
+    所以要自己處理 Redis 不可用的情況：回 503 而不是讓例外冒出去變成 500。
+    注意 RedisDep 取得 client 時不會真的連線（redis-py 是惰性連線），
+    要等下面實際下指令才會發現連不上，因此 try 要包住指令本身。
+    """
+    try:
+        r.set("hello", "world", ex=60)
+        return {"value": r.get("hello")}
+    except redis.RedisError as exc:
+        raise HTTPException(503, f"Redis 連線失敗，請確認 Redis 是否啟動：{exc}")

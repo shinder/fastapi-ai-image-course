@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
-# start-redis.sh — 單獨啟動 Redis 容器（不需 docker compose）
+# sh-start-redis.sh — 單獨啟動 Redis 容器（不需 docker compose）
 set -euo pipefail
+
+# 關掉 Git Bash（MSYS）的路徑自動轉換：它會把參數中看起來像 POSIX 絕對路徑的字串改寫成
+# Windows 路徑（/data → C:/Program Files/Git/data），下面 --mount 的 tmpfs 掛載點就會掛錯
+# 地方。兩個變數分別是 Git for Windows 專有與 MSYS2 原生，都設比較保險；
+# macOS / Linux 只是多兩個沒人讀的環境變數，不影響。
+export MSYS_NO_PATHCONV=1
+export MSYS2_ARG_CONV_EXCL='*'
 
 # 同名容器已存在就先移除，讓這支 script 可重複執行
 docker rm -f redis-ai-image 2>/dev/null || true
