@@ -23,7 +23,7 @@ docker run -d \
   -e POSTGRES_DB="${DB_NAME}" \
   -p 5432:5432 \
   -v pg-data:/var/lib/postgresql/data \
-  postgres:17
+  pgvector/pgvector:pg17
 
 # ---- 等到資料庫「真的」可用 ----
 # docker run -d 一返回只代表容器建起來了，不代表 PostgreSQL 已能接受連線。實測：

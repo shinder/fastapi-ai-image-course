@@ -27,7 +27,7 @@ docker run -d ^
   -e POSTGRES_DB=%DB_NAME% ^
   -p 5432:5432 ^
   -v pg-data:/var/lib/postgresql/data ^
-  postgres:17
+  pgvector/pgvector:pg17
 
 rem cmd 沒有 bash 的 set -e，指令失敗不會自動中斷，得自己查 errorlevel。
 rem 注意「if errorlevel N」的語義是「errorlevel >= N」，所以 if errorlevel 1 就是「失敗」。

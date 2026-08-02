@@ -1,6 +1,8 @@
 services:
   postgres:
-    image: postgres:17
+    # pgvector 官方映像 = postgres:17 + vector 擴充；官方 postgres 映像裝不了
+    # CREATE EXTENSION vector（附錄 F），其餘用法與 postgres:17 完全相同
+    image: pgvector/pgvector:pg17
     container_name: pg-ai-image
     environment:
       POSTGRES_USER: postgres
