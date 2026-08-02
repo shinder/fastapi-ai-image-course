@@ -27,11 +27,12 @@ docker compose up -d
 
 # 或用腳本啟動（單獨 docker run，不需 docker compose，且比 compose 多含 MongoDB）
 ./sh-start.sh            # 起 PostgreSQL / Redis / MongoDB 三容器，再前景跑開發伺服器（Ctrl-C 結束）
+./sh-start-containers.sh # 只起三個容器，不啟動開發伺服器
 ./sh-start-postgres.sh   # 也可單獨啟動某個服務
 ./sh-start-redis.sh
 ./sh-start-mongodb.sh
 ./sh-stop-containers.sh  # 收工：移除上述三個容器（具名資料卷保留，下次啟動接回）
-# 上述五支各有一份 cmd- 前綴的 .bat（Windows CMD 版，例：sh-start.sh ↔ cmd-start.bat）；
+# 上述六支各有一份 cmd- 前綴的 .bat（Windows CMD 版，例：sh-start.sh ↔ cmd-start.bat）；
 # sh-*.sh 在 Windows 需用 Git Bash 執行。兩套的相容性處理見下方「跨平台腳本」
 
 # 開發伺服器（http://localhost:8000，/docs 看 Swagger）

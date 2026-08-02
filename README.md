@@ -14,11 +14,12 @@ fastapi-ai-image/
 ├── pyproject.toml          # 教材 2.2 套件清單（核心 + 4 組可選）
 ├── docker-compose.yml      # 附錄 F PostgreSQL、附錄 E Redis
 ├── sh-start.sh             # 一鍵起三個依賴容器，再前景跑開發伺服器（替代 docker compose）
+├── sh-start-containers.sh  # 只起三個依賴容器，不啟動開發伺服器
 ├── sh-start-postgres.sh    # 單獨啟動 PostgreSQL 容器（附錄 F）
 ├── sh-start-redis.sh       # 單獨啟動 Redis 容器（附錄 E）
 ├── sh-start-mongodb.sh     # 單獨啟動 MongoDB 容器（單元九）
 ├── sh-stop-containers.sh   # 移除上述三個依賴容器（收工用，具名資料卷保留）
-├── cmd-*.bat               # 上述五支腳本的 Windows CMD 版（cmd-start.bat、cmd-stop-containers.bat…）
+├── cmd-*.bat               # 上述六支腳本的 Windows CMD 版（cmd-start.bat、cmd-stop-containers.bat…）
 ├── Dockerfile              # 教材 部署簡記
 ├── .env / .env.example     # 教材 2.2 環境變數
 ├── app/
@@ -128,6 +129,7 @@ macOS / Linux：
 
 ```bash
 ./sh-start.sh              # 啟動三個依賴容器（PostgreSQL / Redis / MongoDB），再前景跑開發伺服器（Ctrl-C 結束）
+./sh-start-containers.sh   # 只啟動三個依賴容器，不啟動開發伺服器（伺服器自己跑 uv run fastapi dev app/main.py）
 ./sh-stop-containers.sh    # 收工：移除這三個容器（具名資料卷保留，下次啟動自動接回資料）
 
 # 也可單獨啟動某個服務
@@ -150,6 +152,7 @@ macOS / Linux：
 
 ```bat
 cmd-start.bat
+cmd-start-containers.bat
 cmd-stop-containers.bat
 
 rem 也可單獨啟動某個服務
