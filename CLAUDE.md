@@ -15,10 +15,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 uv sync
 
 # 依教材章節加裝可選依賴
-uv sync --extra ml       # 6.3 Hugging Face 分類（transformers + torch，很大）
-uv sync --extra ocr      # 6.4 EasyOCR
-uv sync --extra openai   # 6.5 / 6.6 OpenAI 相容介面、gpt-image-1
-uv sync --extra vector   # 4.8 pgvector
+uv sync --extra ml         # 附錄 D Hugging Face 分類（transformers + torch，很大）
+uv sync --extra ocr        # 附錄 D EasyOCR
+uv sync --extra openai     # 8.6 OpenAI 相容介面、附錄 D gpt-image-1
+uv sync --extra mediapipe  # 8.7 MediaPipe 手部偵測
+uv sync --extra vector     # 附錄 F pgvector
 uv sync --all-extras     # 全部
 
 # 啟動依賴服務（PostgreSQL + Redis；MongoDB 需自行另開，見下方腳本）

@@ -163,15 +163,15 @@ GET {{baseUrl}}/api/v1/images/{{filename}}/base64
 ### 3.6 提供靜態檔案目錄
 GET {{baseUrl}}/uploads/{{filename}}
 
-# === 單元四 資料庫整合（PostgreSQL + SQLModel）===
+# === 單元五 資料庫整合（SQLModel）===
 
-### 4.6 CRUD：列出圖片
+### 5.7 CRUD：列出圖片
 GET {{baseUrl}}/api/v1/images?limit=10
 
-### 4.6 CRUD：取得單張圖片
+### 5.7 CRUD：取得單張圖片
 GET {{baseUrl}}/api/v1/images/1
 
-### 4.7 影像資料儲存：上傳並入庫（不辨識）
+### 5.8 影像資料儲存：上傳並入庫（不辨識）
 POST {{baseUrl}}/api/v1/images/upload
 Content-Type: multipart/form-data; boundary=----Boundary
 
@@ -186,31 +186,17 @@ Content-Type: image/jpeg
 < ./test_images/cat.jpg
 ------Boundary--
 
-# === 單元六 AI 模型整合應用 ===
+# === 單元七 串接外部服務（requests）===
 
-### 6.3 本機模型分類（Hugging Face，不入庫）
-POST {{baseUrl}}/api/v1/ai/classify
-Content-Type: multipart/form-data; boundary=----Boundary
+### 7.4 從公開圖庫匯入隨機圖片（存檔並入庫）
+POST {{baseUrl}}/api/v1/ai/import-random
 
-------Boundary
-Content-Disposition: form-data; name="file"; filename="cat.jpg"
-Content-Type: image/jpeg
+### 附錄 C 並行抓多張圖（asyncio.gather）
+GET {{baseUrl}}/api/v1/ai/fetch-many?count=3
 
-< ./test_images/cat.jpg
-------Boundary--
+# === 單元八 AI 模型整合應用 ===
 
-### 6.4 OCR 文字辨識
-POST {{baseUrl}}/api/v1/ai/ocr
-Content-Type: multipart/form-data; boundary=----Boundary
-
-------Boundary
-Content-Disposition: form-data; name="file"; filename="text.png"
-Content-Type: image/png
-
-< ./test_images/text.png
-------Boundary--
-
-### 6.5 Ollama 視覺模型描述圖片
+### 8.4 Ollama 視覺模型描述圖片
 POST {{baseUrl}}/api/v1/ai/describe
 Content-Type: multipart/form-data; boundary=----Boundary
 
@@ -225,27 +211,98 @@ Content-Type: image/jpeg
 < ./test_images/cat.jpg
 ------Boundary--
 
-### 6.6 影像生成（OpenAI DALL·E）
+### 8.4 發票欄位抽取（結構化輸出；換成發票照片效果較好）
+POST {{baseUrl}}/api/v1/ai/extract-invoice
+Content-Type: multipart/form-data; boundary=----Boundary
+
+------Boundary
+Content-Disposition: form-data; name="file"; filename="text.png"
+Content-Type: image/png
+
+< ./test_images/text.png
+------Boundary--
+
+### 8.5 快取版描述：同一張圖第二次呼叫幾乎零秒回傳
+POST {{baseUrl}}/api/v1/ai/describe-cached
+Content-Type: multipart/form-data; boundary=----Boundary
+
+------Boundary
+Content-Disposition: form-data; name="file"; filename="cat.jpg"
+Content-Type: image/jpeg
+
+< ./test_images/cat.jpg
+------Boundary--
+
+### 8.5 快取命中統計
+GET {{baseUrl}}/api/v1/ai/describe-cached/stats
+
+### 8.7 MediaPipe 手部偵測（不存檔；請換成有手的照片）
+POST {{baseUrl}}/api/v1/hands/detect
+Content-Type: multipart/form-data; boundary=----Boundary
+
+------Boundary
+Content-Disposition: form-data; name="file"; filename="cat.jpg"
+Content-Type: image/jpeg
+
+< ./test_images/cat.jpg
+------Boundary--
+
+### 8.7 MediaPipe 上傳存檔＋偵測，結果寫進 images 表
+POST {{baseUrl}}/api/v1/hands/upload
+Content-Type: multipart/form-data; boundary=----Boundary
+
+------Boundary
+Content-Disposition: form-data; name="file"; filename="cat.jpg"
+Content-Type: image/jpeg
+
+< ./test_images/cat.jpg
+------Boundary--
+
+# === 附錄 D 其他 AI 整合方式 ===
+
+### 附錄 D 本機模型分類（Hugging Face，不入庫）
+POST {{baseUrl}}/api/v1/ai/classify
+Content-Type: multipart/form-data; boundary=----Boundary
+
+------Boundary
+Content-Disposition: form-data; name="file"; filename="cat.jpg"
+Content-Type: image/jpeg
+
+< ./test_images/cat.jpg
+------Boundary--
+
+### 附錄 D OCR 文字辨識
+POST {{baseUrl}}/api/v1/ai/ocr
+Content-Type: multipart/form-data; boundary=----Boundary
+
+------Boundary
+Content-Disposition: form-data; name="file"; filename="text.png"
+Content-Type: image/png
+
+< ./test_images/text.png
+------Boundary--
+
+### 附錄 D 影像生成（OpenAI gpt-image-1）
 POST {{baseUrl}}/api/v1/ai/generate
 Content-Type: application/x-www-form-urlencoded
 
 prompt=A cute corgi wearing sunglasses on a beach, watercolor style
 
-# === 單元七 Redis 快取與非同步任務 ===
+# === 附錄 E Redis 快取與非同步任務 ===
 
-### 7.4 在 FastAPI 中使用 Redis（依賴注入示範）
+### 附錄 E 在 FastAPI 中使用 Redis（依賴注入示範）
 GET {{baseUrl}}/api/v1/ai/cache-test
 
-### 7.7 監控與除錯：Redis 快取統計
+### 附錄 E 監控與除錯：Redis 快取統計
 GET {{baseUrl}}/api/v1/ai/cache/stats
 
-### 7.10 用 Redis 管理非同步任務：啟動非同步生成
+### 附錄 E 用 Redis 管理非同步任務：啟動非同步生成
 POST {{baseUrl}}/api/v1/ai/generate-async
 Content-Type: application/x-www-form-urlencoded
 
 prompt=A futuristic city at night, cyberpunk style
 
-### 7.10 查詢任務狀態（換成上一行回傳的 task_id）
+### 附錄 E 查詢任務狀態（換成上一行回傳的 task_id）
 GET {{baseUrl}}/api/v1/ai/tasks/REPLACE_TASK_ID
 
 # === 單元六 網頁與模板（Jinja2）===

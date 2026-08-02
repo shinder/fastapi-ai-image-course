@@ -1,4 +1,4 @@
-"""FastAPI 入口（教材 2.3、2.4、2.5、2.6、3.6、5.4、6.7、附錄 D）"""
+"""FastAPI 入口（教材 2.3、2.4、2.5、2.6、3.6、5.4、6.7、8.7、附錄 B）"""
 
 import logging
 import os
@@ -15,7 +15,7 @@ from app.database import init_db
 from app.db.mongo import close_mongo, connect_mongo
 from app.routes import ai, basic, hands, images, mongo_demo, users, web
 
-# 主控台日誌（教材 2.6）：root 維持 WARNING，只讓自家 app.access 輸出 INFO，
+# 主控台日誌（教材 附錄 B）：root 維持 WARNING，只讓自家 app.access 輸出 INFO，
 # 避免把 httpx 等第三方套件的 INFO 訊息也一起印出來
 logging.basicConfig(
     level=logging.WARNING,
@@ -26,7 +26,7 @@ logger.setLevel(logging.INFO)
 
 
 class TimingMiddleware(BaseHTTPMiddleware):
-    """計時中介軟體（教材 2.6）：量測請求處理時間，寫入回應標頭並記錄 log"""
+    """計時中介軟體（教材 附錄 B）：量測請求處理時間，寫入回應標頭並記錄 log"""
 
     async def dispatch(self, request: Request, call_next):
         start = time.perf_counter()
@@ -45,7 +45,7 @@ class TimingMiddleware(BaseHTTPMiddleware):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """應用生命週期（教材 5.4、附錄 D）：定義 app「啟動時」與「關閉時」各跑一次的程式碼。
+    """應用生命週期（教材 5.4、8.7、9.3）：定義 app「啟動時」與「關閉時」各跑一次的程式碼。
 
     lifespan 是一個 async context manager，用 yield 把它切成兩半：
     - yield 之前：啟動階段（開始收請求之前執行）→ 建表、連 Mongo，也可在此預載 AI 模型。
@@ -61,7 +61,7 @@ async def lifespan(app: FastAPI):
         print(f"資料庫連線成功：{settings.DATABASE_URL}")
     # 單元九：連線 MongoDB（連不到也不中斷啟動）
     await connect_mongo()
-    # 附錄 D：預載 MediaPipe 手部模型。模型檔不存在時只印警告、不中斷啟動，
+    # 教材 8.7：預載 MediaPipe 手部模型。模型檔不存在時只印警告、不中斷啟動，
     # 手部端點會回 503（與 init_db 相同的優雅降級策略）
     from app.services import hand_landmark
 
@@ -90,7 +90,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 計時中介軟體（教材 2.6）；後加 → 較外層，計時涵蓋 CORS 與路由
+# 計時中介軟體（教材 附錄 B）；後加 → 較外層，計時涵蓋 CORS 與路由
 app.add_middleware(TimingMiddleware)
 
 # 靜態檔案掛載（教材 3.6）：把整個上傳目錄掛到 /uploads 路徑底下，
@@ -161,6 +161,6 @@ app.include_router(basic.router)
 app.include_router(images.router)
 app.include_router(users.router)  # 教材 5.7：最小 CRUD
 app.include_router(ai.router)
-app.include_router(hands.router)  # 附錄 D：MediaPipe 手部偵測
+app.include_router(hands.router)  # 教材 8.7：MediaPipe 手部偵測
 app.include_router(web.router)  # 單元六：Jinja2 樣板網頁
 app.include_router(mongo_demo.router)  # 單元九（補充教材）：MongoDB 留言

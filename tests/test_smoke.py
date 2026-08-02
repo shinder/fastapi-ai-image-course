@@ -43,7 +43,7 @@ def test_demo_create_image_validation():
 
 
 def test_web_gallery_page():
-    """8.6 圖片列表頁：應回 200 並渲染出 HTML（含「圖片列表」標題）"""
+    """6.10 圖片列表頁：應回 200 並渲染出 HTML（含「圖片列表」標題）"""
     from app.main import app
 
     client = TestClient(app)
@@ -54,7 +54,7 @@ def test_web_gallery_page():
 
 
 def test_web_upload_page():
-    """8.6 上傳表單頁：應回 200 並含 file 上傳欄位"""
+    """6.11 上傳表單頁：應回 200 並含 file 上傳欄位"""
     from app.main import app
 
     client = TestClient(app)
@@ -64,7 +64,7 @@ def test_web_upload_page():
 
 
 def test_web_upload_prg(tmp_path, monkeypatch):
-    """8.6 PRG 上傳：POST 後應回 303 並 Location 指向列表頁。
+    """6.11 PRG 上傳：POST 後應回 303 並 Location 指向列表頁。
 
     用 tmp_path 覆蓋上傳目錄，避免污染真正的 uploads/。
     """

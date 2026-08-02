@@ -5,7 +5,7 @@
    - navbar.html 是「片段」，任何樣板用 {% include %} 把它嵌進來。
    include 進來的片段與呼叫端共用同一組 context，所以下面可以直接用 request。
 
-   教材 6.8：用 request.url_path 判斷目前在哪一頁，替該連結加上 active 樣式。
+   教材 6.8：用 request.url.path 判斷目前在哪一頁，替該連結加上 active 樣式。
    這也順帶示範「樣板裡拿得到 request」——前提是 TemplateResponse 有把它傳進來。
 #}
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">

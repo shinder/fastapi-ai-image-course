@@ -1,10 +1,10 @@
-"""MediaPipe 手部關鍵點偵測（附錄 D）
+"""MediaPipe 手部關鍵點偵測（教材 8.7）
 
 兩條端點：
 - POST /api/v1/hands/detect  只偵測，不存檔、不寫資料庫
 - POST /api/v1/hands/upload  上傳存檔 + 偵測，結果寫進 images 表的 ai_result
 
-與 7.4 的 Ollama 端點是同一個模式：service 層負責推論、路由層只處理 HTTP，
+與 8.4 的 Ollama 端點是同一個模式：service 層負責推論、路由層只處理 HTTP，
 阻塞的 CPU 工作一律用 run_in_threadpool 丟出去。
 """
 

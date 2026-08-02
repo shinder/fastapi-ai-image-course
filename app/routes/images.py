@@ -201,7 +201,7 @@ def image_base64(filename: str):
     return {"filename": filename, "data": f"data:{mime};base64,{encoded}"}
 
 
-# ---------- 4.6 CRUD ----------
+# ---------- 5.7 CRUD ----------
 
 
 @router.post("", response_model=ImagePublic, status_code=status.HTTP_201_CREATED)
@@ -275,7 +275,7 @@ def delete_image(image_id: int, session: SessionDep):
     session.commit()
 
 
-# ---------- 4.7 上傳並入庫 ----------
+# ---------- 5.8 上傳並入庫 ----------
 
 
 @router.post("/upload", response_model=ImagePublic, status_code=201)

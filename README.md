@@ -24,17 +24,18 @@ fastapi-ai-image/
 ├── app/
 │   ├── config.py           # 教材 2.2 Settings
 │   ├── database.py         # 教材 5.4、5.6 engine、init_db、SessionDep
-│   ├── main.py             # 教材 2.3、2.5、2.6、3.6、5.4 FastAPI 入口
+│   ├── main.py             # 教材 2.3、2.4、2.5、2.6、3.6、5.4、6.7、8.7、附錄 B FastAPI 入口
 │   ├── models/
 │   │   ├── image.py        # 教材 5.5 SQLModel 影像表 + 多層模型
-│   │   └── user.py         # 教材 5.5 一對多關聯範例
+│   │   └── user.py         # 教材 5.5 一對多／多對多關聯範例
 │   ├── schemas/
 │   │   └── image.py        # 教材 3.1、3.2、3.3 純 Pydantic 範例
 │   ├── routes/
 │   │   ├── basic.py        # 教材 3.2、3.3、3.4 demo 路由（單元 2 路由直接寫在 main.py）
 │   │   ├── images.py       # 教材 3.5、3.6、5.7、5.8、綜合實作
 │   │   ├── images_raw.py   # 教材 5.x 對照：psycopg3 原生驅動，不經 ORM
-│   │   ├── web.py          # 教材 6.2、6.7、6.11 Jinja2 頁面路由
+│   │   ├── users.py        # 教材 5.7 User CRUD（關聯示範表實際會建出）
+│   │   ├── web.py          # 教材 6.9~6.12 Jinja2 頁面路由
 │   │   ├── mongo_demo.py   # 教材 9.4 MongoDB 留言 CRUD
 │   │   └── ai.py           # 教材 8.4、8.6、附錄 E、7.4、附錄 D
 │   ├── services/
@@ -43,14 +44,17 @@ fastapi-ai-image/
 │   │   ├── ollama_service.py        # 教材 8.3、8.4 Ollama 視覺模型
 │   │   ├── image_gen_service.py     # 教材 附錄 D OpenAI gpt-image-1
 │   │   ├── external_ai.py           # 教材 7.4、附錄 C 公開 API（Picsum / Dog CEO）
-│   │   ├── hand_landmark.py         # 附錄 D MediaPipe 手部偵測（Tasks API）
+│   │   ├── hand_landmark.py         # 教材 8.7 MediaPipe 手部偵測（Tasks API）
 │   │   ├── memo_cache.py            # 教材 8.5 以圖片 hash 為 key 的記憶體快取
 │   │   └── cache_service.py         # 教材 附錄 E Redis
 │   ├── db/
 │   │   └── mongo.py        # 教材 9.3 MongoDB 連線
 │   ├── templates/          # 教材單元六 Jinja2 模板
 │   │   ├── base.html       # 6.4 骨架（extends 的基底）
-│   │   ├── index.html      # 6.9 圖片列表頁
+│   │   ├── navbar.html     # 6.5、6.8 導覽列片段（include）
+│   │   ├── index.html      # 6.10 圖片列表頁
+│   │   ├── users.html      # 6.9 用戶列表頁
+│   │   ├── camera.html     # 6.12 相機拍照上傳頁
 │   │   └── upload.html     # 6.11 上傳表單頁（PRG）
 │   ├── static/
 │   │   ├── app.css         # 教材 6.7 專案自備樣式（驗證 /static 掛載）
@@ -66,7 +70,7 @@ fastapi-ai-image/
 │   └── stop-windows-services.md  # Windows 原生服務佔用埠號時的停用／恢復指南
 ├── practices/              # 教材練習：可獨立執行的小範例（多數需先啟動 API）
 │   ├── try_30~32_*.py      # generator / 模組匯入 / hashlib（5.1、3.7）
-│   ├── try_40_mediapipe_hand.py  # 附錄 D MediaPipe 手部關鍵點
+│   ├── try_40_mediapipe_hand.py  # 教材 8.7 MediaPipe 手部關鍵點
 │   ├── try_01~03_*.py      # Pydantic（單元三）
 │   ├── try_04~09_*.py      # tkinter 串接（單元三）
 │   ├── try_10~18_*.py      # requests 串接 + 綜合應用（單元七）
@@ -216,7 +220,7 @@ uv run python scripts/download_models.py
 # 開課前／上課前先驗一次，確認檔案完整（比對 SHA-256，不重新下載）：
 uv run python scripts/download_models.py --check
 
-# 7.6 Ollama 的 OpenAI 相容介面 / 附錄 D gpt-image-1
+# 8.6 Ollama 的 OpenAI 相容介面 / 附錄 D gpt-image-1
 uv sync --extra openai
 
 # 附錄 F pgvector 向量搜尋
@@ -280,7 +284,8 @@ VSCode 使用者：專案 `.vscode/settings.json` 已設定存檔時自動以 Ru
 | Method | Path | 說明 | 教材 |
 | ------ | ---- | ---- | ---- |
 | GET    | `/health`                              | 健康檢查 | 2.3 |
-| GET    | `/items`                               | 查詢參數示範 | 2.4 |
+| GET    | `/items`                               | 基本路由 | 2.4 |
+| GET    | `/my-items`                            | 查詢參數示範 | 2.4 |
 | POST   | `/items`                               | 基本 POST | 2.4 |
 | GET    | `/items/{item_id}`                     | 路徑參數示範 | 2.4 |
 | GET    | `/users/me` / `/users/{user_id}`       | 路徑順序示範 | 2.4 |
@@ -300,21 +305,28 @@ VSCode 使用者：專案 `.vscode/settings.json` 已設定存檔時自動以 Ru
 | GET    | `/api/v1/images/{filename}/download`   | FileResponse | 3.6 |
 | GET    | `/api/v1/images/{filename}/stream`     | StreamingResponse | 3.6 |
 | GET    | `/api/v1/images/{filename}/base64`     | Base64 | 3.6 |
-| POST   | `/api/v1/ai/classify`                  | 影像分類（含快取） | 附錄 D、9.5 |
+| POST   | `/api/v1/ai/classify`                  | 影像分類（含 Redis 快取） | 附錄 D、附錄 E |
 | POST   | `/api/v1/ai/ocr`                       | OCR 文字辨識 | 附錄 D |
-| POST   | `/api/v1/ai/describe`                  | Ollama 圖片描述 | 7.4 |
-| POST   | `/api/v1/ai/describe-cached`           | 同上，但先查記憶體快取 | 7.5 |
-| POST   | `/api/v1/hands/detect`                 | MediaPipe 手部關鍵點（只偵測） | 附錄 D |
-| POST   | `/api/v1/hands/upload`                 | 手部偵測 + 存檔入庫 | 附錄 D |
-| GET    | `/api/v1/ai/describe-cached/stats`     | 記憶體快取命中率 | 7.5 |
-| POST   | `/api/v1/ai/extract-invoice`           | 發票結構化抽取 | 7.4 |
+| POST   | `/api/v1/ai/describe`                  | Ollama 圖片描述 | 8.4 |
+| POST   | `/api/v1/ai/describe-cached`           | 同上，但先查記憶體快取 | 8.5 |
+| POST   | `/api/v1/hands/detect`                 | MediaPipe 手部關鍵點（只偵測） | 8.7 |
+| POST   | `/api/v1/hands/upload`                 | 手部偵測 + 存檔入庫 | 8.7 |
+| GET    | `/api/v1/ai/describe-cached/stats`     | 記憶體快取命中率 | 8.5 |
+| POST   | `/api/v1/ai/extract-invoice`           | 發票結構化抽取 | 8.4 |
 | POST   | `/api/v1/ai/generate`                  | gpt-image-1 影像生成 | 附錄 D |
-| POST   | `/api/v1/ai/generate-async`            | 背景任務生成 | 附錄 D |
-| GET    | `/api/v1/ai/tasks/{task_id}`           | 查任務狀態 | 附錄 D |
+| POST   | `/api/v1/ai/generate-async`            | 背景任務生成 | 附錄 D、附錄 E |
+| GET    | `/api/v1/ai/tasks/{task_id}`           | 查任務狀態 | 附錄 E |
 | POST   | `/api/v1/ai/import-random`             | 從公開圖庫抓圖存檔入庫 | 7.4 |
 | GET    | `/api/v1/ai/fetch-many`                | 並行抓多張圖 | 附錄 C |
-| GET    | `/api/v1/ai/cache/stats`               | 快取命中率 | 9.7 |
-| GET    | `/api/v1/ai/cache-test`                | RedisDep 測試 | 9.4 |
+| GET    | `/api/v1/ai/cache/stats`               | Redis 快取命中率 | 附錄 E |
+| GET    | `/api/v1/ai/cache-test`                | RedisDep 測試 | 附錄 E |
+| GET    | `/api/v1/users`                        | 用戶列表 | 5.7 |
+| GET    | `/api/v1/users/{user_id}`              | 取得單一用戶（含關聯圖片） | 5.7 |
+| POST   | `/api/v1/users`                        | 建立用戶 | 5.7 |
+| DELETE | `/api/v1/users/{user_id}`              | 刪除用戶 | 5.7 |
+| GET    | `/web` / `/web/users` / `/web/camera`  | Jinja2 頁面（列表／用戶／相機） | 6.9~6.12 |
+| GET    | `/web/upload`                          | 上傳表單頁 | 6.11 |
+| POST   | `/web/upload`                          | 表單上傳（PRG） | 6.11 |
 
 ---
 
@@ -324,7 +336,7 @@ VSCode 使用者：專案 `.vscode/settings.json` 已設定存檔時自動以 Ru
 # requests 串接小範例（單元七，try_10~17 各一個觀念，需先啟動 API）
 uv run python practices/try_10_requests_get.py
 
-# 綜合：模擬第三方串接（上傳辨識 + 查歷史）
+# 綜合：模擬第三方串接（上傳入庫 + 查歷史）
 uv run python practices/try_18_client_app.py
 ```
 

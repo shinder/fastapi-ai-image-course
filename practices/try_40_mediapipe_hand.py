@@ -1,4 +1,4 @@
-"""附錄 D：MediaPipe 手部關鍵點偵測
+"""教材 8.7：MediaPipe 手部關鍵點偵測
 
 和 Ollama 視覺模型（教材 8.4）是互補的兩種工具：
   - MediaPipe：幾 MB 的專用模型，數十毫秒就回傳「手在哪裡」的結構化座標
@@ -6,8 +6,7 @@
 
 需要的東西：
     uv sync --extra mediapipe
-    curl -o ml_models/hand_landmarker.task \\
-      https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task
+    uv run python scripts/download_models.py   # 下載並驗證模型檔（教材 8.7 的作法）
 
 執行：
     uv run python -m practices.try_40_mediapipe_hand [圖片路徑]

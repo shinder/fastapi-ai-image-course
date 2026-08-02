@@ -41,7 +41,7 @@ from app.services.rate_limit import RateLimit
 router = APIRouter(prefix="/api/v1/ai", tags=["ai"])
 
 
-# ---------- 6.3 + 7.5 影像分類（含快取） ----------
+# ---------- 附錄 D + 附錄 E 影像分類（含 Redis 快取） ----------
 
 
 @router.post("/classify", dependencies=[Depends(RateLimit(limit=30, window=60))])
@@ -72,7 +72,7 @@ async def classify(file: UploadFile = File(...), r: RedisDep = None):
     return {"results": results, "cached": False}
 
 
-# ---------- 6.4 OCR ----------
+# ---------- 附錄 D OCR ----------
 
 
 @router.post("/ocr")
@@ -90,7 +90,7 @@ async def ocr(file: UploadFile = File(...)):
     return {"full_text": full_text, "details": results, "elapsed_seconds": elapsed_seconds}
 
 
-# ---------- 6.5 Ollama 視覺模型 ----------
+# ---------- 8.4 Ollama 視覺模型 ----------
 
 
 @router.post("/describe")
@@ -169,7 +169,7 @@ async def extract_invoice(file: UploadFile = File(...)):
     return data
 
 
-# ---------- 6.6 影像生成 ----------
+# ---------- 附錄 D 影像生成 ----------
 
 
 @router.post("/generate", dependencies=[Depends(RateLimit(limit=10, window=60))])

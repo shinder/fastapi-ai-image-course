@@ -18,7 +18,7 @@ class Settings:
     OLLAMA_HOST: str = os.getenv("OLLAMA_HOST", "http://localhost:11434")
     OLLAMA_VISION_MODEL: str = os.getenv("OLLAMA_VISION_MODEL", "gemma3:4b")
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
-    # 附錄 D：MediaPipe 手部偵測
+    # 教材 8.7：MediaPipe 手部偵測
     HAND_MODEL_PATH: str = os.getenv("HAND_MODEL_PATH", "./ml_models/hand_landmarker.task")
     HAND_MAX_NUM: int = int(os.getenv("HAND_MAX_NUM", "2"))
     # 超過這個邊長就先縮圖再推論（座標是正規化的，縮圖不影響結果）
