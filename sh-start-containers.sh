@@ -2,7 +2,7 @@
 # sh-start-containers.sh — 只啟動三個依賴服務的容器（PostgreSQL / Redis / MongoDB）
 #   不啟動 FastAPI 開發伺服器——伺服器另開終端機自己跑：
 #       uv run fastapi dev app/main.py
-#   想「容器 + 伺服器」一鍵全起的，用 sh-start.sh。
+#   或用專案根目錄的 start.bat（跨平台單行腳本，bash 下執行 sh start.bat）。
 set -euo pipefail
 
 # 切換到本 script 所在目錄，確保不論從哪裡呼叫，相對路徑都正確

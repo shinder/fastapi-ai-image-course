@@ -13,13 +13,13 @@ FastAPI 與 AI 影像應用開發的範例專案，內容對應講義 `fastapi-a
 fastapi-ai-image/
 ├── pyproject.toml          # 教材 2.2 套件清單（核心 + 4 組可選）
 ├── docker-compose.yml      # 附錄 F PostgreSQL、附錄 E Redis
-├── sh-start.sh             # 一鍵起三個依賴容器，再前景跑開發伺服器（替代 docker compose）
-├── sh-start-containers.sh  # 只起三個依賴容器，不啟動開發伺服器
+├── start.bat               # 啟動開發伺服器的單行腳本（CMD 直接執行；bash 用 sh start.bat）
+├── sh-start-containers.sh  # 一鍵起三個依賴容器（替代 docker compose；不含伺服器）
 ├── sh-start-postgres.sh    # 單獨啟動 PostgreSQL 容器（附錄 F）
 ├── sh-start-redis.sh       # 單獨啟動 Redis 容器（附錄 E）
 ├── sh-start-mongodb.sh     # 單獨啟動 MongoDB 容器（單元九）
 ├── sh-stop-containers.sh   # 移除上述三個依賴容器（收工用，具名資料卷保留）
-├── cmd-*.bat               # 上述六支腳本的 Windows CMD 版（cmd-start.bat、cmd-stop-containers.bat…）
+├── cmd-*.bat               # 上述五支 sh-*.sh 的 Windows CMD 版（cmd-start-containers.bat…）
 ├── Dockerfile              # 教材 部署簡記
 ├── .env / .env.example     # 教材 2.2 環境變數
 ├── app/
@@ -115,10 +115,10 @@ docker compose up -d        # 或 ./start-postgres.sh
 ## 用腳本啟動 / 停止服務（替代 docker compose）
 
 除了 `docker compose`，專案也附了一鍵腳本，改用單獨的 `docker run` 管理依賴服務容器
-——比 docker compose 多含 MongoDB（單元九），`sh-start.sh` / `cmd-start.bat` 還會接著在前景
-啟動開發伺服器。
+——比 docker compose 多含 MongoDB（單元九）。開發伺服器則用單行腳本 `start.bat` 啟動（見下）。
 
-同一件事各有兩份實作，**用檔名前綴區分，選一套用就好**：
+同一件事各有兩份實作，**用檔名前綴區分，選一套用就好**；
+唯一例外是 `start.bat`——內容只有單行指令，兩種環境共用一份：
 
 | 前綴 | 版本 | 執行環境 |
 | --- | --- | --- |
@@ -128,8 +128,8 @@ docker compose up -d        # 或 ./start-postgres.sh
 macOS / Linux：
 
 ```bash
-./sh-start.sh              # 啟動三個依賴容器（PostgreSQL / Redis / MongoDB），再前景跑開發伺服器（Ctrl-C 結束）
-./sh-start-containers.sh   # 只啟動三個依賴容器，不啟動開發伺服器（伺服器自己跑 uv run fastapi dev app/main.py）
+./sh-start-containers.sh   # 啟動三個依賴容器（PostgreSQL / Redis / MongoDB）
+sh start.bat               # 前景啟動開發伺服器（--host 0.0.0.0；Ctrl-C 結束）
 ./sh-stop-containers.sh    # 收工：移除這三個容器（具名資料卷保留，下次啟動自動接回資料）
 
 # 也可單獨啟動某個服務
@@ -143,7 +143,7 @@ macOS / Linux：
 #### 先決條件
 
 - **Docker Desktop**：維持預設的 **Linux 容器模式**（腳本用到的 tmpfs 掛載需要它）。
-- **uv**：已安裝且在 PATH 中——`cmd-start.bat` / `sh-start.sh` 最後會用 `uv run` 啟動伺服器。
+- **uv**：已安裝且在 PATH 中——`start.bat` 用 `uv run` 啟動伺服器。
 - **Git for Windows**：只有要跑 `sh-*.sh` 版才需要（Git Bash 是它內附的）；走 `cmd-*.bat` 版可以不裝。
 
 #### 建議走 CMD 版（`cmd-*.bat`）
@@ -151,8 +151,8 @@ macOS / Linux：
 在 CMD 或 PowerShell 直接執行，不需要 Git Bash：
 
 ```bat
-cmd-start.bat
 cmd-start-containers.bat
+start.bat
 cmd-stop-containers.bat
 
 rem 也可單獨啟動某個服務
@@ -161,7 +161,7 @@ cmd-start-redis.bat
 cmd-start-mongodb.bat
 ```
 
-- PowerShell 執行要加 `.\`（例：`.\cmd-start.bat`）；`.bat` 是交給 cmd.exe 跑的，
+- PowerShell 執行要加 `.\`（例：`.\cmd-start-containers.bat`）；`.bat` 是交給 cmd.exe 跑的，
   不受 PowerShell 執行原則（ExecutionPolicy）限制。
 - 想換資料庫名稱：CMD 是先 `set DB_NAME=my_db`、PowerShell 是先 `$env:DB_NAME="my_db"`，
   再執行 `cmd-start-postgres.bat`，並同步改 `.env` 的 `DATABASE_URL`。
@@ -172,8 +172,8 @@ cmd-start-mongodb.bat
 
 請在 **Git Bash** 執行（不是 CMD 或 PowerShell），指令與上面 macOS / Linux 那段完全相同：
 
-- `./sh-start.sh` 若因執行權限被拒，改用 `bash sh-start.sh`。
-- `sh-start.sh` 最後前景跑的 uvicorn，在 Git Bash 下 Ctrl-C 偶爾要按兩次才停得下來。
+- `./sh-start-containers.sh` 若因執行權限被拒，改用 `bash sh-start-containers.sh`。
+- `sh start.bat` 前景跑的 uvicorn，在 Git Bash 下 Ctrl-C 偶爾要按兩次才停得下來。
 - 腳本開頭已關掉 MSYS 的路徑自動轉換，`-v` / `--mount` 的掛載路徑不會被改寫成 Windows 路徑，
   這點不必自己處理。
 
@@ -185,9 +185,9 @@ cmd-start-mongodb.bat
 判斷是誰佔著埠號、以及停用／恢復的完整步驟見
 [`docs/stop-windows-services.md`](docs/stop-windows-services.md)。
 
-**在 CMD 輸入 `sh-start.sh` 跳出「選擇開啟方式」對話框**
+**在 CMD 輸入 `sh-start-containers.sh` 跳出「選擇開啟方式」對話框**
 
-`.sh` 不是 CMD 能執行的東西。改用 `cmd-start.bat`，或到 Git Bash 裡執行。
+`.sh` 不是 CMD 能執行的東西。改用 `cmd-start-containers.bat`，或到 Git Bash 裡執行。
 
 **Git Bash 執行 `.sh` 報 `bad interpreter` 或 `$'\r': command not found`**
 

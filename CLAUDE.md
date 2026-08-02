@@ -26,17 +26,18 @@ uv sync --all-extras     # 全部
 docker compose up -d
 
 # 或用腳本啟動（單獨 docker run，不需 docker compose，且比 compose 多含 MongoDB）
-./sh-start.sh            # 起 PostgreSQL / Redis / MongoDB 三容器，再前景跑開發伺服器（Ctrl-C 結束）
-./sh-start-containers.sh # 只起三個容器，不啟動開發伺服器
+./sh-start-containers.sh # 起 PostgreSQL / Redis / MongoDB 三容器（不含開發伺服器）
 ./sh-start-postgres.sh   # 也可單獨啟動某個服務
 ./sh-start-redis.sh
 ./sh-start-mongodb.sh
 ./sh-stop-containers.sh  # 收工：移除上述三個容器（具名資料卷保留，下次啟動接回）
-# 上述六支各有一份 cmd- 前綴的 .bat（Windows CMD 版，例：sh-start.sh ↔ cmd-start.bat）；
+# 上述五支各有一份 cmd- 前綴的 .bat（Windows CMD 版，例：sh-start-containers.sh ↔ cmd-start-containers.bat）；
 # sh-*.sh 在 Windows 需用 Git Bash 執行。兩套的相容性處理見下方「跨平台腳本」
 
 # 開發伺服器（http://localhost:8000，/docs 看 Swagger）
 uv run fastapi dev app/main.py
+# 或用跨平台單行腳本：CMD 直接打 start.bat、bash 用 sh start.bat
+# （內容是 uvicorn --host 0.0.0.0，順便供 4.5 的區網測試）
 
 # 測試
 uv run pytest -q
@@ -93,14 +94,16 @@ AI 推論是同步且耗時的，async 路由中一律用 `fastapi.concurrency.r
 
 ### 跨平台腳本（Windows）
 五支腳本各有兩份實作，**用檔名前綴區分**：`sh-*.sh`（bash / Git Bash）與 `cmd-*.bat`（Windows
-CMD），前綴之後的名稱一一對應（`sh-start.sh` ↔ `cmd-start.bat`）。**兩套是平行維護的，
+CMD），前綴之後的名稱一一對應（`sh-start-containers.sh` ↔ `cmd-start-containers.bat`）。**兩套是平行維護的，
 改了其中一支，另一支要一起改**，行為與輸出訊息都應保持一致。新增腳本請延續這個命名慣例。
+唯一的例外是 `start.bat`（啟動開發伺服器）：內容只有單行指令，兩種環境共用一份——
+CMD 直接執行，bash 用 `sh start.bat`。
 
 #### `sh-*.sh` 版：Git Bash 相容性
 學生可能在 Windows 上用 Git Bash 跑 `sh-start*.sh` / `sh-stop-containers.sh`，新增或修改腳本時請維持兩項防護：
 
 - **換行字元**：`.gitattributes` 已強制 `*.sh` 與 `Dockerfile` 以 `eol=lf` checkout。Git for Windows 預設 `core.autocrlf=true`，被轉成 CRLF 的腳本執行時只會報 `bad interpreter` 或 `$'\r': command not found`，看不出是換行問題。新增會交給 Linux 直譯器讀的檔案，記得一併納入。
-- **MSYS 路徑轉換**：Git Bash 會把參數中看起來像 POSIX 絕對路徑的字串改寫成 Windows 路徑（`/data` → `C:/Program Files/Git/data`）。腳本只要帶了 `-v` / `--mount` 這類含絕對路徑的參數，開頭就要 `export MSYS_NO_PATHCONV=1` 與 `export MSYS2_ARG_CONV_EXCL='*'`（分別是 Git for Windows 專有與 MSYS2 原生，各版本認的不一定相同，兩個都設；macOS / Linux 直接忽略）。三支 `sh-start-*.sh` 已設，`sh-stop-containers.sh` 與 `sh-start.sh` 沒有路徑參數故不需要。
+- **MSYS 路徑轉換**：Git Bash 會把參數中看起來像 POSIX 絕對路徑的字串改寫成 Windows 路徑（`/data` → `C:/Program Files/Git/data`）。腳本只要帶了 `-v` / `--mount` 這類含絕對路徑的參數，開頭就要 `export MSYS_NO_PATHCONV=1` 與 `export MSYS2_ARG_CONV_EXCL='*'`（分別是 Git for Windows 專有與 MSYS2 原生，各版本認的不一定相同，兩個都設；macOS / Linux 直接忽略）。三支資料庫的 `sh-start-*.sh` 已設，`sh-stop-containers.sh` 與 `sh-start-containers.sh` 沒有路徑參數故不需要。
 
 #### `cmd-*.bat` 版：CMD 的幾個坑
 `.bat` 不是 `.sh` 的逐行直譯，改寫時有幾件事一定要顧到（現有五支都已處理，新增時比照）：
@@ -111,7 +114,7 @@ CMD），前綴之後的名稱一一對應（`sh-start.sh` ↔ `cmd-start.bat`�
   cp950 主控台是亂碼。**不可**存成 UTF-8 with BOM——cmd 不認 BOM，會把它併進第一行指令。
 - **`echo` 裡的 `>` 要跳脫成 `^>`**：專案訊息慣用 `==>` / `-->` 開頭，沒跳脫會被當成輸出重導向，
   真的去建一個檔案。（`1>&2` 這種刻意導向 stderr 的則保持原樣。）
-- **呼叫另一支 `.bat` 要加 `call`**：否則控制權一去不回，`cmd-start.bat` 起完 postgres 就結束了。
+- **呼叫另一支 `.bat` 要加 `call`**：否則控制權一去不回，`cmd-start-containers.bat` 起完 postgres 就結束了。
 - **沒有 `set -e`**：關鍵步驟後自己接 `if errorlevel 1`（語義是「>= 1」，即失敗）。
 - **沒有 `sleep`**：用 `ping -n 2 127.0.0.1 >nul` 等約 1 秒。不用 `timeout /t 1`——標準輸入被
   重導向時它會直接報錯，被別的腳本呼叫時不可靠。
@@ -119,5 +122,5 @@ CMD），前綴之後的名稱一一對應（`sh-start.sh` ↔ `cmd-start.bat`�
 - **不需要** MSYS 那兩個環境變數：路徑改寫是 Git Bash 特有行為，CMD 不會動 `-v` / `--mount` 的參數。
 
 其餘 Windows 注意事項（Docker Desktop 維持 Linux 容器模式、`sh-*.sh` 版執行權限被拒改用
-`bash sh-start.sh`、`set DB_NAME=` 覆寫資料庫名）寫在 README 的「Windows 使用者」小節；
+`bash sh-start-containers.sh`、`set DB_NAME=` 覆寫資料庫名）寫在 README 的「Windows 使用者」小節；
 Windows 原生服務佔用埠號（5432 / 27017）的排除方式另見 `docs/stop-windows-services.md`。

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# sh-stop-containers.sh — 一鍵移除 sh-start.sh 啟動的三個依賴服務容器
+# sh-stop-containers.sh — 一鍵移除 sh-start-containers.sh 啟動的三個依賴服務容器
 #   （PostgreSQL / Redis / MongoDB）
 #
 # 註：用 docker rm -fv 把容器「刪掉」（正在跑的會先 kill 再移除）。
@@ -7,11 +7,11 @@
 #     tmpfs（記憶體），其餘要保留的路徑掛具名資料卷——所以正常情況根本不會產生匿名資料卷。
 #     這裡仍保留 -v 當「收工防呆」：萬一日後新增的服務漏處理了某個 VOLUME，收工時會把那個
 #     匿名資料卷一起帶走、不留垃圾。-v「只刪匿名資料卷、不碰具名資料卷」，故具名的
-#     pg-data / mongo-data 一律保留，資料仍在；下次 sh-start.sh 會重新 docker run 並接回。
+#     pg-data / mongo-data 一律保留，資料仍在；下次 sh-start-containers.sh 會重新 docker run 並接回。
 set -euo pipefail
 
 # 採「盡力而為」：某個容器不存在（沒起過、已移除）只印警告、不中斷，
-# 與 sh-start.sh 的優雅降級精神一致。
+# 與 sh-start-containers.sh 的優雅降級精神一致。
 echo "==> 移除依賴服務容器"
 for c in pg-ai-image redis-ai-image mongo-ai-image; do
   echo "--> $c"
