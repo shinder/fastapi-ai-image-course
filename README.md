@@ -32,7 +32,7 @@ fastapi-ai-image/
 │   │   └── image.py        # 教材 3.1、3.2、3.3 純 Pydantic 範例
 │   ├── routes/
 │   │   ├── basic.py        # 教材 3.2、3.3、3.4 demo 路由（單元 2 路由直接寫在 main.py）
-│   │   ├── images.py       # 教材 3.5、3.6、5.7、5.8、綜合實作
+│   │   ├── images.py       # 教材 3.5、3.6、5.7、5.8
 │   │   ├── images_raw.py   # 教材 5.x 對照：psycopg3 原生驅動，不經 ORM
 │   │   ├── users.py        # 教材 5.7 User CRUD（關聯示範表實際會建出）
 │   │   ├── web.py          # 教材 6.9~6.12 Jinja2 頁面路由
@@ -76,7 +76,7 @@ fastapi-ai-image/
 │   ├── try_10~18_*.py      # requests 串接 + 綜合應用（單元七）
 │   └── try_20~27_*.py      # httpx 非同步串接（附錄 C）
 ├── requests/
-│   └── api.http            # 教材 1.6 REST Client 測試檔（含綜合實作）
+│   └── api.http            # 教材 1.6 REST Client 測試檔
 ├── tests/
 │   └── test_smoke.py       # 簡單冒煙測試
 ├── uploads/                # 上傳檔案儲存目錄
