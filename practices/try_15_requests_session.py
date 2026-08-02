@@ -9,7 +9,7 @@
 - 適合「對同一個服務連續發多個請求」的情境。
 
 執行前請先啟動後端：
-    uvicorn app.main:app --reload
+    uv run fastapi dev app/main.py
 """
 
 import requests

@@ -10,7 +10,7 @@
 - 建立成功回 201，回應主體是新建立的資源（含自動產生的 id）。
 
 執行前請先啟動後端：
-    uvicorn app.main:app --reload
+    uv run fastapi dev app/main.py
 """
 
 import requests

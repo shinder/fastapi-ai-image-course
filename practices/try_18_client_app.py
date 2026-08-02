@@ -6,7 +6,7 @@
 把前面學到的 requests 用法串成一個小應用：上傳圖片入庫，再查詢歷史。
 
 執行前請先啟動後端：
-    uvicorn app.main:app --reload
+    uv run fastapi dev app/main.py
 （並準備一張圖片，預設讀 test_images/cat.jpg）
 """
 

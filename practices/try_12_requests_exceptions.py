@@ -13,7 +13,7 @@
 - 想觀察 HTTPError，可把 URL 的 id 改成不存在的（例如 /images/999999）會回 404。
 
 執行前請先啟動後端：
-    uvicorn app.main:app --reload
+    uv run fastapi dev app/main.py
 """
 
 import requests

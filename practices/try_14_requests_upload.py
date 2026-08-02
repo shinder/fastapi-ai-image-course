@@ -10,7 +10,7 @@
 - files 字典的 key（"file"）必須和後端路由參數名一致。
 
 執行前請先啟動後端：
-    uvicorn app.main:app --reload
+    uv run fastapi dev app/main.py
 （並準備一張圖片，預設讀 test_images/cat.jpg）
 """
 

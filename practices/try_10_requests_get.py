@@ -12,7 +12,7 @@
   - .json()：把 JSON 主體解析成 Python dict / list（非 JSON 會丟例外）
 
 執行前請先啟動後端：
-    uvicorn app.main:app --reload
+    uv run fastapi dev app/main.py
 （並確認資料庫裡有 id=1 的圖片，可先跑 try_11_requests_post.py 建立一筆）
 """
 

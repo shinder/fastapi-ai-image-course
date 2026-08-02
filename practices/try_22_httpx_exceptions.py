@@ -11,7 +11,7 @@
 except 同樣由「具體」到「一般」排列；timeout 設在 AsyncClient(timeout=...)。
 
 執行前請先啟動後端：
-    uvicorn app.main:app --reload
+    uv run fastapi dev app/main.py
 """
 
 import asyncio

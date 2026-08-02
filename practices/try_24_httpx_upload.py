@@ -10,7 +10,7 @@
 - 開檔仍用一般 open（小檔即可）；只有「送請求」這段是非同步的。
 
 執行前請先啟動後端：
-    uvicorn app.main:app --reload
+    uv run fastapi dev app/main.py
 （並準備一張圖片，預設讀 test_images/cat.jpg）
 """
 

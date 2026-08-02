@@ -72,7 +72,7 @@ fastapi-ai-image/
 │   ├── try_30~32_*.py      # generator / 模組匯入 / hashlib（5.1、3.7）
 │   ├── try_40_mediapipe_hand.py  # 教材 8.7 MediaPipe 手部關鍵點
 │   ├── try_01~03_*.py      # Pydantic（單元三）
-│   ├── try_04~09_*.py      # tkinter 串接（單元三）
+│   ├── try_04~09_*.py      # tkinter 串接（參考範例；打單元三的端點）
 │   ├── try_10~18_*.py      # requests 串接 + 綜合應用（單元七）
 │   └── try_20~27_*.py      # httpx 非同步串接（附錄 C）
 ├── requests/

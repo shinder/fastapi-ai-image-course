@@ -11,7 +11,7 @@
 - 可印 r.url 觀察 params 實際組成的查詢字串。
 
 執行前請先啟動後端：
-    uvicorn app.main:app --reload
+    uv run fastapi dev app/main.py
 """
 
 import requests

@@ -8,7 +8,8 @@
    教材 6.8：用 request.url.path 判斷目前在哪一頁，替該連結加上 active 樣式。
    這也順帶示範「樣板裡拿得到 request」——前提是 TemplateResponse 有把它傳進來。
 #}
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+{# 深色導覽列用 data-bs-theme="dark"（Bootstrap 5.3 起的寫法，舊的 navbar-dark 已棄用）#}
+<nav class="navbar navbar-expand-lg bg-dark" data-bs-theme="dark">
   <div class="container">
     {# url_for('路由函式名') 會反查出該路由的網址，路徑改了也不必改樣板 #}
     <a class="navbar-brand" href="{{ url_for('gallery') }}">AI 影像服務</a>

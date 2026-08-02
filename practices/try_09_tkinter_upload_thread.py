@@ -12,7 +12,7 @@ Thread 的觀念與範例 07 相同（詳見該檔說明）：
       只有「讀檔 + 上傳」這段耗時工作才丟到背景執行緒。
 
 執行前請先啟動後端：
-    uvicorn app.main:app --reload
+    uv run fastapi dev app/main.py
 """
 
 import threading

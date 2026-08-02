@@ -12,7 +12,7 @@
 - Response 的用法（status_code、headers、json()）和 requests 幾乎一樣。
 
 執行前請先啟動後端：
-    uvicorn app.main:app --reload
+    uv run fastapi dev app/main.py
 （並確認資料庫裡有 id=1 的圖片，可先跑 try_21_httpx_post.py 建立一筆）
 """
 

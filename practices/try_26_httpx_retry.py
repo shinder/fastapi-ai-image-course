@@ -9,7 +9,7 @@
 - 若 httpx 也想對 5xx 重試，要自己包重試迴圈，或用 tenacity 這類套件。
 
 執行前請先啟動後端：
-    uvicorn app.main:app --reload
+    uv run fastapi dev app/main.py
 """
 
 import asyncio

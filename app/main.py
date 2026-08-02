@@ -1,4 +1,4 @@
-"""FastAPI 入口（教材 2.3、2.4、2.5、2.6、3.6、5.4、6.7、8.7、附錄 B）"""
+"""FastAPI 入口（教材 2.3、2.4、2.5、2.6、3.6、4.1、5.4、6.7、8.7、附錄 B）"""
 
 import logging
 import os
@@ -100,7 +100,7 @@ app.add_middleware(TimingMiddleware)
 os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_DIR), name="uploads")
 
-# 靜態檔案掛載（教材 6.7）：另外把 app/static 掛到 /static，提供「專案自備」的 CSS/JS。
+# 靜態檔案掛載（教材 4.1，6.7 沿用）：另外把 app/static 掛到 /static，提供「專案自備」的 CSS/JS。
 # 與上面 /uploads 的差別：/uploads 放「使用者上傳」的檔案，/static 放「開發者預先準備」的
 # 靜態資源（樣式、前端腳本、圖示等）。
 # base.html 會用 url_for('static', path='app.css') 反查這裡的網址來載入樣式，

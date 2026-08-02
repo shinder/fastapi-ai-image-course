@@ -16,7 +16,7 @@
 - 進階做法：把上傳丟到背景執行緒，見 try_09_tkinter_upload_thread.py。
 
 執行前請先啟動後端：
-    uvicorn app.main:app --reload
+    uv run fastapi dev app/main.py
 """
 
 import tkinter as tk

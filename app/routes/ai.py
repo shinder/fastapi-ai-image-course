@@ -45,7 +45,7 @@ router = APIRouter(prefix="/api/v1/ai", tags=["ai"])
 
 
 @router.post("/classify", dependencies=[Depends(RateLimit(limit=30, window=60))])
-async def classify(file: UploadFile = File(...), r: RedisDep = None):
+async def classify(r: RedisDep, file: UploadFile = File(...)):
     """以圖片 hash 為快取 key，未命中才呼叫模型，並統計命中率（教材 附錄 E）"""
     if not file.content_type or not file.content_type.startswith("image/"):
         raise HTTPException(400, "請上傳圖片")
@@ -130,6 +130,8 @@ async def describe_cached(
     from app.services.ollama_service import describe_image  # lazy import
 
     content = await file.read()
+    # key 只含圖片內容、不含 prompt：換 prompt 重打同一張圖會拿到舊 prompt 的結果
+    # （教材 8.5 的提示框有說明；正式環境應把 prompt 一併納入 key）
     key = memo_cache.image_key(content, "describe")
 
     # 1. 先查快取

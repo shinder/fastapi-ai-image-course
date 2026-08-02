@@ -17,7 +17,7 @@
   「請主執行緒在下一輪事件迴圈儘快執行這個函式」。
 
 執行前請先啟動後端：
-    uvicorn app.main:app --reload
+    uv run fastapi dev app/main.py
 """
 
 import threading

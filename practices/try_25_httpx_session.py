@@ -10,7 +10,7 @@
 - 所以「用同一個 AsyncClient 連發多個請求」就是 httpx 的連線重用慣例。
 
 執行前請先啟動後端：
-    uvicorn app.main:app --reload
+    uv run fastapi dev app/main.py
 """
 
 import asyncio

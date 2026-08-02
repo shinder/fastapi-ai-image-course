@@ -29,9 +29,10 @@ uv run python -m practices.try_32_hashlib
 | `try_02_pydantic.py` | 用 Field 設定欄位限制與預設值 |
 | `try_03_pydantic.py` | 用 field_validator 自訂驗證邏輯 |
 
-## 二、tkinter 桌面 GUI 串接（需後端，教材 3.2～3.5）
+## 二、tkinter 桌面 GUI 串接（需後端；參考範例）
 
 用 tkinter 做一個小視窗，示範桌面程式怎麼把資料送給 FastAPI。
+教材沒有 tkinter 章節，這組是給有興趣的學員的參考範例；表中「教材」欄指的是**串接的後端端點**出自哪一節。
 `try_04`～`06` 是基礎版，`try_07`～`09` 是對應的 **Thread 進階版**（把請求丟到背景執行緒，避免送出時視窗凍結）。
 
 | 檔案 | 主題 | 對應後端端點 | 教材 |
@@ -88,7 +89,7 @@ uv run python practices/try_01_pydantic.py
 
 ```bash
 # 終端機 1：啟動後端（需 docker compose 的 PostgreSQL，見專案根目錄 README）
-uvicorn app.main:app --reload
+uv run fastapi dev app/main.py
 
 # 終端機 2：執行範例
 uv run python practices/try_11_requests_post.py

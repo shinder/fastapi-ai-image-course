@@ -12,7 +12,7 @@
 - 掛上 adapter 後，之後用這個 session 發的請求都會自動套用重試。
 
 執行前請先啟動後端：
-    uvicorn app.main:app --reload
+    uv run fastapi dev app/main.py
 """
 
 import requests
