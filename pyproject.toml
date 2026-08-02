@@ -14,7 +14,9 @@ dependencies = [
     "httpx>=0.27.0",
     "python-dotenv>=1.0.1",
     "pymongo>=4.13.0",
-    "beanie>=1.27.0",
+    # 下限設 2.0：教材 9.5 的 init_beanie(database=AsyncMongoClient()[db]) 寫法
+    # 需要 Beanie 2.x（改用 PyMongo 原生 async）；1.x 是搭 Motor 的舊介面。
+    "beanie>=2.0",
 ]
 
 [project.optional-dependencies]
@@ -28,15 +30,15 @@ ocr = [
     "easyocr>=1.7.0",
     "numpy>=2.0.0",
 ]
-# 附錄 D：OpenAI gpt-image-1 影像生成（也可給 7.6 Ollama 的 OpenAI 相容介面使用）
+# 附錄 D：OpenAI gpt-image-1 影像生成（也可給 8.6 Ollama 的 OpenAI 相容介面使用）
 openai = [
     "openai>=1.50.0",
 ]
-# 附錄 D：MediaPipe 手部／臉部／姿勢偵測（輕量本機模型）
+# 教材 8.7：MediaPipe 手部／臉部／姿勢偵測（輕量本機模型）
 mediapipe = [
     # 下限設 0.10.30：Apple Silicon(arm64) 的 wheel 從這個版本才開始提供。
     # 注意 Intel Mac(x86_64) 的 wheel 在 0.10.21 之後就停止供應，兩者沒有交集，
-    # 因此本專案不支援 Intel Mac 跑 MediaPipe（附錄 D 有說明替代作法）。
+    # 因此本專案不支援 Intel Mac 跑 MediaPipe（教材 8.7 有說明替代作法）。
     "mediapipe>=0.10.30",
 ]
 # 附錄 F：pgvector 向量搜尋

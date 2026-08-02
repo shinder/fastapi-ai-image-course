@@ -21,7 +21,7 @@
 （AsyncConnection），以搭配 FastAPI 的 async 路由。另一個常見選擇是 asyncpg
 （純非同步、效能更好，但 placeholder 用 $1/$2 而非 %s，API 也不同）。
 
-預設不掛進 app（比照 models/user.py，是純示範、不影響既有 app 啟動）。要啟用：
+預設不掛進 app（main.py 沒 include 這個 router，純示範、不影響既有 app 啟動）。要啟用：
     1. 確認 docker compose 的 postgres 有在跑（本檔連的是 PostgreSQL，不是預設的 sqlite）。
     2. 設環境變數 PG_DSN（見下方），或直接用預設值（對到 docker-compose.yml）。
     3. 在 app/main.py：
@@ -170,7 +170,7 @@ class ImagePublicRaw(BaseModel):
 
 
 # ============================================================================
-# 路由層（對照 app/routes/images.py 的 4.6 CRUD 段）
+# 路由層（對照 app/routes/images.py 的 5.7 CRUD 段）
 # ============================================================================
 #
 # 用 /api/v2/images 區隔，避免和 SQLModel 版的 /api/v1/images 撞路徑。

@@ -32,10 +32,10 @@ templates = Jinja2Templates(directory="app/templates")
 
 router = APIRouter(prefix="/web", tags=["web"])
 
-# 圖片列表頁要顯示的副檔名
-IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".webp", ".gif"}
-# 上傳允許的 MIME 類型（對應 IMAGE_EXTS）；後端驗證，不能只靠前端 accept
+# 上傳允許的 MIME 類型；後端驗證，不能只靠前端 accept
 ALLOWED_CONTENT_TYPES = {"image/jpeg", "image/png", "image/webp", "image/gif"}
+# 上傳大小上限，與 routes/images.py 的 MAX_SIZE 一致
+MAX_SIZE = 10 * 1024 * 1024
 
 
 @router.get("", response_class=HTMLResponse)
@@ -92,6 +92,10 @@ async def handle_upload(request: Request, session: SessionDep, file: UploadFile 
     if file.content_type not in ALLOWED_CONTENT_TYPES:
         # PRG：重導回上傳頁並以 query 帶出錯誤，仍走無副作用的 GET
         url = request.url_for("upload_page").include_query_params(error="type")
+        return RedirectResponse(url=url, status_code=303)
+    # 大小上限：與 API 端點（routes/images.py）同一標準，超過就擋下
+    if file.size is not None and file.size > MAX_SIZE:
+        url = request.url_for("upload_page").include_query_params(error="size")
         return RedirectResponse(url=url, status_code=303)
 
     content = await file.read()

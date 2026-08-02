@@ -1,0 +1,39 @@
+# 沒有這個檔案時，Dockerfile 的 COPY . . 會把下列東西一併烤進映像檔：
+# - 宿主機的 .venv/（macOS/Windows 的二進位檔會蓋掉映像內 uv sync 建好的 Linux venv，容器必掛）
+# - .env（含 OPENAI_API_KEY 等秘密）
+# - app.db、uploads/、ml_models/（本機資料，映像不該帶）
+
+# 虛擬環境與快取
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# 秘密與本機設定（.env.example 是範本，保留）
+.env
+
+# 本機資料與模型
+app.db
+uploads/
+ml_models/
+
+# 版本控制與編輯器
+.git/
+.gitignore
+.gitattributes
+.vscode/
+
+# 與執行無關的檔案
+docs/
+tests/
+requests/
+practices/
+README.md
+CLAUDE.md
+sh-*.sh
+cmd-*.bat
+docker-compose.yml
+Dockerfile
+.dockerignore

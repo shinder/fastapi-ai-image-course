@@ -5,8 +5,10 @@
 {% block content %}
   <h1 class="mb-4">上傳圖片</h1>
 
-  {# 後端驗證失敗時（如上傳非圖片），handle_upload 會重導回此頁並帶 error #}
-  {% if error %}
+  {# 後端驗證失敗時（如上傳非圖片、檔案過大），handle_upload 會重導回此頁並帶 error #}
+  {% if error == "size" %}
+    <div class="alert alert-danger">檔案過大（超過 10 MB）。</div>
+  {% elif error %}
     <div class="alert alert-danger">只接受圖片檔（JPEG / PNG / WebP / GIF）。</div>
   {% endif %}
 

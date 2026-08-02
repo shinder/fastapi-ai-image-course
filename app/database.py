@@ -22,8 +22,9 @@ def init_db() -> bool:
 
     create_all() 只會建立「啟動時已被 import、註冊到 SQLModel.metadata」的
     table=True 模型對應的資料表，且只建「還不存在」的表（冪等，每次啟動呼叫都安全）。
-    本專案的 import 鏈（main → routes.images → models.image）讓 Image 被註冊，
-    所以實際只建 Image 那張表；models/user.py 沒被任何地方 import，其關聯示範表不會建出。
+    本專案的 import 鏈（main → routes.images → models.image、main → routes.users →
+    models.user）會把 Image 與 User / UserImage / Tag（含多對多中間表）都註冊進來，
+    啟動時這幾張表全部會建出。
     注意：create_all 不做 migration——改了既有模型（加欄位、改型別）不會 ALTER 既有表，
     需改用 Alembic 這類遷移工具（或開發階段砍表重建）。
 
@@ -49,7 +50,7 @@ def init_db() -> bool:
 def get_session():
     """FastAPI 依賴注入用。
 
-    優雅降級（教材 4.5）：連不到 PostgreSQL 時，讓端點回 503（服務暫時不可用）
+    優雅降級（教材 5.4）：連不到 PostgreSQL 時，讓端點回 503（服務暫時不可用）
     而不是預設的 500（伺服器內部錯誤）——「資料庫沒開」是外部依賴缺席，
     不是程式寫錯，503 才是正確語意，也讓學生一眼看出該去啟動資料庫。
 

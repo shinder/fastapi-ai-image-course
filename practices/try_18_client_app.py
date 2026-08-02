@@ -1,6 +1,6 @@
 """綜合範例 18：模擬第三方應用串接本服務
 
-對應教材：單元八的綜合 requests 應用
+對應教材：單元七的綜合 requests 應用
 對應後端：POST /api/v1/images/upload（教材 5.8 上傳並入庫）、GET /api/v1/images
 
 把前面學到的 requests 用法串成一個小應用：上傳圖片入庫，再查詢歷史。
@@ -38,9 +38,9 @@ def list_images(limit: int = 10) -> list:
 
 
 if __name__ == "__main__":
-    # 1. 上傳並辨識
+    # 1. 上傳並入庫（回應是 ImagePublic：id、title、filename、file_size…）
     result = upload_image("test_images/cat.jpg", "我家的貓")
-    print("辨識結果：", result["ai_result"])
+    print(f"上傳完成：#{result['id']} {result['title']}（{result['file_size']} bytes）")
 
     # 2. 查詢歷史
     history = list_images(limit=5)
