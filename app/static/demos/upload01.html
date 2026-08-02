@@ -33,7 +33,7 @@
       // 直接把整個 <form> 包成 FormData，欄位名沿用 input 的 name
       const fd = new FormData(document.form1);
 
-      const r = await fetch('http://localhost:8000/api/v1/images/upload-only', {
+      const r = await fetch('/api/v1/images/upload-only', {
         method: 'POST',
         body: fd,           // 不要自己設 Content-Type
       });
@@ -42,7 +42,7 @@
 
       if (r.ok) {
         // 後端回傳存檔後的檔名，組出 /uploads/xxx 的網址顯示
-        my_img.src = `http://localhost:8000/uploads/${result.filename}`;
+        my_img.src = `/uploads/${result.filename}`;
       }
     });
   </script>

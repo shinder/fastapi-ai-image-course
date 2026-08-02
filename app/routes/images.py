@@ -103,7 +103,7 @@ async def upload_and_process(file: UploadFile = File(...)):
     content = await file.read()
 
     # 用 Pillow 開啟圖片；BytesIO 把 bytes 包成「類檔案物件」，省去先落地存檔
-    # 非圖片或壞檔會丟 UnidentifiedImageError，包成 400 而非未處理的 500
+    # 非圖片會丟 UnidentifiedImageError，包成 400 而非未處理的 500
     try:
         img = PILImage.open(BytesIO(content))
     except Exception:
@@ -116,8 +116,12 @@ async def upload_and_process(file: UploadFile = File(...)):
         "height": img.height,
     }
 
-    # 縮圖：等比例縮到最長邊不超過 800px；thumbnail 會就地修改 img
-    img.thumbnail((800, 800))
+    # 縮圖：等比例縮到最長邊不超過 800px；thumbnail 會就地修改 img。
+    # open() 只讀檔頭，截斷／毀損的圖片要到這裡實際解碼才會爆（OSError），也要擋成 400
+    try:
+        img.thumbnail((800, 800))
+    except OSError:
+        raise HTTPException(400, "圖片內容毀損，無法處理")
     # JPEG 不支援透明通道，RGBA / P（調色盤）需先轉成 RGB 才能存成 JPEG
     if img.mode in ("RGBA", "P"):
         img = img.convert("RGB")

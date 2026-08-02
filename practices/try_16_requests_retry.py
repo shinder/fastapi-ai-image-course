@@ -7,7 +7,7 @@
 - 伺服器偶發 5xx、網路抖動時，自動重試常能救回請求。
 - 用 urllib3 的 Retry 設定重試策略，掛到 Session 的 HTTPAdapter：
   - total：最多重試次數
-  - backoff_factor：指數退避，每次失敗等待 0.5、1、2… 秒再試
+  - backoff_factor：指數退避，重試前等 0、1、2… 秒（第一次重試不等待）
   - status_forcelist：哪些狀態碼才觸發重試
 - 掛上 adapter 後，之後用這個 session 發的請求都會自動套用重試。
 
@@ -24,7 +24,7 @@ def build_session_with_retry() -> requests.Session:
     session = requests.Session()
     retries = Retry(
         total=3,  # 最多重試 3 次
-        backoff_factor=0.5,  # 0.5、1、2 秒（指數退避）
+        backoff_factor=0.5,  # 重試前等 0、1、2 秒（指數退避；第一次重試不等待）
         status_forcelist=[500, 502, 503, 504],  # 這些狀態碼才重試
         allowed_methods=["GET", "POST"],
     )

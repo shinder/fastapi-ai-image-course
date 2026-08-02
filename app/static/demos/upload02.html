@@ -30,7 +30,7 @@
       const fd = new FormData(document.form1);
       out.textContent = '上傳中…';
 
-      const r = await fetch('http://localhost:8000/api/v1/images/upload-and-process', {
+      const r = await fetch('/api/v1/images/upload-and-process', {
         method: 'POST',
         body: fd,
       });
@@ -38,7 +38,7 @@
       out.textContent = JSON.stringify(result, null, 2);
 
       if (r.ok && result.thumbnail) {
-        my_img.src = `http://localhost:8000/uploads/${result.thumbnail}`;
+        my_img.src = `/uploads/${result.thumbnail}`;
       }
     });
   </script>
