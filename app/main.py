@@ -129,7 +129,7 @@ def list_items():
 # 基本路由 + 查詢參數
 @app.get("/my-items")
 def my_list_items(skip: int = 0, limit: int = 10, keyword: str | None = None):
-    """查詢參數示範：GET /items?skip=0&limit=20&keyword=cat"""
+    """查詢參數示範：GET /my-items?skip=0&limit=20&keyword=cat"""
     return {"skip": skip, "limit": limit, "keyword": keyword}
 
 

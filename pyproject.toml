@@ -49,19 +49,24 @@ vector = [
 [dependency-groups]
 dev = [
     "pytest>=8.3.0",
-    "black>=24.10.0",
     "ruff>=0.7.0",
     "mypy>=1.13.0",
 ]
-
-[tool.ty.environment]
-python = "./.venv"
-python-version = "3.12"
 
 [tool.ruff]
 line-length = 100
 target-version = "py312"
 
-[tool.black]
-line-length = 100
-target-version = ["py312"]
+[tool.mypy]
+python_version = "3.12"
+# 可選依賴（uv sync --extra ...）沒裝時，或套件本身沒有型別標記時，不要讓 mypy 因此報錯
+[[tool.mypy.overrides]]
+module = [
+    "transformers",
+    "transformers.*",
+    "openai",
+    "easyocr",
+    "mediapipe",
+    "mediapipe.*",
+]
+ignore_missing_imports = true

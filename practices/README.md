@@ -77,6 +77,12 @@ uv run python -m practices.try_32_hashlib
 
 後端端點與對應的 requests 版相同（見上一組表格），差別只在同步 / 非同步。
 
+## 五、MediaPipe 手部偵測（純本地，需 `uv sync --extra mediapipe`，教材 8.7）
+
+| 檔案 | 主題 | 對應後端端點 | 教材 |
+| --- | --- | --- | --- |
+| `try_40_mediapipe_hand.py` | 不經 API，直接用 `hand_landmark.py` 對一張圖偵測手部關鍵點 | （不需後端） | 8.7 |
+
 ## 執行方式
 
 純本地範例（`try_01`～`try_03`，以及只示範寫法的 `try_17`、`try_27`）直接執行：

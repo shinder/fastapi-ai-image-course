@@ -137,9 +137,7 @@ def main() -> int:
         return 1
 
     print(
-        "\n全部模型驗證通過。"
-        if args.check
-        else "\n模型準備完成：uv run uvicorn app.main:app --reload"
+        "\n全部模型驗證通過。" if args.check else "\n模型準備完成：uv run fastapi dev app/main.py"
     )
     return 0
 

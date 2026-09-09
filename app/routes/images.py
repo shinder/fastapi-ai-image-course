@@ -17,7 +17,7 @@ from typing import List
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile, status
 from fastapi.responses import FileResponse, StreamingResponse
 from PIL import Image as PILImage
-from sqlmodel import func, select
+from sqlmodel import col, func, select
 
 from app.config import settings
 from app.database import SessionDep
@@ -105,7 +105,8 @@ async def upload_and_process(file: UploadFile = File(...)):
     # 用 Pillow 開啟圖片；BytesIO 把 bytes 包成「類檔案物件」，省去先落地存檔
     # 非圖片會丟 UnidentifiedImageError，包成 400 而非未處理的 500
     try:
-        img = PILImage.open(BytesIO(content))
+        # 標成 Image.Image：open() 回傳的是子類 ImageFile，下面 convert() 會換成一般 Image
+        img: PILImage.Image = PILImage.open(BytesIO(content))
     except Exception:
         raise HTTPException(400, "無法解析的圖片檔")
     # 讀取原圖基本資訊（格式、色彩模式、寬高）
@@ -235,15 +236,16 @@ def list_images(
 ):
     statement = select(Image)
     if keyword:
-        statement = statement.where(Image.title.icontains(keyword))  # icontains：不分大小寫
-    statement = statement.offset(skip).limit(limit).order_by(Image.uploaded_at.desc())
+        # col() 把模型欄位包成 SQLAlchemy 欄位物件，型別檢查器才知道有 icontains / desc 可用
+        statement = statement.where(col(Image.title).icontains(keyword))  # 不分大小寫
+    statement = statement.offset(skip).limit(limit).order_by(col(Image.uploaded_at).desc())
     return session.exec(statement).all()
 
 
 @router.get("/stats/total")
 def total_images(session: SessionDep):
     """計數查詢（教材 5.7）"""
-    statement = select(func.count(Image.id))
+    statement = select(func.count(col(Image.id)))
     total = session.exec(statement).one()
     return {"total": total}
 

@@ -4,39 +4,45 @@
 每個點都是 0~1 的正規化座標，乘上圖片寬高就是實際像素位置。
 
 重要：新版 mediapipe 已經把舊的 mp.solutions.* 整個移除，只剩 mediapipe.tasks。
-網路上常見的 mp.solutions.hands.Hands() 寫法在 0.10.35 會直接 AttributeError，
+網路上常見的 mp.solutions.hands.Hands() 寫法在新版（本專案要求的 0.10.30 以上）會直接 AttributeError，
 請一律用本檔案示範的 Tasks API。
 
 為什麼要獨立成 services 層：
 推論邏輯跟 HTTP 無關，抽出來之後路由檔可以維持輕薄，
 之後要改接 WebSocket 即時串流或換別的模型，也不必動到路由。
+
+mediapipe 與 numpy 是可選依賴（uv sync --extra mediapipe），所以和 ai_service.py 一樣
+**只在函式內 import**：核心安裝下 app 照樣能啟動，只有手部端點會回 503。
+本檔案頂層若直接 import mediapipe，main.py 一 import 到 routes/hands.py 整個 app 就起不來
+（tests/test_smoke.py 有測試守著這件事）。
 """
+
+from __future__ import annotations
 
 import os
 import threading
 from io import BytesIO
+from typing import TYPE_CHECKING
 
-import numpy as np
 from PIL import Image as PILImage, ImageOps
 
-import mediapipe as mp
-from mediapipe.tasks.python import BaseOptions
-from mediapipe.tasks.python.vision import (
-    HandLandmarker,
-    HandLandmarkerOptions,
-    RunningMode,
-)
-
 from app.config import settings
+
+if TYPE_CHECKING:  # 只給型別檢查器看，執行期不會 import
+    import numpy as np
+    from mediapipe.tasks.python.vision import HandLandmarker
 
 # 模組層單例：建立 detector 要花一秒左右（要把模型讀進記憶體、初始化 GPU），
 # 不可能每個請求建一次，所以啟動時建好一直重複用。
 # 這跟 app/database.py 的 engine 是同一種模式：模組只會被 import 一次。
 _detector: HandLandmarker | None = None
 
+# detector 沒建起來的原因（套件沒裝／模型檔不存在），路由拿它組 503 的錯誤訊息
+_unavailable_reason: str | None = None
+
 # MediaPipe 從未保證 detector 可以被多執行緒同時呼叫，而 FastAPI 會把
 # run_in_threadpool 的工作丟到不同執行緒，所以用鎖把 detect() 串成一次一個。
-# 補充：0.10.31 之後 MediaPipe 內部已經用單一執行緒把所有 C 呼叫序列化，
+# 補充：新版 MediaPipe（0.10.30 以上）內部已經用單一執行緒把所有 C 呼叫序列化，
 # 所以這把鎖不會讓速度變慢（本來就沒有平行度），但語意明確、也不依賴實作細節。
 _lock = threading.Lock()
 
@@ -45,16 +51,36 @@ def load_detector() -> bool:
     """應用啟動時（lifespan）呼叫，預先把模型載入記憶體。
 
     採用與 database.init_db() 相同的優雅降級策略：
-    模型檔不存在時不讓整個應用崩潰，只印出清楚的警告與下載指令並回傳 False，
+    套件沒裝或模型檔不存在時不讓整個應用崩潰，只印出清楚的警告與對應指令並回傳 False，
     這樣其他不需要 AI 的路由仍可正常使用，手部相關端點則會回 503。
     """
-    global _detector
+    global _detector, _unavailable_reason
 
     if _detector is not None:
         return True
 
+    # 1. 套件有沒有裝（可選依賴，lazy import）
+    try:
+        from mediapipe.tasks.python import BaseOptions
+        from mediapipe.tasks.python.vision import (
+            HandLandmarker,
+            HandLandmarkerOptions,
+            RunningMode,
+        )
+    except ImportError:
+        _unavailable_reason = "尚未安裝 mediapipe，請先執行：uv sync --extra mediapipe 再重啟服務"
+        print("=" * 70)
+        print("未安裝 mediapipe，手部偵測端點將無法使用（其餘功能不受影響）。")
+        print("   → 請執行：uv sync --extra mediapipe")
+        print("=" * 70)
+        return False
+
+    # 2. 模型檔有沒有下載
     path = settings.HAND_MODEL_PATH
     if not os.path.exists(path):
+        _unavailable_reason = (
+            "手部模型尚未載入，請先執行：uv run python scripts/download_models.py 再重啟服務"
+        )
         print("=" * 70)
         print("找不到 MediaPipe 手部模型檔，手部偵測端點將無法使用。")
         print(f"   預期路徑：{path}")
@@ -72,6 +98,7 @@ def load_detector() -> bool:
         min_hand_presence_confidence=0.5,
     )
     _detector = HandLandmarker.create_from_options(options)
+    _unavailable_reason = None
 
     print(f"MediaPipe 手部模型載入完成：{path}")
     return True
@@ -91,6 +118,14 @@ def is_ready() -> bool:
     return _detector is not None
 
 
+def unavailable_reason() -> str:
+    """模型不可用時給用戶端看的原因；lifespan 沒跑過（例如 TestClient）時給通用說法"""
+    return _unavailable_reason or (
+        "手部模型尚未載入，請確認已 uv sync --extra mediapipe 並執行 "
+        "uv run python scripts/download_models.py 後重啟服務"
+    )
+
+
 def decode_image(content: bytes) -> tuple[np.ndarray, int, int]:
     """圖檔 bytes → (RGB uint8 的 numpy 陣列, 原圖寬, 原圖高)
 
@@ -105,7 +140,9 @@ def decode_image(content: bytes) -> tuple[np.ndarray, int, int]:
     - ascontiguousarray：mp.Image 會把陣列的記憶體位址直接交給 C 函式，
       要求記憶體連續的 uint8
     """
-    img = PILImage.open(BytesIO(content))
+    import numpy as np  # 可選依賴，lazy import（與 mediapipe 同一個 extra 帶進來）
+
+    img: PILImage.Image = PILImage.open(BytesIO(content))
     img = ImageOps.exif_transpose(img)
     img = img.convert("RGB")
 
@@ -130,6 +167,8 @@ def detect(content: bytes) -> dict:
     """
     if _detector is None:
         raise RuntimeError("手部模型尚未載入")
+
+    import mediapipe as mp  # 走到這裡 detector 已建好，代表套件一定裝了
 
     rgb, width, height = decode_image(content)
     processed_height, processed_width = rgb.shape[:2]

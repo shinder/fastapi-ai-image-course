@@ -75,6 +75,9 @@ def describe_image_via_openai_compat(encoded_b64: str) -> str:
     """進階：透過 Ollama 的 OpenAI 相容介面（教材 8.6）
 
     需安裝可選依賴：uv sync --extra openai
+    這支函式只示範寫法，沒有掛到任何端點；要試可在 Python shell 直接呼叫：
+        from app.services.ollama_service import describe_image_via_openai_compat
+        print(describe_image_via_openai_compat(base64.b64encode(open("cat.jpg", "rb").read()).decode()))
     """
     from openai import OpenAI  # lazy import
 

@@ -9,7 +9,9 @@
 所以一個 models 檔案如果沒被任何地方 import，它的表就永遠不會被建出來
 （教材 5.5 會再回到這件事）。
 
-執行：uv run python practices/try_31_module.py
+執行：uv run python -m practices.try_31_module
+（要用 -m 從專案根目錄以模組方式執行；直接跑檔案時 sys.path[0] 是 practices/，
+找不到 practices 這個套件，會 ModuleNotFoundError）
 """
 
 print("=== 1. import 的當下，模組的全域範圍就會執行 ===")

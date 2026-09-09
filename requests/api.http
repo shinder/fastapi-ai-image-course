@@ -171,6 +171,15 @@ GET {{baseUrl}}/api/v1/images?limit=10
 ### 5.7 CRUD：取得單張圖片
 GET {{baseUrl}}/api/v1/images/1
 
+### 5.7 / 6.9 新增用戶（表單欄位；6.9 的用戶列表頁要先有資料）
+POST {{baseUrl}}/api/v1/users
+Content-Type: application/x-www-form-urlencoded
+
+name=王小明
+
+### 5.7 列出用戶
+GET {{baseUrl}}/api/v1/users
+
 ### 5.8 影像資料儲存：上傳並入庫（不辨識）
 POST {{baseUrl}}/api/v1/images/upload
 Content-Type: multipart/form-data; boundary=----Boundary
@@ -306,6 +315,9 @@ prompt=A futuristic city at night, cyberpunk style
 GET {{baseUrl}}/api/v1/ai/tasks/REPLACE_TASK_ID
 
 # === 單元六 網頁與模板（Jinja2）===
+
+### 6.9 用戶列表頁（建議用瀏覽器開；資料用上面「新增用戶」灌）
+GET {{baseUrl}}/web/users
 
 ### 6.10 圖片列表頁（建議用瀏覽器開）
 GET {{baseUrl}}/web

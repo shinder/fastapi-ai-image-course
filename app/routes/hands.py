@@ -51,10 +51,8 @@ def _check_model_ready() -> None:
     不是程式寫錯，不該回 500。
     """
     if not hand_landmark.is_ready():
-        raise HTTPException(
-            503,
-            "手部模型尚未載入，請先執行：uv run python scripts/download_models.py 再重啟服務",
-        )
+        # 原因由 service 層記錄（套件沒裝 vs 模型檔沒下載），這裡只負責轉成 503
+        raise HTTPException(503, hand_landmark.unavailable_reason())
 
 
 async def _detect(content: bytes) -> dict:

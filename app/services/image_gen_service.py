@@ -29,7 +29,10 @@ def generate_image(prompt: str) -> str:
         # 可選參數：quality="low"/"medium"/"high"、output_format="png"/"jpeg"
     )
 
-    # gpt-image-1 一律回 base64（response.data[0].b64_json），沒有 url
+    # gpt-image-1 一律回 base64（response.data[0].b64_json），沒有 url。
+    # SDK 把 data 與 b64_json 都標成 Optional，先檢查再解碼，缺了就明確報錯而不是 TypeError
+    if not response.data or not response.data[0].b64_json:
+        raise RuntimeError("OpenAI 未回傳圖片資料")
     image_bytes = base64.b64decode(response.data[0].b64_json)
     os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
     filename = f"gen_{uuid.uuid4().hex}.png"

@@ -32,7 +32,7 @@
 """
 
 import os
-from typing import Annotated, Optional
+from typing import Annotated, Any, Optional, cast
 
 import psycopg
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -248,8 +248,10 @@ async def total_images(conn: ConnDep):
     """計數查詢（對照原版 total_images 的 select(func.count(...))）"""
     async with conn.cursor() as cur:
         await cur.execute("SELECT count(*) AS total FROM images_raw")
-        row = await cur.fetchone()
-    return {"total": row["total"]}  # dict_row 讓我們能用欄位別名 total 取值
+        # dict_row 讓我們能用欄位別名 total 取值；但 psycopg 的型別標記仍以 tuple 為準，
+        # 這裡用 cast 告訴型別檢查器實際拿到的是 dict（fetchone 沒資料時會是 None）
+        row = cast("dict[str, Any] | None", await cur.fetchone())
+    return {"total": row["total"] if row else 0}
 
 
 @router.get("/{image_id}", response_model=ImagePublicRaw)

@@ -1,6 +1,6 @@
 # fastapi-ai-image
 
-FastAPI 與 AI 影像應用開發的範例專案，內容對應講義 `fastapi-ai-image.md`（2026-08 改版）。
+FastAPI 與 AI 影像應用開發的範例專案，內容對應講義 `fastapi-ai-image.md`（版本日期見講義首頁）。
 
 每一個檔案都對應教材中的某一節（原始碼註解裡的「教材 X.Y」即為節次），
 方便學員閱讀程式碼時直接回去查文。
@@ -100,7 +100,7 @@ uv run fastapi dev app/main.py
 要改用 PostgreSQL（教材 5.3）再啟動容器並改 `.env`：
 
 ```bash
-docker compose up -d        # 或 ./start-postgres.sh
+docker compose up -d        # 或 ./sh-start-postgres.sh
 ```
 
 之後開瀏覽器：
@@ -232,6 +232,10 @@ uv sync --extra vector
 # 全部一次裝
 uv sync --all-extras
 ```
+
+> **`uv sync` 會把沒指定的 extra 移除**：裝過 `--extra mediapipe` 之後，若再跑一次不帶參數的
+> `uv sync`（例如 pull 完順手同步），mediapipe 會被靜默拆掉，端點只剩 503。要保留就每次帶一樣的
+> `--extra`，或改用 `uv sync --inexact`（不移除多出來的套件）。
 
 ---
 

@@ -36,7 +36,9 @@ def fetch_random_image(timeout: int = 15) -> tuple[bytes, str]:
     except requests.Timeout:
         raise RuntimeError("外部服務逾時")
     except requests.HTTPError as e:
-        raise RuntimeError(f"外部服務錯誤：{e.response.status_code}")
+        # raise_for_status() 丟出的 HTTPError 一定帶 response；型別上仍是 Optional，故多判一次
+        code = e.response.status_code if e.response is not None else "?"
+        raise RuntimeError(f"外部服務錯誤：{code}")
     except requests.RequestException as e:
         # 連線失敗、DNS 錯誤等的後援（須放最後，因前面都是它的子類）
         raise RuntimeError(f"外部服務連線失敗：{e}")

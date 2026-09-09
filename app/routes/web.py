@@ -20,7 +20,7 @@ import uuid
 from fastapi import APIRouter, File, Request, UploadFile
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-from sqlmodel import select
+from sqlmodel import col, select
 
 from app.config import settings
 from app.database import SessionDep
@@ -33,7 +33,7 @@ templates = Jinja2Templates(directory="app/templates")
 router = APIRouter(prefix="/web", tags=["web"])
 
 # 上傳允許的 MIME 類型；後端驗證，不能只靠前端 accept
-ALLOWED_CONTENT_TYPES = {"image/jpeg", "image/png", "image/webp", "image/gif"}
+ALLOWED_CONTENT_TYPES = {"image/jpeg", "image/png", "image/webp"}  # 與 routes/images.py 同一套
 # 上傳大小上限，與 routes/images.py 的 MAX_SIZE 一致
 MAX_SIZE = 10 * 1024 * 1024
 
@@ -46,7 +46,7 @@ def gallery(request: Request, session: SessionDep, skip: int = 0, limit: int = 1
     檔案大小這些中繼資料都在資料庫裡。改成查資料表後，頁面能顯示的資訊多得多，
     也和 5.7 的 JSON 端點用同一份資料來源。
     """
-    stmt = select(Image).order_by(Image.id.desc()).offset(skip).limit(limit)
+    stmt = select(Image).order_by(col(Image.id).desc()).offset(skip).limit(limit)
     images = session.exec(stmt).all()
     # Starlette 1.0 的新簽名：TemplateResponse(request, 樣板名, context)
     # request 必須傳入，樣板中才能使用 url_for 等功能

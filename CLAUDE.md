@@ -71,7 +71,9 @@ Python 版本鎖定 3.12（`requires-python = ">=3.12,<3.13"`）。
 沒裝某個資料庫或服務時，用不到它的路由仍應正常運作——這是測試（`tests/test_smoke.py` 用不進 lifespan 的 `TestClient`）與設計的共同前提。
 
 ### 可選依賴用 lazy import
-重型 / 可選套件（transformers、torch、easyocr、openai）**一律在函式內 import**，不在模組頂層，這樣核心 `uv sync` 安裝下 app 仍能啟動，只有實際呼叫到該端點才會觸發 ImportError。`routes/ai.py` 的每個 AI 端點、`services/ai_service.py` 的 `get_classifier()` 都是這個模式。新增 AI 功能請照此辦理。
+重型 / 可選套件（transformers、torch、easyocr、openai）**一律在函式內 import**，不在模組頂層，這樣核心 `uv sync` 安裝下 app 仍能啟動，只有實際呼叫到該端點才會觸發 ImportError。`routes/ai.py` 的每個 AI 端點、`services/ai_service.py` 的 `get_classifier()`、`services/hand_landmark.py`（mediapipe、numpy 放在 `load_detector()` / `decode_image()` / `detect()` 內）都是這個模式。新增 AI 功能請照此辦理；`tests/test_smoke.py` 有測試守著 hand_landmark 不得在頂層 import 這兩個套件。
+
+注意 `uv sync` 不帶 `--extra` 會把已裝的可選套件移除；本機開發環境慣用 `uv sync --all-extras`。
 
 ### 同步推論不阻塞事件迴圈
 AI 推論是同步且耗時的，async 路由中一律用 `fastapi.concurrency.run_in_threadpool` 包起來呼叫（見 `routes/ai.py`）。模型本身用模組級單例快取（`ai_service._classifier`）避免每次請求重載。
@@ -80,7 +82,7 @@ AI 推論是同步且耗時的，async 路由中一律用 `fastapi.concurrency.r
 用 `Annotated[..., Depends(...)]` 包成可重用型別別名：`SessionDep`（`database.py`，SQLModel Session）、`RedisDep`（`cache_service.py`，Redis client）。路由參數直接標這些別名即可。
 
 ### 兩套資料庫
-- **PostgreSQL + SQLModel**（`models/image.py`）：影像 CRUD。採分層模型 `ImageBase / Image(table=True) / ImageCreate / ImagePublic / ImageUpdate`，分別對應基底、資料表、請求、回應、部分更新。`models/user.py` 是一對多 / 多對多關聯的純示範，預設未被 `init_db()` 載入。
+- **PostgreSQL + SQLModel**（`models/image.py`）：影像 CRUD。採分層模型 `ImageBase / Image(table=True) / ImageCreate / ImagePublic / ImageUpdate`，分別對應基底、資料表、請求、回應、部分更新。`models/user.py` 是一對多 / 多對多關聯的示範，`routes/users.py` 有 import 它，所以四張表（users / user_images / tags / image_tag_links）啟動時會一起由 `init_db()` 建出。
 - **MongoDB + PyMongo 原生 async**（`db/mongo.py`、`routes/mongo_demo.py`）：圖片留言。注意用的是 `AsyncMongoClient`（Motor 已棄用），非同步操作。
 
 ### 組態

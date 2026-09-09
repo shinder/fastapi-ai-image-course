@@ -21,7 +21,9 @@ async def connect_mongo() -> bool:
     global _client
     try:
         # serverSelectionTimeoutMS 設短一點，連不到時不會卡太久
-        client = AsyncMongoClient(settings.MONGO_URL, serverSelectionTimeoutMS=2000)
+        client: AsyncMongoClient = AsyncMongoClient(
+            settings.MONGO_URL, serverSelectionTimeoutMS=2000
+        )
         await client.admin.command("ping")  # 真的連一次，確認伺服器可達
         _client = client
         print(f"MongoDB 連線成功：{settings.MONGO_URL}")

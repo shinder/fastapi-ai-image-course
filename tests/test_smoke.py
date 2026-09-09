@@ -119,6 +119,41 @@ def test_notes_requires_mongo():
     assert r.status_code == 503
 
 
+# ---------- 8.7：MediaPipe 是可選依賴，沒裝時 app 仍要能啟動 ----------
+
+
+def test_hand_landmark_has_no_top_level_optional_imports():
+    """守住「可選套件只在函式內 import」：一旦有人把 mediapipe / numpy 搬回模組頂層，
+    核心 uv sync 的環境就會在 import app.main 時直接炸掉。"""
+    from app.services import hand_landmark
+
+    assert "mp" not in vars(hand_landmark)
+    assert "np" not in vars(hand_landmark)
+    assert "mediapipe" not in vars(hand_landmark)
+
+
+def test_hand_detect_returns_503_when_mediapipe_missing(monkeypatch):
+    """模擬沒裝 mediapipe：load_detector() 要優雅回 False，端點回 503 並提示安裝指令"""
+    import sys
+
+    from app.main import app
+    from app.services import hand_landmark
+
+    # sys.modules 設成 None 會讓 import 直接丟 ImportError（Python 的標準做法）
+    monkeypatch.setitem(sys.modules, "mediapipe", None)
+    monkeypatch.setitem(sys.modules, "mediapipe.tasks.python", None)
+    monkeypatch.setattr(hand_landmark, "_detector", None)
+    monkeypatch.setattr(hand_landmark, "_unavailable_reason", None)
+
+    assert hand_landmark.load_detector() is False
+    assert hand_landmark.is_ready() is False
+
+    client = TestClient(app)
+    r = client.post("/api/v1/hands/detect", files={"file": ("h.jpg", b"fake", "image/jpeg")})
+    assert r.status_code == 503
+    assert "uv sync --extra mediapipe" in r.json()["detail"]
+
+
 # ---------- 附錄 E：速率限制 / 分散式鎖（Redis 不可用時 fail-open）----------
 
 

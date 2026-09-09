@@ -11,7 +11,7 @@ from app.config import settings
 
 def make_thumbnail(content: bytes, max_size: tuple[int, int] = (800, 800)) -> bytes:
     """縮圖（不超過 max_size，保持比例）並轉 JPEG 壓縮"""
-    img = Image.open(BytesIO(content))
+    img: Image.Image = Image.open(BytesIO(content))  # open() 回傳子類 ImageFile，統一標成 Image
     img.thumbnail(max_size)
 
     if img.mode in ("RGBA", "P"):
