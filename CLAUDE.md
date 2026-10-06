@@ -11,6 +11,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## 常用指令
 
 ```bash
+# 全新 clone 先建立 .env（未進版控；缺少時 app 一 import 就失敗，見下方「組態」）
+cp .env.example .env
+
 # 安裝核心依賴（不含重型 ML 套件）
 uv sync
 
@@ -21,6 +24,10 @@ uv sync --extra openai     # 8.6 OpenAI 相容介面、附錄 D gpt-image-1
 uv sync --extra mediapipe  # 8.7 MediaPipe 手部偵測
 uv sync --extra vector     # 附錄 F pgvector
 uv sync --all-extras     # 全部
+
+# 8.7 手部模型檔（ml_models/*.task 未進版控；沒有它手部端點回 503）
+uv run python scripts/download_models.py           # 下載缺少的並比對 SHA-256
+uv run python scripts/download_models.py --check   # 只驗證不下載
 
 # 啟動依賴服務（PostgreSQL + Redis；MongoDB 需自行另開，見下方腳本）
 docker compose up -d
@@ -51,6 +58,9 @@ uv run mypy app
 # 練習範例（practices/，可獨立執行；多數需先啟動 API）
 uv run python practices/try_10_requests_get.py    # requests 小範例（單元七 try_10~17）
 uv run python practices/try_18_client_app.py      # 綜合：模擬第三方串接
+# try_30~32、try_40 的 docstring 指定用 -m 從專案根目錄執行；
+# 其中 try_31 有 from practices.module_a import，直接跑檔案會 ModuleNotFoundError
+uv run python -m practices.try_31_module
 ```
 
 Python 版本鎖定 3.12（`requires-python = ">=3.12,<3.13"`）。
@@ -64,11 +74,14 @@ Python 版本鎖定 3.12（`requires-python = ">=3.12,<3.13"`）。
 
 ### 優雅降級（最重要的跨檔案設計）
 所有外部依賴都做到「連不到也不讓 app 崩潰」，這是貫穿全專案的原則，修改時務必維持：
-- **PostgreSQL**：`database.py` 的 `init_db()` 連不到只印警告、回 `False`。
+- **PostgreSQL**：`database.py` 的 `init_db()` 連不到只印警告、回 `False`；請求階段由 `get_session()` 把 `OperationalError` 轉成 503。Session 是惰性連線，錯誤要等路由執行查詢才拋出，所以 try/except 包的是 `yield`，不是 `with Session(...)` 那一行。
 - **MongoDB**：`db/mongo.py` 的 `connect_mongo()` 失敗時讓 `_client` 維持 `None`，`get_db()` 回 `None`，相關路由再回 503。
 - **Redis**：`services/cache_service.py` 所有 helper（`cache_get/set/incr`…）捕捉 `redis.RedisError`，快取採「盡力而為」當未命中；`rate_limit.py` 與 `acquire_lock()` 採 **fail-open**（Redis 掛掉時放行 / 視為取得鎖）。
+- **MediaPipe**：`lifespan` 啟動段呼叫 `hand_landmark.load_detector()` 預載模型；套件沒裝或模型檔不存在時回 `False` 並記下原因，`routes/hands.py` 用 `is_ready()` / `unavailable_reason()` 回 503（訊息內含對應的安裝或下載指令）。
 
-沒裝某個資料庫或服務時，用不到它的路由仍應正常運作——這是測試（`tests/test_smoke.py` 用不進 lifespan 的 `TestClient`）與設計的共同前提。
+沒裝某個資料庫或服務時，用不到它的路由仍應正常運作——這是測試與設計的共同前提。`tests/test_smoke.py` 一律直接建構 `TestClient(app)`、不用 `with`，藉此跳過 lifespan（不建表、不連 Mongo、不載模型）；新增測試請沿用這個寫法，且不得依賴任何外部服務——Redis 用丟 `RedisError` 的 `MagicMock` 模擬，缺套件用 `monkeypatch.setitem(sys.modules, 名稱, None)` 模擬。
+
+唯一沒有降級的是 `DATABASE_URL` 本身：見下方「組態」。
 
 ### 可選依賴用 lazy import
 重型 / 可選套件（transformers、torch、easyocr、openai）**一律在函式內 import**，不在模組頂層，這樣核心 `uv sync` 安裝下 app 仍能啟動，只有實際呼叫到該端點才會觸發 ImportError。`routes/ai.py` 的每個 AI 端點、`services/ai_service.py` 的 `get_classifier()`、`services/hand_landmark.py`（mediapipe、numpy 放在 `load_detector()` / `decode_image()` / `detect()` 內）都是這個模式。新增 AI 功能請照此辦理；`tests/test_smoke.py` 有測試守著 hand_landmark 不得在頂層 import 這兩個套件。
@@ -85,11 +98,21 @@ AI 推論是同步且耗時的，async 路由中一律用 `fastapi.concurrency.r
 - **PostgreSQL + SQLModel**（`models/image.py`）：影像 CRUD。採分層模型 `ImageBase / Image(table=True) / ImageCreate / ImagePublic / ImageUpdate`，分別對應基底、資料表、請求、回應、部分更新。`models/user.py` 是一對多 / 多對多關聯的示範，`routes/users.py` 有 import 它，所以四張表（users / user_images / tags / image_tag_links）啟動時會一起由 `init_db()` 建出。
 - **MongoDB + PyMongo 原生 async**（`db/mongo.py`、`routes/mongo_demo.py`）：圖片留言。注意用的是 `AsyncMongoClient`（Motor 已棄用），非同步操作。
 
+### 刻意並存的對照實作
+下列幾組看起來像重複或沒接上線的程式碼，都是教材要拿來並排比較的，不要合併、刪除或「順手接上」：
+
+- **`routes/images_raw.py` 沒有掛進 app**：它是 `images.py` 的 psycopg3 原生驅動對照版（路由前綴 `/api/v2/images`、資料表 `images_raw`），`main.py` 刻意不 `include_router`，啟用步驟寫在檔案開頭的 docstring。它自己讀環境變數 `PG_DSN`（libpq 格式，不能帶 `+psycopg`），不共用 `settings.DATABASE_URL`，因為後者預設是 SQLite。
+- **`schemas/image.py` 與 `models/image.py`**：前者是單元三的純 Pydantic 範例（只有 `routes/basic.py` 的 demo 端點在用），後者是單元五的 SQLModel 分層模型。兩邊的類別名稱相近但互不相干。
+- **`services/memo_cache.py` 與 `services/cache_service.py`**：前者是教材 8.5 的行程內 dict 快取（`/describe-cached` 使用），後者是附錄 E 的 Redis 版。前者的三個限制正是用來帶出後者，不要把前者改寫成 Redis。
+- **requests 與 httpx**：`services/external_ai.py` 同步、非同步兩種寫法並存；`practices/try_20~27` 是 `try_10~17` 的 httpx 版，編號一一對應，改其中一支要看另一支是否需要同步調整。
+
 ### 組態
-`config.py` 用單純的 `Settings` 類別 + `os.getenv` 讀 `.env`（**非** pydantic-settings）。新增設定就在這裡加類別屬性。`.env.example` 是範本；本機開發預設 `DATABASE_URL=sqlite:///./app.db`，可改成 docker compose 起的 PostgreSQL。
+`config.py` 用單純的 `Settings` 類別 + `os.getenv` 讀 `.env`（**非** pydantic-settings）。新增設定就在這裡加類別屬性，並同步補進 `.env.example`。`.env.example` 是範本；本機開發預設 `DATABASE_URL=sqlite:///./app.db`，可改成 docker compose 起的 PostgreSQL。
+
+`.env` 不進版控，而 `DATABASE_URL` 在 `config.py` 的後援值是空字串：缺 `.env` 時 `database.py` 模組頂層的 `create_engine("")` 會直接丟 `ArgumentError`，連 `import app.main` 與 pytest 都跑不起來。遇到這個錯誤先確認 `.env` 是否存在。
 
 ### 上傳檔案安全
-使用者可控檔名一律經 `safe_upload_path()`（`routes/images.py`）解析以擋路徑穿越；存檔用 `uuid` 重新命名。對外暴露的上傳端點（含 `routes/web.py` 的表單上傳）都做 MIME 白名單與大小上限驗證——因為 `uploads/` 會經 `/uploads` 直接對外提供，存入非圖片有資安風險。
+使用者可控檔名一律經 `safe_upload_path()`（`routes/images.py`）解析以擋路徑穿越；存檔用 `uuid` 重新命名。對外暴露的上傳端點（含 `routes/web.py` 的表單上傳）都做 MIME 白名單與大小上限驗證——因為 `uploads/` 會經 `/uploads` 直接對外提供，存入非圖片有資安風險。白名單與 10 MB 上限的常數在 `routes/images.py`、`routes/web.py`、`routes/hands.py` 各有一份（各檔自成一節教材，刻意不抽共用），調整規則時三處要一起改。
 
 ### 背景任務
 `routes/ai.py` 的影像生成用 `BackgroundTasks`（`/generate-async`）示範：同進程、回應後才執行；任務狀態存 Redis（`task:gen:{id}`，可 TTL 自動清），再用 `/tasks/{task_id}` 查詢（教材 附錄 E）。
