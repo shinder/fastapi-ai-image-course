@@ -17,7 +17,8 @@ app/static，由 main.py 掛載的 /static（StaticFiles，教材 6.7）提供�
 import os
 import uuid
 
-from fastapi import APIRouter, File, Request, UploadFile
+import requests
+from fastapi import APIRouter, File, HTTPException, Request, UploadFile
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlmodel import col, select
@@ -120,3 +121,34 @@ async def handle_upload(request: Request, session: SessionDep, file: UploadFile 
 
     # 重導到列表頁（gallery）；status_code=303 是 PRG 的標準作法
     return RedirectResponse(url=request.url_for("gallery"), status_code=303)
+
+
+# requests 預設送出的 User-Agent 是 python-requests/x.y.z，Yahoo 的邊緣伺服器
+# 會把它當成爬蟲，第一次請求就回 429（內容是 "Edge: Too Many Requests"）。
+# 帶上一般瀏覽器的 User-Agent 才拿得到真正的首頁。
+BROWSER_USER_AGENT = (
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
+    "(KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36"
+)
+
+
+@router.get("/yahoo", response_class=HTMLResponse)
+def yahoo_page():
+    """抓 Yahoo 首頁的 HTML 原樣回傳：示範在路由裡用 requests 呼叫外部網站。
+
+    用 def（不是 async def）：requests 是同步的，FastAPI 會把 def 路由丟到
+    執行緒池執行，等待對方回應時才不會卡住事件迴圈。
+    """
+    try:
+        # timeout 一定要設：requests 預設會無限等待，對方不回應時這個請求就永遠卡著
+        response = requests.get(
+            "https://www.yahoo.com",
+            headers={"User-Agent": BROWSER_USER_AGENT},
+            timeout=15,
+        )
+        # 4xx / 5xx 轉成例外：不檢查的話，對方的錯誤頁會被當成正常內容以 200 回給瀏覽器
+        response.raise_for_status()
+    except requests.RequestException as exc:
+        # 問題出在上游網站，不是本服務寫錯 → 502 Bad Gateway
+        raise HTTPException(502, f"抓取 Yahoo 失敗：{exc}")
+    return response.text
