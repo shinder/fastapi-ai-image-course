@@ -154,6 +154,84 @@ def test_hand_detect_returns_503_when_mediapipe_missing(monkeypatch):
     assert "uv sync --extra mediapipe" in r.json()["detail"]
 
 
+# ---------- 附錄 D：H03 WebSocket 串流（同樣不得在頂層 import 可選套件）----------
+
+
+def test_hand_stream_has_no_top_level_optional_imports():
+    """routes/hands_ws.py 在頂層 import hand_stream，而 main.py 又 import hands_ws；
+    hand_stream 頂層一旦 import mediapipe / numpy，核心 uv sync 的環境就起不來。"""
+    from app.services import hand_stream
+
+    assert "mp" not in vars(hand_stream)
+    assert "np" not in vars(hand_stream)
+    assert "mediapipe" not in vars(hand_stream)
+
+
+def test_hands_ws_rejects_when_mediapipe_missing(monkeypatch):
+    """模擬沒裝 mediapipe：連線會被接受、收到一則說明原因的 error，再以 1011 關閉；
+    而且名額要還回去（finally 有跑到），否則斷幾次之後就再也連不進來。"""
+    import sys
+
+    import pytest
+    from starlette.websockets import WebSocketDisconnect
+
+    from app.main import app
+    from app.routes import hands_ws
+
+    monkeypatch.setitem(sys.modules, "mediapipe", None)
+    monkeypatch.setitem(sys.modules, "mediapipe.tasks.python", None)
+    monkeypatch.setattr(hands_ws, "_active_connections", 0)
+
+    client = TestClient(app)
+    with client.websocket_connect("/api/v1/hands/ws") as ws:
+        msg = ws.receive_json()
+        assert msg["type"] == "error"
+        assert "uv sync --extra mediapipe" in msg["message"]
+        with pytest.raises(WebSocketDisconnect) as exc_info:
+            ws.receive_json()
+        assert exc_info.value.code == 1011
+
+    assert hands_ws._active_connections == 0
+
+
+def test_hands_ws_rejects_over_connection_limit(monkeypatch):
+    """連線數達上限時：先 accept 才送得出看得懂的訊息，再以 1008 關閉。
+
+    把上限設成 0 就能在不建立任何 detector 的情況下測到這條路徑。
+    """
+    import pytest
+    from starlette.websockets import WebSocketDisconnect
+
+    from app.config import settings
+    from app.main import app
+    from app.routes import hands_ws
+
+    monkeypatch.setattr(settings, "HAND_WS_MAX_CONN", 0)
+    monkeypatch.setattr(hands_ws, "_active_connections", 0)
+
+    client = TestClient(app)
+    with client.websocket_connect("/api/v1/hands/ws") as ws:
+        msg = ws.receive_json()
+        assert msg["type"] == "error"
+        assert "連線數已達上限" in msg["message"]
+        with pytest.raises(WebSocketDisconnect) as exc_info:
+            ws.receive_json()
+        assert exc_info.value.code == 1008
+
+    # 被拒絕的連線沒有佔用名額，計數器不能被減成負的
+    assert hands_ws._active_connections == 0
+
+
+def test_models_mount_serves_hand_model():
+    """H04 在瀏覽器端推論，要能從 /models 下載到隨版控附上的模型檔"""
+    from app.main import app
+
+    client = TestClient(app)
+    r = client.head("/models/hand_landmarker.task")
+    assert r.status_code == 200
+    assert int(r.headers["content-length"]) == 7819105
+
+
 # ---------- 附錄 E：速率限制 / 分散式鎖（Redis 不可用時 fail-open）----------
 
 

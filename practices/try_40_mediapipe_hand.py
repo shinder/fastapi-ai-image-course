@@ -6,7 +6,8 @@
 
 需要的東西：
     uv sync --extra mediapipe
-    uv run python scripts/download_models.py   # 下載並驗證模型檔（教材 8.7 的作法）
+    # 模型檔 ml_models/hand_landmarker.task 已隨版控附上；遺失時用這行重新下載並驗證（教材 8.7）
+    uv run python scripts/download_models.py
 
 執行：
     uv run python -m practices.try_40_mediapipe_hand [圖片路徑]

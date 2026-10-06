@@ -1,4 +1,4 @@
-"""FastAPI 入口（教材 2.3、2.4、2.5、2.6、3.6、4.1、5.4、6.7、8.7、附錄 B）"""
+"""FastAPI 入口（教材 2.3、2.4、2.5、2.6、3.6、4.1、5.4、6.7、8.7、附錄 B、附錄 D）"""
 
 import logging
 import os
@@ -13,7 +13,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from app.config import settings
 from app.database import init_db
 from app.db.mongo import close_mongo, connect_mongo
-from app.routes import ai, basic, hands, images, mongo_demo, users, web
+from app.routes import ai, basic, hands, hands_ws, images, mongo_demo, users, web
 
 # 主控台日誌（教材 附錄 B）：root 維持 WARNING，只讓自家 app.access 輸出 INFO，
 # 避免把 httpx 等第三方套件的 INFO 訊息也一起印出來
@@ -107,6 +107,15 @@ app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_DIR), name="uploads"
 # 路徑日後改了樣板也不必跟著改。
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
+# 靜態檔案掛載（教材 附錄 D）：把模型檔所在的目錄掛到 /models，開放給瀏覽器下載。
+# H04（app/static/demos/H04-hands-live.html）是在瀏覽器端跑 MediaPipe，需要抓同一個 .task 檔。
+# 從自己的伺服器供應（而不是連 Google 的網址），教室網路不通時也能上課，
+# 而且與後端 Python 用的是同一個檔案，對照才有意義。
+# 這個掛載與 Python 的 mediapipe 套件無關：沒裝 --extra mediapipe 時 H04 照樣能跑。
+_model_dir = os.path.dirname(settings.HAND_MODEL_PATH) or "."
+os.makedirs(_model_dir, exist_ok=True)
+app.mount("/models", StaticFiles(directory=_model_dir), name="models")
+
 
 @app.get("/")
 def read_root():
@@ -162,5 +171,8 @@ app.include_router(images.router)
 app.include_router(users.router)  # 教材 5.7：最小 CRUD
 app.include_router(ai.router)
 app.include_router(hands.router)  # 教材 8.7：MediaPipe 手部偵測
+# 教材 附錄 D：H03 的 WebSocket 串流端點另外開一個檔案，前綴一樣是 /api/v1/hands。
+# 同一個前綴掛兩個 router 沒問題，路徑不重複就好
+app.include_router(hands_ws.router)
 app.include_router(web.router)  # 單元六：Jinja2 樣板網頁
 app.include_router(mongo_demo.router)  # 單元九（補充教材）：MongoDB 留言

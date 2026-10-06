@@ -11,7 +11,7 @@ FastAPI 與 AI 影像應用開發的範例專案，內容對應講義 `fastapi-a
 
 ```txt
 fastapi-ai-image/
-├── pyproject.toml          # 教材 2.2 套件清單（核心 + 4 組可選）
+├── pyproject.toml          # 教材 2.2 套件清單（核心 + 5 組可選）
 ├── docker-compose.yml      # 附錄 F PostgreSQL、附錄 E Redis
 ├── start.bat               # 啟動開發伺服器的單行腳本（CMD 直接執行；bash 用 sh start.bat）
 ├── sh-start-containers.sh  # 一鍵起三個依賴容器（替代 docker compose；不含伺服器）
@@ -25,7 +25,7 @@ fastapi-ai-image/
 ├── app/
 │   ├── config.py           # 教材 2.2 Settings
 │   ├── database.py         # 教材 5.4、5.6 engine、init_db、SessionDep
-│   ├── main.py             # 教材 2.3、2.4、2.5、2.6、3.6、5.4、6.7、8.7、附錄 B FastAPI 入口
+│   ├── main.py             # 教材 2.3、2.4、2.5、2.6、3.6、5.4、6.7、8.7、附錄 B、附錄 D FastAPI 入口
 │   ├── models/
 │   │   ├── image.py        # 教材 5.5 SQLModel 影像表 + 多層模型
 │   │   └── user.py         # 教材 5.5 一對多／多對多關聯範例
@@ -38,6 +38,8 @@ fastapi-ai-image/
 │   │   ├── users.py        # 教材 5.7 User CRUD（關聯示範表實際會建出）
 │   │   ├── web.py          # 教材 6.9~6.12 Jinja2 頁面路由
 │   │   ├── mongo_demo.py   # 教材 9.4 MongoDB 留言 CRUD
+│   │   ├── hands.py        # 教材 8.7 MediaPipe 手部偵測（單張上傳；附錄 D 的 H02 也用它）
+│   │   ├── hands_ws.py     # 教材 附錄 D WebSocket 手部串流（H03）
 │   │   └── ai.py           # 教材 8.4、8.6、附錄 E、7.4、附錄 D
 │   ├── services/
 │   │   ├── ai_service.py            # 教材 附錄 D Hugging Face 分類
@@ -46,6 +48,7 @@ fastapi-ai-image/
 │   │   ├── image_gen_service.py     # 教材 附錄 D OpenAI gpt-image-1
 │   │   ├── external_ai.py           # 教材 7.4、附錄 C 公開 API（Picsum / Dog CEO）
 │   │   ├── hand_landmark.py         # 教材 8.7 MediaPipe 手部偵測（Tasks API）
+│   │   ├── hand_stream.py           # 教材 附錄 D 串流用偵測器（每條連線一個，VIDEO 模式）
 │   │   ├── memo_cache.py            # 教材 8.5 以圖片 hash 為 key 的記憶體快取
 │   │   └── cache_service.py         # 教材 附錄 E Redis
 │   ├── db/
@@ -64,11 +67,20 @@ fastapi-ai-image/
 │   │       ├── form01~04.html      # 4.2 HTML 表單四連發
 │   │       ├── upload01~02.html    # 4.3 AJAX 上傳
 │   │       ├── preview-01.html     # 4.4 createObjectURL 預覽
-│   │       └── base64-01.html      # 4.4 FileReader / Base64
+│   │       ├── base64-01.html      # 4.4 FileReader / Base64
+│   │       ├── H02-hands-1.html    # 附錄 D 手部關鍵點：單張上傳，後端推論
+│   │       ├── H03-hands-ws.html   # 附錄 D 手部關鍵點：WebSocket 串流，後端推論
+│   │       └── H04-hands-live.html # 附錄 D 手部關鍵點：瀏覽器端 WASM 推論
 │   └── utils/
 │       └── image_utils.py  # 教材 3.5 Pillow 工具
 ├── docs/                   # 補充文件
+│   ├── H02-hands-upload.md       # 附錄 D 手部關鍵點三種做法的實作說明（H02 單張上傳）
+│   ├── H03-hands-ws.md           # 同上（H03 WebSocket 串流）
+│   ├── H04-hands-live.md         # 同上（H04 瀏覽器端推論）
 │   └── stop-windows-services.md  # Windows 原生服務佔用埠號時的停用／恢復指南
+├── ml_models/              # 教材 8.7 MediaPipe 模型檔（hand_landmarker.task，已隨版控附上）
+├── scripts/
+│   └── download_models.py  # 教材 8.7 模型檔遺失時重新下載＋SHA-256 驗證
 ├── practices/              # 教材練習：可獨立執行的小範例（多數需先啟動 API）
 │   ├── try_30~32_*.py      # generator / 模組匯入 / hashlib（5.1、3.7）
 │   ├── try_40_mediapipe_hand.py  # 教材 8.7 MediaPipe 手部關鍵點
@@ -213,15 +225,16 @@ uv sync --extra ml
 # 附錄 D EasyOCR
 uv sync --extra ocr
 
-# 附錄 D MediaPipe 手部／臉部／姿勢偵測（輕量本機模型）
+# 8.7、附錄 D MediaPipe 手部／臉部／姿勢偵測（輕量本機模型）
 # 注意：不支援 Intel Mac——MediaPipe 的 x86_64 macOS wheel 停在 0.10.21，
 # 而 Apple Silicon 的 wheel 從 0.10.30 才開始，兩者沒有交集。
 # 另外這個 extra 會連帶裝進 opencv-contrib-python（約 236 MB），下載需要一點時間。
 uv sync --extra mediapipe
-# 另需下載模型檔（7.5 MB，未進版控）：
-uv run python scripts/download_models.py
-# 開課前／上課前先驗一次，確認檔案完整（比對 SHA-256，不重新下載）：
+# 模型檔（ml_models/hand_landmarker.task，約 7.5 MB）已隨版控附上，clone 下來就能用。
+# 開課前／上課前可以驗一次，確認檔案完整（比對 SHA-256，不重新下載）：
 uv run python scripts/download_models.py --check
+# 萬一檔案遺失或損毀，重新下載：
+uv run python scripts/download_models.py
 
 # 8.6 Ollama 的 OpenAI 相容介面 / 附錄 D gpt-image-1
 uv sync --extra openai
@@ -236,6 +249,41 @@ uv sync --all-extras
 > **`uv sync` 會把沒指定的 extra 移除**：裝過 `--extra mediapipe` 之後，若再跑一次不帶參數的
 > `uv sync`（例如 pull 完順手同步），mediapipe 會被靜默拆掉，端點只剩 503。要保留就每次帶一樣的
 > `--extra`，或改用 `uv sync --inexact`（不移除多出來的套件）。
+
+---
+
+## 手部關鍵點的三種做法（教材 附錄 D）
+
+同一個模型（`ml_models/hand_landmarker.task`）放在三個不同的位置跑，拿來對照延遲、頻寬與伺服器負載。
+啟動伺服器後直接開下列頁面：
+
+| 頁面 | 推論在哪 | 傳輸方式 | 用途 | 說明文件 |
+| --- | --- | --- | --- | --- |
+| `/static/demos/H02-hands-1.html` | 後端 Python | `POST` 單張圖 | 上傳存檔 + 寫進資料庫，圖與 JSON 同主檔名存在 `uploads/` | [docs/H02](docs/H02-hands-upload.md) |
+| `/static/demos/H03-hands-ws.html` | 後端 Python | WebSocket 串流 | 即時追蹤，示範 backpressure（回壓） | [docs/H03](docs/H03-hands-ws.md) |
+| `/static/demos/H04-hands-live.html` | 瀏覽器 WASM | 不傳，影像不離開本機 | 即時追蹤，零頻寬零伺服器負載 | [docs/H04](docs/H04-hands-live.md) |
+
+`docs/` 裡三篇分別把前後端的溝通方式與運作流程拆開講，包含資料格式、設計取捨與常見問題。
+
+- **H02、H03 需要後端的 MediaPipe**：先 `uv sync --extra mediapipe`。沒裝時 app 照常啟動，
+  H02 的端點回 503、H03 的 WebSocket 會收到一則說明原因的錯誤訊息後被關閉。
+- **H04 不需要**：推論在瀏覽器裡跑，伺服器只負責供應 HTML 與模型檔（`/models/hand_landmarker.task`）。
+- **攝影機只在 `localhost` 或 HTTPS 下可用**：用區網 IP 開這些頁面時瀏覽器會拒絕開啟攝影機，
+  要用教材 4.5 的 cloudflared 開 HTTPS 通道。
+
+在 M3 Mac 上的實測數字（640x480、`mediapipe` 0.10.35）：
+
+| 項目 | 數字 |
+| --- | --- |
+| Python IMAGE 模式（H02） | 27.3 ms |
+| Python VIDEO 模式（H03） | 16.9 ms，追蹤省掉手掌偵測，快四成 |
+| 瀏覽器 WASM + WebGL（H04） | 16.0~16.8 ms，跟原生 Python 一樣快 |
+| H03 端到端來回 | 約 18~19 ms，其中網路與 JPEG 編碼約 3 ms |
+| 640x480 → 320x240 | 17.3 ms，**沒有變快**，模型內部本來就會縮到 192/224 |
+
+兩個容易搞錯的直覺：**降解析度只省頻寬、不會加速推論**；**後端跑不會比瀏覽器快**。
+所以純粹要即時追蹤的話，H04 客觀上是最好的選擇；H03 這種後端串流合理的時機，
+是伺服器要做用戶端做不到的事（例如比對資料庫、跨使用者彙整）。
 
 ---
 
@@ -317,7 +365,8 @@ VSCode 使用者：專案 `.vscode/settings.json` 已設定存檔時自動以 Ru
 | POST   | `/api/v1/ai/describe`                  | Ollama 圖片描述 | 8.4 |
 | POST   | `/api/v1/ai/describe-cached`           | 同上，但先查記憶體快取 | 8.5 |
 | POST   | `/api/v1/hands/detect`                 | MediaPipe 手部關鍵點（只偵測） | 8.7 |
-| POST   | `/api/v1/hands/upload`                 | 手部偵測 + 存檔入庫 | 8.7 |
+| POST   | `/api/v1/hands/upload`                 | 手部偵測 + 存檔入庫，另存同主檔名的 `.json` | 8.7、附錄 D |
+| WS     | `/api/v1/hands/ws`                     | 手部即時串流（送 JPEG 影格、回座標 JSON） | 附錄 D |
 | GET    | `/api/v1/ai/describe-cached/stats`     | 記憶體快取命中率 | 8.5 |
 | POST   | `/api/v1/ai/extract-invoice`           | 發票結構化抽取 | 8.4 |
 | POST   | `/api/v1/ai/generate`                  | gpt-image-1 影像生成 | 附錄 D |

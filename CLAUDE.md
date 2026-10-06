@@ -25,9 +25,9 @@ uv sync --extra mediapipe  # 8.7 MediaPipe 手部偵測
 uv sync --extra vector     # 附錄 F pgvector
 uv sync --all-extras     # 全部
 
-# 8.7 手部模型檔（ml_models/*.task 未進版控；沒有它手部端點回 503）
-uv run python scripts/download_models.py           # 下載缺少的並比對 SHA-256
+# 8.7 手部模型檔（ml_models/hand_landmarker.task 已隨版控附上；下列腳本是遺失時的後援）
 uv run python scripts/download_models.py --check   # 只驗證不下載
+uv run python scripts/download_models.py           # 重新下載缺少的並比對 SHA-256
 
 # 啟動依賴服務（PostgreSQL + Redis；MongoDB 需自行另開，見下方腳本）
 docker compose up -d
@@ -68,7 +68,7 @@ Python 版本鎖定 3.12（`requires-python = ">=3.12,<3.13"`）。
 ## 架構與關鍵慣例
 
 ### 應用組裝
-`app/main.py` 是入口：定義 `lifespan`（啟動建表 + 連 Mongo、關閉清資源）、掛 CORS 與自製 `TimingMiddleware`、掛兩個 `StaticFiles`（`uploads/` → `/uploads`，放使用者上傳的圖片，教材 3.6；`app/static/` → `/static`，放專案自備的 CSS/JS，教材 6.7），最後 `include_router` 註冊各 APIRouter。教材 2.4 的基本路由刻意直接寫在 `main.py`（模擬還沒拆 router 的階段），其餘都拆進 `app/routes/`。
+`app/main.py` 是入口：定義 `lifespan`（啟動建表 + 連 Mongo、關閉清資源）、掛 CORS 與自製 `TimingMiddleware`、掛三個 `StaticFiles`（`uploads/` → `/uploads`，放使用者上傳的圖片，教材 3.6；`app/static/` → `/static`，放專案自備的 CSS/JS，教材 6.7；`ml_models/` → `/models`，讓瀏覽器端推論的 H04 頁面下載模型檔，教材 附錄 D），最後 `include_router` 註冊各 APIRouter。教材 2.4 的基本路由刻意直接寫在 `main.py`（模擬還沒拆 router 的階段），其餘都拆進 `app/routes/`。
 
 樣式以 Bootstrap CDN 為主（見 `templates/base.html`），`app/static/app.css` 只放少量自訂樣式，示範 `StaticFiles` 掛載搭配樣板裡 `url_for('static', path=...)` 反查網址的用法。
 
@@ -77,14 +77,14 @@ Python 版本鎖定 3.12（`requires-python = ">=3.12,<3.13"`）。
 - **PostgreSQL**：`database.py` 的 `init_db()` 連不到只印警告、回 `False`；請求階段由 `get_session()` 把 `OperationalError` 轉成 503。Session 是惰性連線，錯誤要等路由執行查詢才拋出，所以 try/except 包的是 `yield`，不是 `with Session(...)` 那一行。
 - **MongoDB**：`db/mongo.py` 的 `connect_mongo()` 失敗時讓 `_client` 維持 `None`，`get_db()` 回 `None`，相關路由再回 503。
 - **Redis**：`services/cache_service.py` 所有 helper（`cache_get/set/incr`…）捕捉 `redis.RedisError`，快取採「盡力而為」當未命中；`rate_limit.py` 與 `acquire_lock()` 採 **fail-open**（Redis 掛掉時放行 / 視為取得鎖）。
-- **MediaPipe**：`lifespan` 啟動段呼叫 `hand_landmark.load_detector()` 預載模型；套件沒裝或模型檔不存在時回 `False` 並記下原因，`routes/hands.py` 用 `is_ready()` / `unavailable_reason()` 回 503（訊息內含對應的安裝或下載指令）。
+- **MediaPipe**：`lifespan` 啟動段呼叫 `hand_landmark.load_detector()` 預載模型；套件沒裝或模型檔不存在時回 `False` 並記下原因，`routes/hands.py` 用 `is_ready()` / `unavailable_reason()` 回 503（訊息內含對應的安裝或下載指令）。WebSocket 版（`routes/hands_ws.py`）沒有狀態碼可用，改成先 `accept()`、送一則 `{"type": "error"}` 訊息，再以關閉碼 1011 斷線。
 
 沒裝某個資料庫或服務時，用不到它的路由仍應正常運作——這是測試與設計的共同前提。`tests/test_smoke.py` 一律直接建構 `TestClient(app)`、不用 `with`，藉此跳過 lifespan（不建表、不連 Mongo、不載模型）；新增測試請沿用這個寫法，且不得依賴任何外部服務——Redis 用丟 `RedisError` 的 `MagicMock` 模擬，缺套件用 `monkeypatch.setitem(sys.modules, 名稱, None)` 模擬。
 
 唯一沒有降級的是 `DATABASE_URL` 本身：見下方「組態」。
 
 ### 可選依賴用 lazy import
-重型 / 可選套件（transformers、torch、easyocr、openai）**一律在函式內 import**，不在模組頂層，這樣核心 `uv sync` 安裝下 app 仍能啟動，只有實際呼叫到該端點才會觸發 ImportError。`routes/ai.py` 的每個 AI 端點、`services/ai_service.py` 的 `get_classifier()`、`services/hand_landmark.py`（mediapipe、numpy 放在 `load_detector()` / `decode_image()` / `detect()` 內）都是這個模式。新增 AI 功能請照此辦理；`tests/test_smoke.py` 有測試守著 hand_landmark 不得在頂層 import 這兩個套件。
+重型 / 可選套件（transformers、torch、easyocr、openai）**一律在函式內 import**，不在模組頂層，這樣核心 `uv sync` 安裝下 app 仍能啟動，只有實際呼叫到該端點才會觸發 ImportError。`routes/ai.py` 的每個 AI 端點、`services/ai_service.py` 的 `get_classifier()`、`services/hand_landmark.py`（mediapipe、numpy 放在 `load_detector()` / `decode_image()` / `detect()` 內）、`services/hand_stream.py`（放在 `HandStreamSession.__init__()` / `detect()` 內）都是這個模式。新增 AI 功能請照此辦理；`tests/test_smoke.py` 有測試守著 hand_landmark 與 hand_stream 不得在頂層 import 這兩個套件。
 
 注意 `uv sync` 不帶 `--extra` 會把已裝的可選套件移除；本機開發環境慣用 `uv sync --all-extras`。
 
@@ -112,7 +112,16 @@ AI 推論是同步且耗時的，async 路由中一律用 `fastapi.concurrency.r
 `.env` 不進版控，而 `DATABASE_URL` 在 `config.py` 的後援值是空字串：缺 `.env` 時 `database.py` 模組頂層的 `create_engine("")` 會直接丟 `ArgumentError`，連 `import app.main` 與 pytest 都跑不起來。遇到這個錯誤先確認 `.env` 是否存在。
 
 ### 上傳檔案安全
-使用者可控檔名一律經 `safe_upload_path()`（`routes/images.py`）解析以擋路徑穿越；存檔用 `uuid` 重新命名。對外暴露的上傳端點（含 `routes/web.py` 的表單上傳）都做 MIME 白名單與大小上限驗證——因為 `uploads/` 會經 `/uploads` 直接對外提供，存入非圖片有資安風險。白名單與 10 MB 上限的常數在 `routes/images.py`、`routes/web.py`、`routes/hands.py` 各有一份（各檔自成一節教材，刻意不抽共用），調整規則時三處要一起改。
+使用者可控檔名一律經 `safe_upload_path()`（`routes/images.py`）解析以擋路徑穿越；存檔用 `uuid` 重新命名。對外暴露的上傳端點（含 `routes/web.py` 的表單上傳）都做 MIME 白名單與大小上限驗證——因為 `uploads/` 會經 `/uploads` 直接對外提供，存入非圖片有資安風險。白名單與 10 MB 上限的常數在 `routes/images.py`、`routes/web.py`、`routes/hands.py` 各有一份（各檔自成一節教材，刻意不抽共用），調整規則時三處要一起改。`uploads/` 裡唯一的非圖片是 `/api/v1/hands/upload` 另存的 `.json`：那是伺服器自己產生的偵測結果，不是使用者上傳的內容。
+
+### 手部關鍵點的三種做法（教材 附錄 D）
+同一個模型放在三個位置跑的對照組，頁面在 `app/static/demos/H02~H04-*.html`，各有一篇 `docs/H0x-*.md` 說明。改程式碼時對應的說明文件要一起改（文件裡有大量程式碼片段與回應範例）。
+
+- **H02（單張上傳）**：`routes/hands.py` 的 `/upload`，用 `hand_landmark.py` 的全站單例 detector（IMAGE 模式）加一把鎖。除了寫進 `images.ai_result`，還會在 `uploads/` 另存一份同主檔名的 `.json`。
+- **H03（WebSocket 串流）**：`routes/hands_ws.py` + `services/hand_stream.py`。**每條連線各建一個 VIDEO 模式的 detector，不可改成共用單例**：VIDEO 模式有跨影格狀態、時間戳必須嚴格遞增，共用會直接出錯。代價是每條連線吃一份模型記憶體，所以有 `HAND_WS_MAX_CONN`（預設 4）上限；`finally` 裡歸還名額與關閉 detector 的那段不能少。回壓由前端控制（同時只讓一格在路上）。
+- **H04（瀏覽器端）**：沒有後端程式碼，頁面從 CDN 載入 `@mediapipe/tasks-vision`（版本寫死在網址，與 Python 端的 mediapipe 版本無關），模型檔從 `/models` 下載。
+
+模型檔 `ml_models/hand_landmarker.task` 已進版控（H04 需要伺服器隨時供應得出來），也沒有被 `.dockerignore` 排除。
 
 ### 背景任務
 `routes/ai.py` 的影像生成用 `BackgroundTasks`（`/generate-async`）示範：同進程、回應後才執行；任務狀態存 Redis（`task:gen:{id}`，可 TTL 自動清），再用 `/tasks/{task_id}` 查詢（教材 附錄 E）。

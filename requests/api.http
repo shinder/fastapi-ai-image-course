@@ -256,7 +256,7 @@ Content-Type: image/jpeg
 < ./test_images/cat.jpg
 ------Boundary--
 
-### 8.7 MediaPipe 上傳存檔＋偵測，結果寫進 images 表
+### 8.7 MediaPipe 上傳存檔＋偵測，結果寫進 images 表，並另存同主檔名的 .json（附錄 D 的 H02）
 POST {{baseUrl}}/api/v1/hands/upload
 Content-Type: multipart/form-data; boundary=----Boundary
 
