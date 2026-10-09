@@ -1,1 +1,1 @@
-uv run uvicorn my_fastapi.main:app --reload --port 8080 --host 0.0.0.0
+echo Dev server: http://localhost:8080 - Swagger UI: http://localhost:8080/docs && uv run uvicorn my_fastapi.main:app --reload --port 8080 --host 0.0.0.0

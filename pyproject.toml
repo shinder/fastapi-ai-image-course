@@ -65,6 +65,8 @@ dev = [
     "pytest>=9.1.1",
     "ruff>=0.16.10",
     "mypy>=2.4.0",
+    # starlette 1.7 起 TestClient 改用 httpx2，沒裝會印棄用警告；只有測試需要，與教材用的 httpx 無關
+    "httpx2>=2.13.1",
 ]
 
 [tool.pytest.ini_options]

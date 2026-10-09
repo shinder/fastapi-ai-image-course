@@ -24,5 +24,11 @@ def serve() -> None:
     # 放在函式內 import：單純 `import my_fastapi` 時不必載入伺服器
     import uvicorn
 
+    # uvicorn 只會印綁定位址（http://0.0.0.0:8080），那不是能點的網址（教材 2.3），
+    # 所以先印一行真正能開的；reload 模式下這段只在主行程跑一次
+    print(
+        f"開發伺服器：http://localhost:{DEV_PORT}  （Swagger UI：http://localhost:{DEV_PORT}/docs）"
+    )
+    print("下方 uvicorn 印出的 http://0.0.0.0 是綁定位址，不要點它", flush=True)
     # 傳字串而不是 app 物件，reload 才能在改檔後重新 import
     uvicorn.run("my_fastapi.main:app", host="0.0.0.0", port=DEV_PORT, reload=True)

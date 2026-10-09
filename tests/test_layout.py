@@ -66,8 +66,9 @@ def test_serve_entry_point_is_not_shadowed_by_main_module():
     assert not callable(my_fastapi.main)
 
 
-def test_serve_runs_uvicorn_on_dev_port(monkeypatch):
-    """uv run my-fastapi 應以字串匯入路徑、8080 埠、reload 啟動；不真的開伺服器，攔下 uvicorn.run"""
+def test_serve_runs_uvicorn_on_dev_port(monkeypatch, capsys):
+    """uv run my-fastapi 應以字串匯入路徑、8080 埠、reload 啟動，並印出能點的 localhost 網址；
+    不真的開伺服器，攔下 uvicorn.run"""
     import uvicorn
 
     import my_fastapi
@@ -84,6 +85,8 @@ def test_serve_runs_uvicorn_on_dev_port(monkeypatch):
     assert called["app"] == "my_fastapi.main:app"
     assert called["port"] == my_fastapi.DEV_PORT == 8080
     assert called["reload"] is True
+    # uvicorn 只印 0.0.0.0 那種綁定位址，serve() 要補印一行真正能開的網址（教材 2.3）
+    assert f"http://localhost:{my_fastapi.DEV_PORT}" in capsys.readouterr().out
 
 
 def test_dev_port_is_consistent_across_launchers():
