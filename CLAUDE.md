@@ -85,7 +85,7 @@ Python 版本鎖定 3.14（`requires-python = ">=3.14,<3.15"`）。各套件下�
 - **Redis**：`services/cache_service.py` 所有 helper（`cache_get/set/incr`…）捕捉 `redis.RedisError`，快取採「盡力而為」當未命中；`rate_limit.py` 與 `acquire_lock()` 採 **fail-open**（Redis 掛掉時放行 / 視為取得鎖）。
 - **MediaPipe**：`lifespan` 啟動段呼叫 `hand_landmark.load_detector()` 預載模型；套件沒裝或模型檔不存在時回 `False` 並記下原因，`routes/hands.py` 用 `is_ready()` / `unavailable_reason()` 回 503（訊息內含對應的安裝或下載指令）。WebSocket 版（`routes/hands_ws.py`）沒有狀態碼可用，改成先 `accept()`、送一則 `{"type": "error"}` 訊息，再以關閉碼 1011 斷線。
 
-沒裝某個資料庫或服務時，用不到它的路由仍應正常運作——這是測試與設計的共同前提。`tests/test_smoke.py` 一律直接建構 `TestClient(app)`、不用 `with`，藉此跳過 lifespan（不建表、不連 Mongo、不載模型）；新增測試請沿用這個寫法，且不得依賴任何外部服務——Redis 用丟 `RedisError` 的 `MagicMock` 模擬，缺套件用 `monkeypatch.setitem(sys.modules, 名稱, None)` 模擬。
+沒裝某個資料庫或服務時，用不到它的路由仍應正常運作——這是測試與設計的共同前提。`tests/test_smoke.py` 與 `tests/test_layout.py` 一律直接建構 `TestClient(app)`、不用 `with`，藉此跳過 lifespan（不建表、不連 Mongo、不載模型）；新增測試請沿用這個寫法，且不得依賴任何外部服務——Redis 用丟 `RedisError` 的 `MagicMock` 模擬，缺套件用 `monkeypatch.setitem(sys.modules, 名稱, None)` 模擬。
 
 唯一沒有降級的是 `DATABASE_URL` 本身：見下方「組態」。
 

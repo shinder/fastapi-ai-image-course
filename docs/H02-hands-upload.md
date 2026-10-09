@@ -258,7 +258,7 @@ JSON 檔多帶了幾個檔案層面的欄位，單獨拿出來看也知道對應
   "width": 640, "height": 960,
   "processed_width": 640, "processed_height": 960,
   "model": "hand_landmarker",
-  "mediapipe_version": "1.0.0",
+  "mediapipe_version": "1.1.0",
   "hand_count": 2,
   "hands": [ ... ]
 }
@@ -286,7 +286,7 @@ JSON 檔多帶了幾個檔案層面的欄位，單獨拿出來看也知道對應
   "processed_width": 640,
   "processed_height": 960,
   "model": "hand_landmarker",
-  "mediapipe_version": "1.0.0",
+  "mediapipe_version": "1.1.0",
   "hand_count": 2,
   "hands": [
     {

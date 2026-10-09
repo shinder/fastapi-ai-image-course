@@ -1,4 +1,4 @@
-# fastapi-ai-image
+# fastapi-ai-image-course
 
 FastAPI 與 AI 影像應用開發的範例專案，內容對應講義 `fastapi-ai-image.md`（版本日期見講義首頁）。
 
@@ -10,7 +10,7 @@ FastAPI 與 AI 影像應用開發的範例專案，內容對應講義 `fastapi-a
 ## 專案結構與教材對照
 
 ```txt
-fastapi-ai-image/
+fastapi-ai-image-course/
 ├── pyproject.toml          # 教材 2.2 套件清單（核心 + 5 組可選）
 ├── docker-compose.yml      # 附錄 F PostgreSQL、附錄 E Redis
 ├── start.bat               # 啟動開發伺服器的單行腳本（CMD 直接執行；bash 用 sh start.bat）
@@ -256,7 +256,7 @@ uv sync --extra ocr
 
 # 8.7、附錄 D MediaPipe 手部／臉部／姿勢偵測（輕量本機模型）
 # 注意：不支援 Intel Mac（MediaPipe 的 macOS x86_64 wheel 停在 0.10.21）。
-# 另外這個 extra 會連帶裝進 opencv-contrib-python（約 236 MB），下載需要一點時間。
+# 另外這個 extra 會連帶裝進 opencv-contrib-python（wheel 約 56 MB，整組下載約 110 MB），下載需要一點時間。
 uv sync --extra mediapipe
 # 模型檔（ml_models/hand_landmarker.task，約 7.5 MB）已隨版控附上，clone 下來就能用。
 # 開課前／上課前可以驗一次，確認檔案完整（比對 SHA-256，不重新下載）：
@@ -336,7 +336,9 @@ ollama serve
 uv run pytest -q
 ```
 
-冒煙測試只測不依賴外部服務的端點。需要 DB / Redis 的端點請用
+`tests/test_smoke.py` 是冒煙測試，只測不依賴外部服務的端點；`tests/test_layout.py`
+守住 src 佈局的約定（套件從 `src/` 安裝、static 與樣板不依賴工作目錄、`serve()` 進入點與埠號一致）。
+需要 DB / Redis 的端點請用
 `requests/api.http`（VSCode 的 REST Client 外掛）或 Swagger UI 操作。
 
 ---

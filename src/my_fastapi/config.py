@@ -8,7 +8,7 @@ load_dotenv()
 
 
 class Settings:
-    APP_NAME: str = os.getenv("APP_NAME", "fastapi-ai-image")
+    APP_NAME: str = os.getenv("APP_NAME", "my-fastapi")
     DEBUG: bool = os.getenv("DEBUG", "false").lower() == "true"
     DATABASE_URL: str = os.getenv("DATABASE_URL", "")
     REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379/0")
