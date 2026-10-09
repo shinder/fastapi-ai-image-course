@@ -1,7 +1,7 @@
 @echo off
 rem cmd-start-containers.bat — 只啟動三個依賴服務的容器（Windows CMD 版，對應 sh-start-containers.sh）
 rem   PostgreSQL / Redis / MongoDB 三個容器起完就結束，不啟動 FastAPI 開發伺服器——
-rem   伺服器另開視窗自己跑：uv run fastapi dev app/main.py
+rem   伺服器另開視窗自己跑：uv run fastapi dev src/my_fastapi/main.py --port 8080
 rem   或直接執行專案根目錄的 start.bat（單行腳本，CMD / PowerShell 皆可）。
 rem
 rem 編碼：本檔以 UTF-8「無 BOM」儲存，chcp 65001 把主控台切成 UTF-8，中文才不會變亂碼。
@@ -24,5 +24,5 @@ for %%s in (cmd-start-postgres.bat cmd-start-redis.bat cmd-start-mongodb.bat) do
   call "%%s" || echo 警告：%%s 啟動失敗，繼續啟動其餘容器
 )
 
-echo ==^> 容器啟動完成。開發伺服器請另行執行：uv run fastapi dev app/main.py
+echo ==^> 容器啟動完成。開發伺服器請另行執行：uv run fastapi dev src/my_fastapi/main.py --port 8080
 endlocal

@@ -17,7 +17,7 @@
   「請主執行緒在下一輪事件迴圈儘快執行這個函式」。
 
 執行前請先啟動後端：
-    uv run fastapi dev app/main.py
+    uv run fastapi dev src/my_fastapi/main.py --port 8080
 """
 
 import threading
@@ -25,7 +25,7 @@ import tkinter as tk
 
 import requests
 
-API_URL = "http://localhost:8000/api/v1/demo/images"
+API_URL = "http://localhost:8080/api/v1/demo/images"
 
 
 def submit():

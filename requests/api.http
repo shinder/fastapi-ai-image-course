@@ -1,4 +1,4 @@
-@baseUrl = http://localhost:8000
+@baseUrl = http://localhost:8080
 # 教材 3.6 測試用：先執行上傳端點，把回傳的 filename 填到這裡
 @filename = REPLACE_WITH_UPLOADED_FILENAME
 

@@ -1,7 +1,11 @@
 [project]
-name = "fastapi-ai-image"
+name = "my-fastapi"
 version = "0.1.0"
 description = "FastAPI 與 AI 影像應用開發 範例專案"
+readme = "README.md"
+authors = [
+    { name = "Shinder Lin", email = "shinder.lin@gmail.com" }
+]
 requires-python = ">=3.12,<3.13"
 dependencies = [
     "fastapi[all]>=0.140.0",
@@ -18,6 +22,17 @@ dependencies = [
     # 需要 Beanie 2.x（改用 PyMongo 原生 async）；1.x 是搭 Motor 的舊介面。
     "beanie>=2.0",
 ]
+
+[project.scripts]
+# uv run my-fastapi 會呼叫 src/my_fastapi/__init__.py 的 serve()（啟動開發伺服器；
+# 不叫 main() 是因為會被 main.py 子模組蓋掉，見 __init__.py 的說明）
+my-fastapi = "my_fastapi:serve"
+
+[build-system]
+# uv init 預設產生的 src 佈局（教材 2.2）：有這一段，uv sync 會把 src/my_fastapi 以可編輯模式
+# 裝進 .venv，之後不管從哪個目錄執行、測試放在哪裡，import my_fastapi 都找得到
+requires = ["uv_build>=0.12.23,<0.13.0"]
+build-backend = "uv_build"
 
 [project.optional-dependencies]
 # 附錄 D：本機 Hugging Face 影像分類
@@ -52,6 +67,9 @@ dev = [
     "ruff>=0.7.0",
     "mypy>=1.13.0",
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
 
 [tool.ruff]
 line-length = 100

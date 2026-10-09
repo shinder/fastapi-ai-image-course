@@ -22,7 +22,8 @@ fastapi-ai-image/
 ├── cmd-*.bat               # 上述五支 sh-*.sh 的 Windows CMD 版（cmd-start-containers.bat…）
 ├── Dockerfile              # 教材 部署簡記
 ├── .env / .env.example     # 教材 2.2 環境變數
-├── app/
+├── src/my_fastapi/         # 教材 2.2 uv init 的 src 佈局：整個後端都在這個套件裡
+│   ├── __init__.py         # 教材 2.2 uv init 產生；serve() 給 uv run my-fastapi 啟動伺服器
 │   ├── config.py           # 教材 2.2 Settings
 │   ├── database.py         # 教材 5.4、5.6 engine、init_db、SessionDep
 │   ├── main.py             # 教材 2.3、2.4、2.5、2.6、3.6、5.4、6.7、8.7、附錄 B、附錄 D FastAPI 入口
@@ -98,15 +99,43 @@ fastapi-ai-image/
 
 ---
 
+## 專案是怎麼建出來的（教材 2.2）
+
+採用 uv 0.12 `uv init` 預設的 **src 佈局**：整個後端是 `src/my_fastapi/` 這一個套件，
+`pyproject.toml` 有 `[build-system]`（uv_build）與 `[project.scripts]`，講義第 2 章從這個指令開始：
+
+```bash
+# 1. 先建好專案資料夾並進入，再在裡面 uv init；--name 指定專案名（資料夾名可以不同）
+#    產生：pyproject.toml、.python-version、README.md、src/my_fastapi/__init__.py
+mkdir fastapi-ai-image-course
+cd fastapi-ai-image-course
+uv init --name my-fastapi --python 3.12
+
+# 2. 加入核心套件（其餘套件在教到的那一節再 uv add，見講義 2.2 的安裝時機表）
+uv add "fastapi[all]"
+uv add --dev pytest ruff mypy
+
+# 3. 之後的程式碼都放進 src/my_fastapi/，main.py 是 FastAPI 入口
+```
+
+套件名 `my_fastapi` 是 uv 由 `--name my-fastapi` 自動換算的（連字號改底線），不必另外設定；資料夾名與專案名無關。
+
+---
+
 ## 快速開始
 
 ```bash
 # 1. 安裝核心依賴
 uv sync
 
-# 2. 啟動開發伺服器（預設用 SQLite，不必先起任何容器）
-uv run fastapi dev app/main.py
+# 2. 啟動開發伺服器（預設用 SQLite，不必先起任何容器）；兩種寫法擇一
+uv run fastapi dev src/my_fastapi/main.py --port 8080   # fastapi CLI，自動重載
+uv run my-fastapi                           # pyproject.toml [project.scripts]，呼叫 my_fastapi.serve()
 ```
+
+`uv sync` 除了裝第三方套件，也會把 `src/my_fastapi` 以可編輯模式裝進 `.venv`（`pyproject.toml`
+的 `[build-system]`），所以程式裡一律寫 `from my_fastapi.xxx import ...`，從哪個目錄執行都找得到。
+不過 `uploads/`、`ml_models/` 與 `.env` 都放在專案根目錄、用相對路徑指定，啟動伺服器仍請在專案根目錄執行。
 
 `.env` 預設 `DATABASE_URL=sqlite:///./app.db`，開箱即可跑。
 要改用 PostgreSQL（教材 5.3）再啟動容器並改 `.env`：
@@ -117,10 +146,10 @@ docker compose up -d        # 或 ./sh-start-postgres.sh
 
 之後開瀏覽器：
 
-- <http://localhost:8000>：根路由
-- <http://localhost:8000/docs>：Swagger UI
-- <http://localhost:8000/redoc>：ReDoc
-- <http://localhost:8000/uploads/<filename>>：上傳檔案直存取
+- <http://localhost:8080>：根路由
+- <http://localhost:8080/docs>：Swagger UI
+- <http://localhost:8080/redoc>：ReDoc
+- <http://localhost:8080/uploads/<filename>>：上傳檔案直存取
 
 ---
 
@@ -327,10 +356,10 @@ VSCode 使用者：專案 `.vscode/settings.json` 已設定存檔時自動以 Ru
 專案會提示安裝建議的擴充套件（見 `.vscode/extensions.json`）。其中
 `ruff.importStrategy: "fromEnvironment"` 會直接使用專案 `.venv` 裡的 Ruff，不需另裝。
 
-另外 `files.associations` 把 `app/templates/**/*.html` 關聯成 `jinja-html`
+另外 `files.associations` 把 `src/my_fastapi/templates/**/*.html` 關聯成 `jinja-html`
 （需 Better Jinja 擴充套件）——模板檔名維持 `.html` 才能保有 Jinja 的 autoescape
 （教材 6.3），但編輯時當成 Jinja 看，就不會被 HTML 檢查器一直報錯。
-`app/static/demos/` 底下的純 HTML 測試頁不受影響。
+`src/my_fastapi/static/demos/` 底下的純 HTML 測試頁不受影響。
 
 ---
 

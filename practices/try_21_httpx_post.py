@@ -10,14 +10,14 @@
 - 建立成功回 201，回應主體是新建立的資源（含自動產生的 id）。
 
 執行前請先啟動後端：
-    uv run fastapi dev app/main.py
+    uv run fastapi dev src/my_fastapi/main.py --port 8080
 """
 
 import asyncio
 
 import httpx
 
-URL = "http://localhost:8000/api/v1/images"
+URL = "http://localhost:8080/api/v1/images"
 
 
 async def basic_post():

@@ -1,1 +1,1 @@
-uv run uvicorn app.main:app --reload --port 8000 --host 0.0.0.0
+uv run uvicorn my_fastapi.main:app --reload --port 8080 --host 0.0.0.0

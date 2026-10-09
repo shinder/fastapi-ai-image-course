@@ -13,7 +13,7 @@
 - 想觀察 HTTPError，可把 URL 的 id 改成不存在的（例如 /images/999999）會回 404。
 
 執行前請先啟動後端：
-    uv run fastapi dev app/main.py
+    uv run fastapi dev src/my_fastapi/main.py --port 8080
 """
 
 import requests
@@ -24,7 +24,7 @@ from requests.exceptions import (
     Timeout,
 )
 
-URL = "http://localhost:8000/api/v1/images/1"
+URL = "http://localhost:8080/api/v1/images/1"
 
 
 def with_exceptions():

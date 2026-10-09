@@ -11,7 +11,7 @@ from fastapi.testclient import TestClient
 
 
 def test_health():
-    from app.main import app
+    from my_fastapi.main import app
 
     client = TestClient(app)
     r = client.get("/health")
@@ -20,7 +20,7 @@ def test_health():
 
 
 def test_root():
-    from app.main import app
+    from my_fastapi.main import app
 
     client = TestClient(app)
     r = client.get("/")
@@ -29,7 +29,7 @@ def test_root():
 
 def test_demo_create_image_validation():
     """教材 3.2 驗證範例：title 不可為空字串"""
-    from app.main import app
+    from my_fastapi.main import app
 
     client = TestClient(app)
     r = client.post(
@@ -44,7 +44,7 @@ def test_demo_create_image_validation():
 
 def test_web_gallery_page():
     """6.10 圖片列表頁：應回 200 並渲染出 HTML（含「圖片列表」標題）"""
-    from app.main import app
+    from my_fastapi.main import app
 
     client = TestClient(app)
     r = client.get("/web")
@@ -55,7 +55,7 @@ def test_web_gallery_page():
 
 def test_web_upload_page():
     """6.11 上傳表單頁：應回 200 並含 file 上傳欄位"""
-    from app.main import app
+    from my_fastapi.main import app
 
     client = TestClient(app)
     r = client.get("/web/upload")
@@ -68,8 +68,8 @@ def test_web_upload_prg(tmp_path, monkeypatch):
 
     用 tmp_path 覆蓋上傳目錄，避免污染真正的 uploads/。
     """
-    from app.config import settings
-    from app.main import app
+    from my_fastapi.config import settings
+    from my_fastapi.main import app
 
     monkeypatch.setattr(settings, "UPLOAD_DIR", str(tmp_path))
 
@@ -100,7 +100,7 @@ def test_web_upload_prg(tmp_path, monkeypatch):
 
 def test_notes_validation():
     """缺必填欄位 text 時，應在進到 Mongo 之前就被擋下回 422"""
-    from app.main import app
+    from my_fastapi.main import app
 
     client = TestClient(app)
     r = client.post("/api/v1/notes", json={"image_filename": "cat.jpg"})
@@ -109,7 +109,7 @@ def test_notes_validation():
 
 def test_notes_requires_mongo():
     """未連線 MongoDB 時，建立留言應回 503（而非崩潰）"""
-    from app.main import app
+    from my_fastapi.main import app
 
     client = TestClient(app)
     r = client.post(
@@ -124,8 +124,8 @@ def test_notes_requires_mongo():
 
 def test_hand_landmark_has_no_top_level_optional_imports():
     """守住「可選套件只在函式內 import」：一旦有人把 mediapipe / numpy 搬回模組頂層，
-    核心 uv sync 的環境就會在 import app.main 時直接炸掉。"""
-    from app.services import hand_landmark
+    核心 uv sync 的環境就會在 import my_fastapi.main 時直接炸掉。"""
+    from my_fastapi.services import hand_landmark
 
     assert "mp" not in vars(hand_landmark)
     assert "np" not in vars(hand_landmark)
@@ -136,8 +136,8 @@ def test_hand_detect_returns_503_when_mediapipe_missing(monkeypatch):
     """模擬沒裝 mediapipe：load_detector() 要優雅回 False，端點回 503 並提示安裝指令"""
     import sys
 
-    from app.main import app
-    from app.services import hand_landmark
+    from my_fastapi.main import app
+    from my_fastapi.services import hand_landmark
 
     # sys.modules 設成 None 會讓 import 直接丟 ImportError（Python 的標準做法）
     monkeypatch.setitem(sys.modules, "mediapipe", None)
@@ -160,7 +160,7 @@ def test_hand_detect_returns_503_when_mediapipe_missing(monkeypatch):
 def test_hand_stream_has_no_top_level_optional_imports():
     """routes/hands_ws.py 在頂層 import hand_stream，而 main.py 又 import hands_ws；
     hand_stream 頂層一旦 import mediapipe / numpy，核心 uv sync 的環境就起不來。"""
-    from app.services import hand_stream
+    from my_fastapi.services import hand_stream
 
     assert "mp" not in vars(hand_stream)
     assert "np" not in vars(hand_stream)
@@ -175,8 +175,8 @@ def test_hands_ws_rejects_when_mediapipe_missing(monkeypatch):
     import pytest
     from starlette.websockets import WebSocketDisconnect
 
-    from app.main import app
-    from app.routes import hands_ws
+    from my_fastapi.main import app
+    from my_fastapi.routes import hands_ws
 
     monkeypatch.setitem(sys.modules, "mediapipe", None)
     monkeypatch.setitem(sys.modules, "mediapipe.tasks.python", None)
@@ -202,9 +202,9 @@ def test_hands_ws_rejects_over_connection_limit(monkeypatch):
     import pytest
     from starlette.websockets import WebSocketDisconnect
 
-    from app.config import settings
-    from app.main import app
-    from app.routes import hands_ws
+    from my_fastapi.config import settings
+    from my_fastapi.main import app
+    from my_fastapi.routes import hands_ws
 
     monkeypatch.setattr(settings, "HAND_WS_MAX_CONN", 0)
     monkeypatch.setattr(hands_ws, "_active_connections", 0)
@@ -224,7 +224,7 @@ def test_hands_ws_rejects_over_connection_limit(monkeypatch):
 
 def test_models_mount_serves_hand_model():
     """H04 在瀏覽器端推論，要能從 /models 下載到隨版控附上的模型檔"""
-    from app.main import app
+    from my_fastapi.main import app
 
     client = TestClient(app)
     r = client.head("/models/hand_landmarker.task")
@@ -255,7 +255,7 @@ def test_rate_limit_fail_open():
     """Redis 不可用時，限流應放行（不丟例外、不擋請求）"""
     from types import SimpleNamespace
 
-    from app.services.rate_limit import RateLimit
+    from my_fastapi.services.rate_limit import RateLimit
 
     rl = RateLimit(limit=1, window=60)
     req = SimpleNamespace(client=SimpleNamespace(host="1.2.3.4"))
@@ -265,7 +265,7 @@ def test_rate_limit_fail_open():
 
 def test_acquire_lock_fail_open():
     """Redis 不可用時，取鎖應 fail-open（視為取得，照常執行）"""
-    from app.services.cache_service import acquire_lock
+    from my_fastapi.services.cache_service import acquire_lock
 
     with acquire_lock(_raising_redis(), "lock:x", ttl=5) as got:
         assert got is True

@@ -3,8 +3,8 @@
 > 教材 附錄 D「MediaPipe 進階：串流與瀏覽器端推論」的實作說明，三篇之二。
 > 後端的基礎（Tasks API、單例、優雅降級）在教材 8.7。
 
-對應頁面 `app/static/demos/H03-hands-ws.html`
-（啟動後開 <http://localhost:8000/static/demos/H03-hands-ws.html>），端點 `WS /api/v1/hands/ws`。
+對應頁面 `src/my_fastapi/static/demos/H03-hands-ws.html`
+（啟動後開 <http://localhost:8080/static/demos/H03-hands-ws.html>），端點 `WS /api/v1/hands/ws`。
 
 一句話：**瀏覽器開一條 WebSocket，把攝影機影格連續壓成 JPEG 送給後端，
 後端每收一格回一則座標 JSON，同時只讓一格在路上飛。**
@@ -20,12 +20,12 @@
 
 | 檔案 | 負責什麼 |
 |---|---|
-| `app/static/demos/H03-hands-ws.html` | 攝影機、送影格、回壓控制、畫骨架 |
-| `app/routes/hands_ws.py` | WebSocket 端點、連線數上限、資源回收 |
-| `app/services/hand_stream.py` | 每條連線一個 detector、VIDEO 模式推論 |
-| `app/config.py` | `HAND_WS_MAX_CONN`（預設 4） |
+| `src/my_fastapi/static/demos/H03-hands-ws.html` | 攝影機、送影格、回壓控制、畫骨架 |
+| `src/my_fastapi/routes/hands_ws.py` | WebSocket 端點、連線數上限、資源回收 |
+| `src/my_fastapi/services/hand_stream.py` | 每條連線一個 detector、VIDEO 模式推論 |
+| `src/my_fastapi/config.py` | `HAND_WS_MAX_CONN`（預設 4） |
 
-注意 H03 **沒有**沿用 `app/services/hand_landmark.py` 的單例 detector，
+注意 H03 **沒有**沿用 `src/my_fastapi/services/hand_landmark.py` 的單例 detector，
 只沿用了它的 `decode_image()`。理由見下面。
 
 ---
@@ -134,7 +134,7 @@ if (msg.type === 'result') {
 
 ## 重點二：為什麼不能共用 H02 的單例
 
-`app/services/hand_stream.py` 讓**每條連線各自建一個 detector**。
+`src/my_fastapi/services/hand_stream.py` 讓**每條連線各自建一個 detector**。
 這跟 H02 的「全站一個單例 + 一把鎖」是相反的設計，有兩個原因。
 
 ### 正確性
@@ -469,7 +469,7 @@ buf = io.BytesIO(); img.save(buf, "JPEG", quality=50)
 frame = buf.getvalue()
 
 async def main():
-    async with websockets.connect("ws://localhost:8000/api/v1/hands/ws") as ws:
+    async with websockets.connect("ws://localhost:8080/api/v1/hands/ws") as ws:
         print(json.loads(await ws.recv()))       # {"type": "ready", ...}
         for _ in range(10):
             await ws.send(frame)                 # in-flight = 1

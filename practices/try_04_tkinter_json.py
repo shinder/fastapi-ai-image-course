@@ -1,6 +1,6 @@
 """tkinter 範例 04：送 JSON 給 FastAPI
 
-對應後端：app/routes/basic.py 的 POST /api/v1/demo/images（教材 3.2）
+對應後端：src/my_fastapi/routes/basic.py 的 POST /api/v1/demo/images（教材 3.2）
 該端點用 Pydantic 模型 ImageCreateRequest 接收 JSON 請求主體。
 
 重點：
@@ -17,15 +17,15 @@
 - 進階做法：把請求丟到背景執行緒，見 try_07_tkinter_json_thread.py。
 
 執行前請先啟動後端：
-    uv run fastapi dev app/main.py
+    uv run fastapi dev src/my_fastapi/main.py --port 8080
 """
 
 import tkinter as tk
 
 import requests
 
-# 後端端點網址（FastAPI 預設跑在 8000 埠）
-API_URL = "http://localhost:8000/api/v1/demo/images"
+# 後端端點網址（本專案的伺服器統一跑在 8080 埠，見 start.bat 與 uv run my-fastapi）
+API_URL = "http://localhost:8080/api/v1/demo/images"
 
 
 def submit():

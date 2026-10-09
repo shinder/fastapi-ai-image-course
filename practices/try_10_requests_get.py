@@ -12,14 +12,14 @@
   - .json()：把 JSON 主體解析成 Python dict / list（非 JSON 會丟例外）
 
 執行前請先啟動後端：
-    uv run fastapi dev app/main.py
+    uv run fastapi dev src/my_fastapi/main.py --port 8080
 （並確認資料庫裡有 id=1 的圖片，可先跑 try_11_requests_post.py 建立一筆）
 """
 
 import requests
 
 # 打本專案單元五的「取得單一圖片」端點
-URL = "http://localhost:8000/api/v1/images/1"
+URL = "http://localhost:8080/api/v1/images/1"
 
 
 def basic_get():

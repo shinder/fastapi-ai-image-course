@@ -6,7 +6,7 @@
 把前面學到的 requests 用法串成一個小應用：上傳圖片入庫，再查詢歷史。
 
 執行前請先啟動後端：
-    uv run fastapi dev app/main.py
+    uv run fastapi dev src/my_fastapi/main.py --port 8080
 （並準備一張圖片，預設讀 test_images/cat.jpg）
 """
 
@@ -14,7 +14,7 @@ from pathlib import Path
 
 import requests
 
-API_BASE = "http://localhost:8000/api/v1"
+API_BASE = "http://localhost:8080/api/v1"
 
 
 def upload_image(image_path: str, title: str) -> dict:

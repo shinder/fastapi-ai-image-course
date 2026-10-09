@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # sh-start-containers.sh — 只啟動三個依賴服務的容器（PostgreSQL / Redis / MongoDB）
 #   不啟動 FastAPI 開發伺服器——伺服器另開終端機自己跑：
-#       uv run fastapi dev app/main.py
+#       uv run fastapi dev src/my_fastapi/main.py --port 8080
 #   或用專案根目錄的 start.bat（跨平台單行腳本，bash 下執行 sh start.bat）。
 set -euo pipefail
 
@@ -16,4 +16,4 @@ for s in sh-start-postgres.sh sh-start-redis.sh sh-start-mongodb.sh; do
   bash "$s" || echo "警告：$s 啟動失敗，繼續啟動其餘容器"
 done
 
-echo "==> 容器啟動完成。開發伺服器請另行執行：uv run fastapi dev app/main.py"
+echo "==> 容器啟動完成。開發伺服器請另行執行：uv run fastapi dev src/my_fastapi/main.py --port 8080"

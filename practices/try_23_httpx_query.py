@@ -9,14 +9,14 @@
 - 可印 r.url 觀察 params 實際組成的查詢字串。
 
 執行前請先啟動後端：
-    uv run fastapi dev app/main.py
+    uv run fastapi dev src/my_fastapi/main.py --port 8080
 """
 
 import asyncio
 
 import httpx
 
-URL = "http://localhost:8000/api/v1/images"
+URL = "http://localhost:8080/api/v1/images"
 
 
 async def with_query_headers_cookies():

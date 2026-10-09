@@ -41,8 +41,9 @@ docker compose up -d
 # 上述五支各有一份 cmd- 前綴的 .bat（Windows CMD 版，例：sh-start-containers.sh ↔ cmd-start-containers.bat）；
 # sh-*.sh 在 Windows 需用 Git Bash 執行。兩套的相容性處理見下方「跨平台腳本」
 
-# 開發伺服器（http://localhost:8000，/docs 看 Swagger）
-uv run fastapi dev app/main.py
+# 開發伺服器（http://localhost:8080，/docs 看 Swagger）
+uv run fastapi dev src/my_fastapi/main.py --port 8080
+uv run my-fastapi          # 同上，走 pyproject [project.scripts] → src/my_fastapi/__init__.py 的 serve()
 # 或用跨平台單行腳本：CMD 直接打 start.bat、bash 用 sh start.bat
 # （內容是 uvicorn --host 0.0.0.0，順便供 4.5 的區網測試）
 
@@ -53,7 +54,7 @@ uv run pytest tests/test_smoke.py::test_health   # 單一測試
 # 格式化 / 靜態檢查（dev group 內，line-length 100）
 uv run ruff format .
 uv run ruff check .
-uv run mypy app
+uv run mypy src
 
 # 練習範例（practices/，可獨立執行；多數需先啟動 API）
 uv run python practices/try_10_requests_get.py    # requests 小範例（單元七 try_10~17）
@@ -67,10 +68,15 @@ Python 版本鎖定 3.12（`requires-python = ">=3.12,<3.13"`）。
 
 ## 架構與關鍵慣例
 
-### 應用組裝
-`app/main.py` 是入口：定義 `lifespan`（啟動建表 + 連 Mongo、關閉清資源）、掛 CORS 與自製 `TimingMiddleware`、掛三個 `StaticFiles`（`uploads/` → `/uploads`，放使用者上傳的圖片，教材 3.6；`app/static/` → `/static`，放專案自備的 CSS/JS，教材 6.7；`ml_models/` → `/models`，讓瀏覽器端推論的 H04 頁面下載模型檔，教材 附錄 D），最後 `include_router` 註冊各 APIRouter。教材 2.4 的基本路由刻意直接寫在 `main.py`（模擬還沒拆 router 的階段），其餘都拆進 `app/routes/`。
+### 套件佈局（uv init 的 src 佈局）
+整個後端是 `src/my_fastapi/` 這一個套件（教材 2.2，uv 0.12 `uv init` 的預設佈局）。`pyproject.toml` 的 `[build-system]` 讓 `uv sync` 把它以可編輯模式裝進 `.venv`，所以 import 一律寫 `from my_fastapi.xxx import ...`，測試與 practices 也一樣，不靠「從根目錄執行」才找得到。建立方式是先開好資料夾、進入後 `uv init --name my-fastapi --python 3.12`；套件名 `my_fastapi` 由 `--name` 自動換算，不要在 pyproject 另設 `module-name`。開發伺服器統一用 8080 埠（`start.bat`、`uv run my-fastapi` 已指定；進入點函式叫 `serve()` 而不是 uv init 慣例的 `main()`，因為會被 `main.py` 子模組蓋掉；`fastapi dev` 預設是 8000，所以文件裡的指令都帶 `--port 8080`）。
 
-樣式以 Bootstrap CDN 為主（見 `templates/base.html`），`app/static/app.css` 只放少量自訂樣式，示範 `StaticFiles` 掛載搭配樣板裡 `url_for('static', path=...)` 反查網址的用法。
+路徑慣例：套件內的 `static/` 與 `templates/` 用 `Path(__file__)` 推算（`main.py` 的 `PACKAGE_DIR`、`routes/web.py`），不寫死相對於工作目錄的字串；`uploads/`、`ml_models/`、`.env`、`app.db` 則留在專案根目錄、由 `config.py` 用相對路徑指定，因此啟動伺服器與跑腳本仍要在專案根目錄。`Dockerfile` 因為專案本身會被建置安裝，`uv sync` 分成 `--no-install-project` 與複製 `src/` 之後的第二次，且 `.dockerignore` 不能排除 `README.md`（`readme` 欄位指到它）。
+
+### 應用組裝
+`src/my_fastapi/main.py` 是入口：定義 `lifespan`（啟動建表 + 連 Mongo、關閉清資源）、掛 CORS 與自製 `TimingMiddleware`、掛三個 `StaticFiles`（`uploads/` → `/uploads`，放使用者上傳的圖片，教材 3.6；`src/my_fastapi/static/` → `/static`，放專案自備的 CSS/JS，教材 6.7；`ml_models/` → `/models`，讓瀏覽器端推論的 H04 頁面下載模型檔，教材 附錄 D），最後 `include_router` 註冊各 APIRouter。教材 2.4 的基本路由刻意直接寫在 `main.py`（模擬還沒拆 router 的階段），其餘都拆進 `src/my_fastapi/routes/`。
+
+樣式以 Bootstrap CDN 為主（見 `templates/base.html`），`src/my_fastapi/static/app.css` 只放少量自訂樣式，示範 `StaticFiles` 掛載搭配樣板裡 `url_for('static', path=...)` 反查網址的用法。
 
 ### 優雅降級（最重要的跨檔案設計）
 所有外部依賴都做到「連不到也不讓 app 崩潰」，這是貫穿全專案的原則，修改時務必維持：
@@ -109,13 +115,13 @@ AI 推論是同步且耗時的，async 路由中一律用 `fastapi.concurrency.r
 ### 組態
 `config.py` 用單純的 `Settings` 類別 + `os.getenv` 讀 `.env`（**非** pydantic-settings）。新增設定就在這裡加類別屬性，並同步補進 `.env.example`。`.env.example` 是範本；本機開發預設 `DATABASE_URL=sqlite:///./app.db`，可改成 docker compose 起的 PostgreSQL。
 
-`.env` 不進版控，而 `DATABASE_URL` 在 `config.py` 的後援值是空字串：缺 `.env` 時 `database.py` 模組頂層的 `create_engine("")` 會直接丟 `ArgumentError`，連 `import app.main` 與 pytest 都跑不起來。遇到這個錯誤先確認 `.env` 是否存在。
+`.env` 不進版控，而 `DATABASE_URL` 在 `config.py` 的後援值是空字串：缺 `.env` 時 `database.py` 模組頂層的 `create_engine("")` 會直接丟 `ArgumentError`，連 `import my_fastapi.main` 與 pytest 都跑不起來。遇到這個錯誤先確認 `.env` 是否存在。
 
 ### 上傳檔案安全
 使用者可控檔名一律經 `safe_upload_path()`（`routes/images.py`）解析以擋路徑穿越；存檔用 `uuid` 重新命名。對外暴露的上傳端點（含 `routes/web.py` 的表單上傳）都做 MIME 白名單與大小上限驗證——因為 `uploads/` 會經 `/uploads` 直接對外提供，存入非圖片有資安風險。白名單與 10 MB 上限的常數在 `routes/images.py`、`routes/web.py`、`routes/hands.py` 各有一份（各檔自成一節教材，刻意不抽共用），調整規則時三處要一起改。`uploads/` 裡唯一的非圖片是 `/api/v1/hands/upload` 另存的 `.json`：那是伺服器自己產生的偵測結果，不是使用者上傳的內容。
 
 ### 手部關鍵點的三種做法（教材 附錄 D）
-同一個模型放在三個位置跑的對照組，頁面在 `app/static/demos/H02~H04-*.html`，各有一篇 `docs/H0x-*.md` 說明。改程式碼時對應的說明文件要一起改（文件裡有大量程式碼片段與回應範例）。
+同一個模型放在三個位置跑的對照組，頁面在 `src/my_fastapi/static/demos/H02~H04-*.html`，各有一篇 `docs/H0x-*.md` 說明。改程式碼時對應的說明文件要一起改（文件裡有大量程式碼片段與回應範例）。
 
 - **H02（單張上傳）**：`routes/hands.py` 的 `/upload`，用 `hand_landmark.py` 的全站單例 detector（IMAGE 模式）加一把鎖。除了寫進 `images.ai_result`，還會在 `uploads/` 另存一份同主檔名的 `.json`。
 - **H03（WebSocket 串流）**：`routes/hands_ws.py` + `services/hand_stream.py`。**每條連線各建一個 VIDEO 模式的 detector，不可改成共用單例**：VIDEO 模式有跨影格狀態、時間戳必須嚴格遞增，共用會直接出錯。代價是每條連線吃一份模型記憶體，所以有 `HAND_WS_MAX_CONN`（預設 4）上限；`finally` 裡歸還名額與關閉 detector 的那段不能少。回壓由前端控制（同時只讓一格在路上）。

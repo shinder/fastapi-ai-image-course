@@ -12,7 +12,7 @@
 - 掛上 adapter 後，之後用這個 session 發的請求都會自動套用重試。
 
 執行前請先啟動後端：
-    uv run fastapi dev app/main.py
+    uv run fastapi dev src/my_fastapi/main.py --port 8080
 """
 
 import requests
@@ -36,5 +36,5 @@ def build_session_with_retry() -> requests.Session:
 
 if __name__ == "__main__":
     session = build_session_with_retry()
-    r = session.get("http://localhost:8000/api/v1/images", timeout=10)
+    r = session.get("http://localhost:8080/api/v1/images", timeout=10)
     print("狀態碼：", r.status_code)

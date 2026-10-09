@@ -1,6 +1,6 @@
 """tkinter 範例 05：送表單資料給 FastAPI
 
-對應後端：app/routes/basic.py 的 POST /api/v1/contact（教材 3.4）
+對應後端：src/my_fastapi/routes/basic.py 的 POST /api/v1/contact（教材 3.4）
 該端點用 Form(...) 接收表單欄位（不是 JSON）。
 
 重點：
@@ -15,14 +15,14 @@
 - 進階做法：把請求丟到背景執行緒，見 try_08_tkinter_form_thread.py。
 
 執行前請先啟動後端：
-    uv run fastapi dev app/main.py
+    uv run fastapi dev src/my_fastapi/main.py --port 8080
 """
 
 import tkinter as tk
 
 import requests
 
-API_URL = "http://localhost:8000/api/v1/contact"
+API_URL = "http://localhost:8080/api/v1/contact"
 
 
 def submit():

@@ -3,8 +3,8 @@
 > 教材 附錄 D「MediaPipe 進階：串流與瀏覽器端推論」的實作說明，三篇之一。
 > 後端的基礎（Tasks API、單例、優雅降級）在教材 8.7。
 
-對應頁面 `app/static/demos/H02-hands-1.html`
-（啟動後開 <http://localhost:8000/static/demos/H02-hands-1.html>），端點 `POST /api/v1/hands/upload`。
+對應頁面 `src/my_fastapi/static/demos/H02-hands-1.html`
+（啟動後開 <http://localhost:8080/static/demos/H02-hands-1.html>），端點 `POST /api/v1/hands/upload`。
 
 一句話：**瀏覽器把一張圖用 multipart/form-data 傳給後端，後端存檔、偵測、寫進資料庫，
 把 21 個關鍵點的正規化座標回傳，骨架由前端自己畫。**
@@ -18,11 +18,11 @@
 
 | 檔案 | 負責什麼 |
 |---|---|
-| `app/static/demos/H02-hands-1.html` | 選檔／拍照、送出請求、畫骨架 |
-| `app/routes/hands.py` | 端點、上傳檢查、存檔、寫資料庫 |
-| `app/services/hand_landmark.py` | 模型載入、圖片解碼、推論 |
-| `app/models/image.py` | `images` 資料表，偵測結果存在 `ai_result` 欄位 |
-| `app/main.py` | 啟動時載入模型、掛載 `/uploads` 靜態目錄 |
+| `src/my_fastapi/static/demos/H02-hands-1.html` | 選檔／拍照、送出請求、畫骨架 |
+| `src/my_fastapi/routes/hands.py` | 端點、上傳檢查、存檔、寫資料庫 |
+| `src/my_fastapi/services/hand_landmark.py` | 模型載入、圖片解碼、推論 |
+| `src/my_fastapi/models/image.py` | `images` 資料表，偵測結果存在 `ai_result` 欄位 |
+| `src/my_fastapi/main.py` | 啟動時載入模型、掛載 `/uploads` 靜態目錄 |
 
 ---
 
@@ -132,7 +132,7 @@ my_img.src = previewUrl;   // 不等後端回應就先顯示
 
 ## 後端：三層防線
 
-`app/routes/hands.py` 把檢查拆成幾個小函式，每一層擋的是不同的東西。
+`src/my_fastapi/routes/hands.py` 把檢查拆成幾個小函式，每一層擋的是不同的東西。
 
 ### 第一層：模型在不在
 
@@ -148,7 +148,7 @@ def _check_model_ready() -> None:
 `mediapipe` 在這個專案是可選依賴（`uv sync --extra mediapipe`），所以模型沒載入有兩種原因：
 套件沒裝，或模型檔不見了。`unavailable_reason()` 會回對應的那一句，訊息裡直接帶著該跑的指令。
 
-模型在 `app/main.py` 的 lifespan 啟動時就載入，不是每個請求載一次 ——
+模型在 `src/my_fastapi/main.py` 的 lifespan 啟動時就載入，不是每個請求載一次 ——
 建立 detector 要花一百多毫秒，逐請求建立等於每次都白付這個成本。
 
 ### 第二層：上傳內容合不合法
@@ -266,7 +266,7 @@ JSON 檔多帶了幾個檔案層面的欄位，單獨拿出來看也知道對應
 
 `ensure_ascii=False` 是必要的，否則中文原檔名會被寫成 `\uXXXX` 跳脫字串。
 
-同一份結果也寫進資料庫的 `images.ai_result`（`app/models/image.py` 早就預留的 JSON 欄位）。
+同一份結果也寫進資料庫的 `images.ai_result`（`src/my_fastapi/models/image.py` 早就預留的 JSON 欄位）。
 結果裡帶了 `model` 與 `mediapipe_version`，之後接別的 AI 功能時才分得出這筆資料是誰產生的。
 
 ---
@@ -310,7 +310,7 @@ JSON 檔多帶了幾個檔案層面的欄位，單獨拿出來看也知道對應
 | `handedness` | `Left` 或 `Right`。**以「鏡像後的影像」為基準判定**，所以拍照前要先鏡射（見上面） |
 | `landmarks` | 21 個點。`x`／`y` 是 0~1 的正規化座標，`z` 是相對於手腕的深度（越小離鏡頭越近） |
 
-`/uploads` 在 `app/main.py` 有掛成靜態目錄，所以 `url` 與 `json_url` 都可以直接用瀏覽器開。
+`/uploads` 在 `src/my_fastapi/main.py` 有掛成靜態目錄，所以 `url` 與 `json_url` 都可以直接用瀏覽器開。
 
 ### 21 個點的編號
 
@@ -394,7 +394,7 @@ MediaPipe 假設輸入影像已經鏡射過。拍照那條路已經在 canvas �
 `hand_landmark.py` 的 `min_hand_detection_confidence`（預設 0.5），調低比較敏感、也比較容易誤判。
 
 **Q：想只偵測不存檔？**
-`app/routes/hands.py` 還有一個 `POST /api/v1/hands/detect`，
+`src/my_fastapi/routes/hands.py` 還有一個 `POST /api/v1/hands/detect`，
 只回座標、不存檔也不寫資料庫。改一下前端的 fetch 網址就能切換。
 
 ---
@@ -404,7 +404,7 @@ MediaPipe 假設輸入影像已經鏡射過。拍照那條路已經在 canvas �
 不開瀏覽器也能測：
 
 ```sh
-curl -X POST http://localhost:8000/api/v1/hands/upload \
+curl -X POST http://localhost:8080/api/v1/hands/upload \
      -F "file=@某張有手的照片.jpg;type=image/jpeg"
 ```
 

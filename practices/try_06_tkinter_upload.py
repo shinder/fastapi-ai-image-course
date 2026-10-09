@@ -1,6 +1,6 @@
 """tkinter 範例 06：上傳圖片檔案給 FastAPI
 
-對應後端：app/routes/images.py 的 POST /api/v1/images/upload-only（教材 3.5）
+對應後端：src/my_fastapi/routes/images.py 的 POST /api/v1/images/upload-only（教材 3.5）
 該端點用 UploadFile = File(...) 接收 multipart/form-data 的檔案。
 
 重點：
@@ -16,7 +16,7 @@
 - 進階做法：把上傳丟到背景執行緒，見 try_09_tkinter_upload_thread.py。
 
 執行前請先啟動後端：
-    uv run fastapi dev app/main.py
+    uv run fastapi dev src/my_fastapi/main.py --port 8080
 """
 
 import tkinter as tk
@@ -24,7 +24,7 @@ from tkinter import filedialog
 
 import requests
 
-API_URL = "http://localhost:8000/api/v1/images/upload-only"
+API_URL = "http://localhost:8080/api/v1/images/upload-only"
 
 
 def choose_and_upload():

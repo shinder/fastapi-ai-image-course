@@ -3,8 +3,8 @@
 > 教材 附錄 D「MediaPipe 進階：串流與瀏覽器端推論」的實作說明，三篇之三。
 > 後端的基礎（Tasks API、單例、優雅降級）在教材 8.7。
 
-對應頁面 `app/static/demos/H04-hands-live.html`
-（啟動後開 <http://localhost:8000/static/demos/H04-hands-live.html>）。**沒有對應的 API 端點** —— 這正是重點。
+對應頁面 `src/my_fastapi/static/demos/H04-hands-live.html`
+（啟動後開 <http://localhost:8080/static/demos/H04-hands-live.html>）。**沒有對應的 API 端點** —— 這正是重點。
 
 一句話：**同一個模型檔下載到瀏覽器，用 WebAssembly + WebGL 在本機跑，
 影像完全不離開這台電腦，伺服器只負責供應 HTML 與模型檔。**
@@ -19,12 +19,12 @@
 
 | 檔案 | 負責什麼 |
 |---|---|
-| `app/static/demos/H04-hands-live.html` | 全部的事 |
-| `app/main.py` | 把 `ml_models/` 掛成 `/models`，讓瀏覽器抓得到模型檔 |
+| `src/my_fastapi/static/demos/H04-hands-live.html` | 全部的事 |
+| `src/my_fastapi/main.py` | 把 `ml_models/` 掛成 `/models`，讓瀏覽器抓得到模型檔 |
 | `ml_models/hand_landmarker.task` | 模型檔（約 7.5 MB，已隨版控附上） |
 | `scripts/download_models.py` | 模型檔遺失時用來重新下載 |
 
-後端的 Python 部分（`app/services/`、`app/routes/hands*.py`）**完全沒有參與** ——
+後端的 Python 部分（`src/my_fastapi/services/`、`src/my_fastapi/routes/hands*.py`）**完全沒有參與** ——
 連後端沒裝 `mediapipe`（沒跑 `uv sync --extra mediapipe`）這一頁也照樣能用。
 
 ---
@@ -95,7 +95,7 @@ handLandmarker = await HandLandmarker.createFromOptions(fileset, {
 WASM 檔（約 11 MB）從 CDN 抓，**模型檔（7.5 MB）從自己的伺服器抓**：
 
 ```python
-# app/main.py
+# src/my_fastapi/main.py
 os.makedirs(os.path.dirname(settings.HAND_MODEL_PATH) or ".", exist_ok=True)
 app.mount(
     "/models",

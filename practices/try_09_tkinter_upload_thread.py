@@ -12,7 +12,7 @@ Thread 的觀念與範例 07 相同（詳見該檔說明）：
       只有「讀檔 + 上傳」這段耗時工作才丟到背景執行緒。
 
 執行前請先啟動後端：
-    uv run fastapi dev app/main.py
+    uv run fastapi dev src/my_fastapi/main.py --port 8080
 """
 
 import threading
@@ -21,7 +21,7 @@ from tkinter import filedialog
 
 import requests
 
-API_URL = "http://localhost:8000/api/v1/images/upload-only"
+API_URL = "http://localhost:8080/api/v1/images/upload-only"
 
 
 def choose_and_upload():

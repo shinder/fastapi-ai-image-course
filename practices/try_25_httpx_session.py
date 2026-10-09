@@ -10,7 +10,7 @@
 - 所以「用同一個 AsyncClient 連發多個請求」就是 httpx 的連線重用慣例。
 
 執行前請先啟動後端：
-    uv run fastapi dev app/main.py
+    uv run fastapi dev src/my_fastapi/main.py --port 8080
 """
 
 import asyncio
@@ -21,7 +21,7 @@ import httpx
 async def client_reuse():
     # base_url + 共用標頭設定一次，之後請求只寫相對路徑
     async with httpx.AsyncClient(
-        base_url="http://localhost:8000",
+        base_url="http://localhost:8080",
         headers={"User-Agent": "MyApp/1.0"},
     ) as client:
         r1 = await client.get("/users/me")  # 單元二 2.4

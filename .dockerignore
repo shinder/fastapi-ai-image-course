@@ -30,8 +30,8 @@ docs/
 tests/
 requests/
 practices/
-README.md
 CLAUDE.md
+# README.md 不排除：pyproject.toml 的 readme 指到它，uv sync 建置 my_fastapi 套件時會讀
 sh-*.sh
 cmd-*.bat
 docker-compose.yml

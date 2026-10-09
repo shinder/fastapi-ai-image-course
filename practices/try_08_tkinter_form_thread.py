@@ -8,7 +8,7 @@ Thread 的觀念與範例 07 相同（詳見該檔說明），這裡只重述兩
 2. tkinter 不是執行緒安全，更新畫面要用 root.after 排回主執行緒。
 
 執行前請先啟動後端：
-    uv run fastapi dev app/main.py
+    uv run fastapi dev src/my_fastapi/main.py --port 8080
 """
 
 import threading
@@ -16,7 +16,7 @@ import tkinter as tk
 
 import requests
 
-API_URL = "http://localhost:8000/api/v1/contact"
+API_URL = "http://localhost:8080/api/v1/contact"
 
 
 def submit():

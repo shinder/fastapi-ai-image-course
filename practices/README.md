@@ -95,7 +95,7 @@ uv run python practices/try_01_pydantic.py
 
 ```bash
 # 終端機 1：啟動後端（需 docker compose 的 PostgreSQL，見專案根目錄 README）
-uv run fastapi dev app/main.py
+uv run fastapi dev src/my_fastapi/main.py --port 8080
 
 # 終端機 2：執行範例
 uv run python practices/try_11_requests_post.py

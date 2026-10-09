@@ -28,7 +28,7 @@ print("  （上面沒有再出現 [module_a] 的訊息）")
 
 print("""
 對照 SQLModel：
-    from app.models.image import Image   # ← 這一行讓 Image 的 class 定義被執行，
+    from my_fastapi.models.image import Image   # ← 這一行讓 Image 的 class 定義被執行，
                                          #    表因此註冊進 metadata
     SQLModel.metadata.create_all(engine) # ← 這時才依註冊內容建表
 """)

@@ -23,7 +23,7 @@ import time
 
 import requests
 
-# 模型存放目錄（相對於專案根目錄，與 app/config.py 的 HAND_MODEL_PATH 預設值一致）
+# 模型存放目錄（相對於專案根目錄，與 src/my_fastapi/config.py 的 HAND_MODEL_PATH 預設值一致）
 MODEL_DIR = "./ml_models"
 
 # 要下載的模型：檔名 → (下載網址, 位元組數, sha256)
@@ -138,7 +138,9 @@ def main() -> int:
         return 1
 
     print(
-        "\n全部模型驗證通過。" if args.check else "\n模型準備完成：uv run fastapi dev app/main.py"
+        "\n全部模型驗證通過。"
+        if args.check
+        else "\n模型準備完成：uv run fastapi dev src/my_fastapi/main.py --port 8080"
     )
     return 0
 

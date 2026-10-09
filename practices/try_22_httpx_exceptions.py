@@ -11,14 +11,14 @@
 except 同樣由「具體」到「一般」排列；timeout 設在 AsyncClient(timeout=...)。
 
 執行前請先啟動後端：
-    uv run fastapi dev app/main.py
+    uv run fastapi dev src/my_fastapi/main.py --port 8080
 """
 
 import asyncio
 
 import httpx
 
-URL = "http://localhost:8000/api/v1/images/1"
+URL = "http://localhost:8080/api/v1/images/1"
 
 
 async def with_exceptions():

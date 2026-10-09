@@ -9,7 +9,7 @@
 - 若 httpx 也想對 5xx 重試，要自己包重試迴圈，或用 tenacity 這類套件。
 
 執行前請先啟動後端：
-    uv run fastapi dev app/main.py
+    uv run fastapi dev src/my_fastapi/main.py --port 8080
 """
 
 import asyncio
@@ -25,7 +25,7 @@ def build_client_with_retry() -> httpx.AsyncClient:
 
 async def main():
     async with build_client_with_retry() as client:
-        r = await client.get("http://localhost:8000/api/v1/images", timeout=10)
+        r = await client.get("http://localhost:8080/api/v1/images", timeout=10)
         print("狀態碼：", r.status_code)
 
 

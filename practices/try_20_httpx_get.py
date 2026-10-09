@@ -12,7 +12,7 @@
 - Response 的用法（status_code、headers、json()）和 requests 幾乎一樣。
 
 執行前請先啟動後端：
-    uv run fastapi dev app/main.py
+    uv run fastapi dev src/my_fastapi/main.py --port 8080
 （並確認資料庫裡有 id=1 的圖片，可先跑 try_21_httpx_post.py 建立一筆）
 """
 
@@ -20,7 +20,7 @@ import asyncio
 
 import httpx
 
-URL = "http://localhost:8000/api/v1/images/1"
+URL = "http://localhost:8080/api/v1/images/1"
 
 
 async def basic_get():

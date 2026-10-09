@@ -9,7 +9,7 @@
 - 適合「對同一個服務連續發多個請求」的情境。
 
 執行前請先啟動後端：
-    uv run fastapi dev app/main.py
+    uv run fastapi dev src/my_fastapi/main.py --port 8080
 """
 
 import requests
@@ -21,8 +21,8 @@ def session_demo():
     session.headers.update({"User-Agent": "MyApp/1.0"})
 
     # 兩個請求重用同一條連線、共用上面的標頭
-    r1 = session.get("http://localhost:8000/users/me")  # 單元二 2.4
-    r2 = session.get("http://localhost:8000/api/v1/images")  # 單元五列表
+    r1 = session.get("http://localhost:8080/users/me")  # 單元二 2.4
+    r2 = session.get("http://localhost:8080/api/v1/images")  # 單元五列表
     print("users/me：", r1.json())
     print("images 筆數：", len(r2.json()))
     return r1, r2

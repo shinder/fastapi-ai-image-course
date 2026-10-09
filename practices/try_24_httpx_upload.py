@@ -10,7 +10,7 @@
 - 開檔仍用一般 open（小檔即可）；只有「送請求」這段是非同步的。
 
 執行前請先啟動後端：
-    uv run fastapi dev app/main.py
+    uv run fastapi dev src/my_fastapi/main.py --port 8080
 （並準備一張圖片，預設讀 test_images/cat.jpg）
 """
 
@@ -18,7 +18,7 @@ import asyncio
 
 import httpx
 
-URL = "http://localhost:8000/api/v1/images/upload"
+URL = "http://localhost:8080/api/v1/images/upload"
 IMAGE_PATH = "test_images/cat.jpg"
 
 
