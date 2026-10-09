@@ -64,12 +64,12 @@ uv run python practices/try_18_client_app.py      # 綜合：模擬第三方串�
 uv run python -m practices.try_31_module
 ```
 
-Python 版本鎖定 3.12（`requires-python = ">=3.12,<3.13"`）。
+Python 版本鎖定 3.14（`requires-python = ">=3.14,<3.15"`）。各套件下限都提到 2026-10 的最新穩定版，升級時用 `uv lock --upgrade` 再把 pyproject 的下限對齊 `uv tree --depth 1` 的結果。
 
 ## 架構與關鍵慣例
 
 ### 套件佈局（uv init 的 src 佈局）
-整個後端是 `src/my_fastapi/` 這一個套件（教材 2.2，uv 0.12 `uv init` 的預設佈局）。`pyproject.toml` 的 `[build-system]` 讓 `uv sync` 把它以可編輯模式裝進 `.venv`，所以 import 一律寫 `from my_fastapi.xxx import ...`，測試與 practices 也一樣，不靠「從根目錄執行」才找得到。建立方式是先開好資料夾、進入後 `uv init --name my-fastapi --python 3.12`；套件名 `my_fastapi` 由 `--name` 自動換算，不要在 pyproject 另設 `module-name`。開發伺服器統一用 8080 埠（`start.bat`、`uv run my-fastapi` 已指定；進入點函式叫 `serve()` 而不是 uv init 慣例的 `main()`，因為會被 `main.py` 子模組蓋掉；`fastapi dev` 預設是 8000，所以文件裡的指令都帶 `--port 8080`）。
+整個後端是 `src/my_fastapi/` 這一個套件（教材 2.2，uv 0.12 `uv init` 的預設佈局）。`pyproject.toml` 的 `[build-system]` 讓 `uv sync` 把它以可編輯模式裝進 `.venv`，所以 import 一律寫 `from my_fastapi.xxx import ...`，測試與 practices 也一樣，不靠「從根目錄執行」才找得到。建立方式是先開好資料夾、進入後 `uv init --name my-fastapi --python 3.14`；套件名 `my_fastapi` 由 `--name` 自動換算，不要在 pyproject 另設 `module-name`。開發伺服器統一用 8080 埠（`start.bat`、`uv run my-fastapi` 已指定；進入點函式叫 `serve()` 而不是 uv init 慣例的 `main()`，因為會被 `main.py` 子模組蓋掉；`fastapi dev` 預設是 8000，所以文件裡的指令都帶 `--port 8080`）。
 
 路徑慣例：套件內的 `static/` 與 `templates/` 用 `Path(__file__)` 推算（`main.py` 的 `PACKAGE_DIR`、`routes/web.py`），不寫死相對於工作目錄的字串；`uploads/`、`ml_models/`、`.env`、`app.db` 則留在專案根目錄、由 `config.py` 用相對路徑指定，因此啟動伺服器與跑腳本仍要在專案根目錄。`Dockerfile` 因為專案本身會被建置安裝，`uv sync` 分成 `--no-install-project` 與複製 `src/` 之後的第二次，且 `.dockerignore` 不能排除 `README.md`（`readme` 欄位指到它）。
 

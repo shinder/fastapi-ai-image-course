@@ -18,7 +18,7 @@ class ImageBase(SQLModel):
     """純 schema，當作其他 model 的基底"""
 
     title: str = Field(..., min_length=1, max_length=200)
-    description: Optional[str] = Field(None, max_length=1000)
+    description: Optional[str] = Field(default=None, max_length=1000)
 
 
 class Image(ImageBase, table=True):

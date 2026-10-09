@@ -6,8 +6,9 @@
 - 將模型實例輸出成 dict 或 JSON 字串
 """
 
-from pydantic import BaseModel
 from datetime import datetime
+
+from pydantic import BaseModel
 
 
 # 繼承 BaseModel 即可建立一個資料模型，類別屬性就是欄位定義。

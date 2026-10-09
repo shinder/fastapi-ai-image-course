@@ -23,7 +23,7 @@ class ImageUpload(BaseModel):
     """教材 3.1 進階驗證：Field"""
 
     title: str = Field(..., min_length=1, max_length=100)
-    description: str | None = Field(None, max_length=500)
+    description: str | None = Field(default=None, max_length=500)
     tags: list[str] = Field(default_factory=list, max_length=10)
     confidence_threshold: float = Field(0.5, ge=0.0, le=1.0)
 

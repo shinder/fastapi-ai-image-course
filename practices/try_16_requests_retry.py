@@ -15,9 +15,10 @@
     uv run fastapi dev src/my_fastapi/main.py --port 8080
 """
 
-import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
+
+import requests
 
 
 def build_session_with_retry() -> requests.Session:

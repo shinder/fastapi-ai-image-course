@@ -13,8 +13,9 @@
 本檔不會真的連線成功（示意 URL），重點在看程式碼怎麼帶認證。
 """
 
-import requests
 from requests.auth import HTTPBasicAuth
+
+import requests
 
 URL = "https://api.example.com"  # 示意：代表「需要認證的目標 API」
 API_KEY = "MY_KEY"

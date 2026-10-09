@@ -16,13 +16,14 @@
     uv run fastapi dev src/my_fastapi/main.py --port 8080
 """
 
-import requests
 from requests.exceptions import (
     ConnectionError,
     HTTPError,
     RequestException,
     Timeout,
 )
+
+import requests
 
 URL = "http://localhost:8080/api/v1/images/1"
 

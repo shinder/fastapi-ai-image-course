@@ -24,7 +24,8 @@ import threading
 from io import BytesIO
 from typing import TYPE_CHECKING
 
-from PIL import Image as PILImage, ImageOps
+from PIL import Image as PILImage
+from PIL import ImageOps
 
 from my_fastapi.config import settings
 

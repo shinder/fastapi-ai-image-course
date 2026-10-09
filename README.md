@@ -109,7 +109,7 @@ fastapi-ai-image/
 #    產生：pyproject.toml、.python-version、README.md、src/my_fastapi/__init__.py
 mkdir fastapi-ai-image-course
 cd fastapi-ai-image-course
-uv init --name my-fastapi --python 3.12
+uv init --name my-fastapi --python 3.14
 
 # 2. 加入核心套件（其餘套件在教到的那一節再 uv add，見講義 2.2 的安裝時機表）
 uv add "fastapi[all]"
@@ -255,8 +255,7 @@ uv sync --extra ml
 uv sync --extra ocr
 
 # 8.7、附錄 D MediaPipe 手部／臉部／姿勢偵測（輕量本機模型）
-# 注意：不支援 Intel Mac——MediaPipe 的 x86_64 macOS wheel 停在 0.10.21，
-# 而 Apple Silicon 的 wheel 從 0.10.30 才開始，兩者沒有交集。
+# 注意：不支援 Intel Mac（MediaPipe 的 macOS x86_64 wheel 停在 0.10.21）。
 # 另外這個 extra 會連帶裝進 opencv-contrib-python（約 236 MB），下載需要一點時間。
 uv sync --extra mediapipe
 # 模型檔（ml_models/hand_landmarker.task，約 7.5 MB）已隨版控附上，clone 下來就能用。

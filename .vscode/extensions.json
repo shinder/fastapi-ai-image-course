@@ -6,6 +6,8 @@
     "samuelcolvin.jinjahtml",
     "humao.rest-client",
     "ms-azuretools.vscode-docker",
-    "ritwickdey.liveserver"
+    "ritwickdey.liveserver",
+    "streetsidesoftware.code-spell-checker",
+    "stuart.unique-window-colors"
   ]
 }

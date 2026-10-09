@@ -18,12 +18,12 @@ import os
 import uuid
 from pathlib import Path
 
-import requests
 from fastapi import APIRouter, File, HTTPException, Request, UploadFile
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlmodel import col, select
 
+import requests
 from my_fastapi.config import settings
 from my_fastapi.database import SessionDep
 from my_fastapi.models.image import Image

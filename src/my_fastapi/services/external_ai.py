@@ -13,6 +13,7 @@ requests 是同步的，在 async def 路由裡呼叫一定要用 run_in_threadp
 import asyncio
 
 import httpx
+
 import requests
 
 # 隨機圖片（一次就給你檔案）
