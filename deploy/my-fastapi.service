@@ -1,0 +1,30 @@
+# systemd 服務檔範例（教材 附錄 G：VM 部署）
+#
+# 放到 /etc/systemd/system/my-fastapi.service，然後：
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now my-fastapi   # 開機自動啟動 + 現在就啟動
+#   journalctl -u my-fastapi -f              # 看日誌（教材 附錄 B 印到 stdout 的那些）
+
+[Unit]
+Description=my-fastapi (uvicorn)
+# 等資料庫服務起來再啟動；沒裝在同一台就拿掉
+After=network.target postgresql.service redis-server.service
+
+[Service]
+# 用一般帳號跑，不要 root
+User=app
+Group=app
+# 一定要設成專案根目錄：uploads/、ml_models/、.env 與 app.db 都是相對路徑（教材 6.13）
+WorkingDirectory=/srv/my-fastapi
+# 直接用 .venv 裡的 uvicorn，不透過 uv run（uv run 會想重新 sync，服務帳號也不一定有 uv）。
+# --host 127.0.0.1：只讓同一台的 nginx 連得到。--workers 依記憶體決定（每個 worker 各載一份模型）
+ExecStart=/srv/my-fastapi/.venv/bin/uvicorn my_fastapi.main:app --host 127.0.0.1 --port 8080 --workers 4
+Restart=always
+RestartSec=3
+# 環境變數：config.py 的 load_dotenv() 仍會讀 WorkingDirectory 下的 .env，
+# 但「已存在的環境變數優先」，所以秘密也可以改放這裡，不落地成檔案
+Environment=DEBUG=false
+# Environment=OPENAI_API_KEY=sk-...
+
+[Install]
+WantedBy=multi-user.target

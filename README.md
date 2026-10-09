@@ -21,6 +21,7 @@ fastapi-ai-image-course/
 ├── sh-stop-containers.sh   # 移除上述三個依賴容器（收工用，具名資料卷保留）
 ├── cmd-*.bat               # 上述五支 sh-*.sh 的 Windows CMD 版（cmd-start-containers.bat…）
 ├── Dockerfile              # 教材 部署簡記
+├── deploy/                 # 教材 附錄 G VM 部署：nginx.conf、my-fastapi.service
 ├── .env / .env.example     # 教材 2.2 環境變數
 ├── src/my_fastapi/         # 教材 2.2 uv init 的 src 佈局：整個後端都在這個套件裡
 │   ├── __init__.py         # 教材 2.2 uv init 產生；serve() 給 uv run my-fastapi 啟動伺服器

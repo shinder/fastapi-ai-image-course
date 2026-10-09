@@ -129,6 +129,9 @@ AI 推論是同步且耗時的，async 路由中一律用 `fastapi.concurrency.r
 
 模型檔 `ml_models/hand_landmarker.task` 已進版控（H04 需要伺服器隨時供應得出來），也沒有被 `.dockerignore` 排除。
 
+### 部署範例（教材 附錄 G）
+`deploy/nginx.conf` 與 `deploy/my-fastapi.service` 是 VM 部署的設定範例，沒有被任何程式讀取，純供講義對照；路徑假設專案在 `/srv/my-fastapi`、uvicorn 綁 127.0.0.1:8080。改埠號或靜態掛載點時這兩個檔要跟著改。`Dockerfile` 是另一條路（部署簡記），兩者擇一。
+
 ### 背景任務
 `routes/ai.py` 的影像生成用 `BackgroundTasks`（`/generate-async`）示範：同進程、回應後才執行；任務狀態存 Redis（`task:gen:{id}`，可 TTL 自動清），再用 `/tasks/{task_id}` 查詢（教材 附錄 E）。
 
