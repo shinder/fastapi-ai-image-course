@@ -18,7 +18,8 @@ Group=app
 WorkingDirectory=/srv/my-fastapi
 # 直接用 .venv 裡的 uvicorn，不透過 uv run（uv run 會想重新 sync，服務帳號也不一定有 uv）。
 # --host 127.0.0.1：只讓同一台的 nginx 連得到。--workers 依記憶體決定（每個 worker 各載一份模型）
-ExecStart=/srv/my-fastapi/.venv/bin/uvicorn my_fastapi.main:app --host 127.0.0.1 --port 8080 --workers 4
+ExecStart=/srv/my-fastapi/.venv/bin/uvicorn my_fastapi.main:app \
+    --host 127.0.0.1 --port 8080 --workers 4
 Restart=always
 RestartSec=3
 # 環境變數：config.py 的 load_dotenv() 仍會讀 WorkingDirectory 下的 .env，

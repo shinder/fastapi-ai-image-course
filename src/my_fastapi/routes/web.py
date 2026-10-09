@@ -32,7 +32,8 @@ from my_fastapi.models.user import User
 # Jinja2Templates：指定樣板資料夾，之後用 templates.TemplateResponse 渲染 .html。
 # 樣板放在套件裡（src/my_fastapi/templates），所以用這個檔案的位置往上一層找，
 # 不寫死相對於工作目錄的字串（與 main.py 掛 /static 的做法一致）
-templates = Jinja2Templates(directory=Path(__file__).resolve().parents[1] / "templates")
+TEMPLATES_DIR = Path(__file__).resolve().parents[1] / "templates"
+templates = Jinja2Templates(directory=TEMPLATES_DIR)
 
 router = APIRouter(prefix="/web", tags=["web"])
 
